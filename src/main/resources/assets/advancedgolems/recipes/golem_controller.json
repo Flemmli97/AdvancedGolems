@@ -1,0 +1,20 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    " S ",
+    "SPS",
+    " S "
+  ],
+  "key": {
+    "S": {
+      "type": "forge:ore_dict",
+      "ore": "paper"
+    },
+    "P": {
+      "item": "minecraft:pumpkin"
+    }
+  },
+  "result": {
+    "item": "advancedgolems:golem_control"
+  }
+}

@@ -1,0 +1,20 @@
+# eclipse
+bin
+.classpath
+.project
+.settings
+build
+
+# forge
+libs
+run
+/lib
+
+# github
+.git
+
+# gradle
+.gradle
+
+# things
+.DS_Store

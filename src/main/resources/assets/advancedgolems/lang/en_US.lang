@@ -1,0 +1,5 @@
+item.golem_spawner.name=Summon Golem
+item.angel_spawner.name=Summon Angel
+item.golem_control.name=Golem Controller
+entity.golemGuard.name=Advanced Golem
+entity.golemAngel.name=Golem Angel

@@ -1,0 +1,12 @@
+[{
+  "modid": "advancedgolems",
+  "name": "Advanced Golems",
+  "description": "Configurable golems in aid for your mob dilemma",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateJSON": "",
+  "authorList": ["Flemmli97"],
+  "credits": "",
+  "logoFile": ""
+}]

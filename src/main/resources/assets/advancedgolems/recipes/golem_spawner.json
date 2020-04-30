@@ -1,0 +1,32 @@
+{
+  "type": "forge:ore_shaped",
+  "pattern": [
+    "LIL",
+    "GDG",
+    "LSL"
+  ],
+  "key": {
+    "L": {
+      "item": "minecraft:dye",
+      "data": 4
+    },
+    "S": {
+      "item": "minecraft:iron_sword",
+      "data": 0
+    },
+    "D": {
+      "item": "minecraft:pumpkin"
+    },
+    "I": {
+      "type": "forge:ore_dict",
+      "ore": "dyeBlack"
+    },
+    "G": {
+      "type": "forge:ore_dict",
+      "ore": "paper"
+    }
+  },
+  "result": {
+    "item": "advancedgolems:golem_spawner"
+  }
+}
