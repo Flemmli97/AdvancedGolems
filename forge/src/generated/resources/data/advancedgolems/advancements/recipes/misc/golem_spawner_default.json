@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "advancedgolems:golem_spawner_default"
+    ]
+  },
+  "criteria": {
+    "golem_spawner": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:pumpkin"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "advancedgolems:golem_spawner_default"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "golem_spawner",
+      "has_the_recipe"
+    ]
+  ]
+}

@@ -1,10 +1,15 @@
 package io.github.flemmli97.advancedgolems.forge.data;
 
+import io.github.flemmli97.advancedgolems.AdvancedGolems;
 import io.github.flemmli97.advancedgolems.forge.registry.ModItems;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.common.Tags;
 
@@ -30,6 +35,18 @@ public class RecipeGen extends RecipeProvider {
                 .group("golem_spawner")
                 .unlockedBy("golem_spawner", RecipeProvider.has(Items.PUMPKIN))
                 .save(consumer);
+        ShapedRecipeBuilder.shaped(ModItems.golemSpawn.get())
+                .define('L', Items.LAPIS_LAZULI)
+                .define('S', Items.IRON_SWORD)
+                .define('D', Items.PUMPKIN)
+                .define('G', Items.PAPER)
+                .define('I', Items.BLACK_DYE)
+                .pattern("LIL")
+                .pattern("GDG")
+                .pattern("LSL")
+                .group("golem_spawner")
+                .unlockedBy("golem_spawner", RecipeProvider.has(Items.PUMPKIN))
+                .save(consumer, new ResourceLocation(AdvancedGolems.MODID, "golem_spawner_default"));
         ShapedRecipeBuilder.shaped(ModItems.golemControl.get())
                 .define('P', Items.PUMPKIN)
                 .define('S', Items.PAPER)
