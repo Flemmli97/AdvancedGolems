@@ -1,0 +1,11 @@
+{
+  "item.advancedgolems.golem_spawner": "Summon Golem",
+  "item.advancedgolems.golem_control": "Golem Controller",
+  "controller.mode.0": "Mode: Remove",
+  "controller.mode.1": "Mode: Home",
+  "controller.mode.2": "Mode: Behaviour",
+  "golem.state.AGGRESSIVE": "Golem is now aggressive",
+  "golem.state.AGGRESSIVESTAND": "Golem is now waiting",
+  "golem.state.PASSIVE": "Golem is now passive",
+  "golem.state.PASSIVESTAND": "Golem is now standing"
+}
