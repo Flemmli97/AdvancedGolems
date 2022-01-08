@@ -14,12 +14,15 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Consumer;
+
 public class ArmorModelHandlerImpl {
 
     @SuppressWarnings("unchecked")
-    public static <T extends LivingEntity, A extends HumanoidModel<T>> HumanoidModel<T> getModel(PoseStack poseStack, MultiBufferSource multiBufferSource, T entity, ItemStack itemStack, EquipmentSlot equipmentSlot, int light, A humanoidModel) {
+    public static <T extends LivingEntity, A extends HumanoidModel<T>> HumanoidModel<T> getModel(PoseStack poseStack, MultiBufferSource multiBufferSource, T entity, ItemStack itemStack, EquipmentSlot equipmentSlot, int light, A humanoidModel, Consumer<HumanoidModel<T>> setup) {
         ArmorRenderer renderer = ArmorRendererRegistryImpl.get(itemStack.getItem());
         if (renderer != null) {
+            setup.accept(humanoidModel);
             renderer.render(poseStack, multiBufferSource, itemStack, entity, equipmentSlot, light, (HumanoidModel<LivingEntity>) humanoidModel);
             return null;
         }

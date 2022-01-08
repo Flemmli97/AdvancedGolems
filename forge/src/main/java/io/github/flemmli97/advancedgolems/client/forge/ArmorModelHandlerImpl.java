@@ -13,10 +13,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.ForgeHooksClient;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Consumer;
+
 public class ArmorModelHandlerImpl {
 
-    public static <T extends LivingEntity, A extends HumanoidModel<T>> HumanoidModel<T> getModel(PoseStack poseStack, MultiBufferSource multiBufferSource, T entity, ItemStack itemStack, EquipmentSlot equipmentSlot, int light, A humanoidModel) {
-        return ForgeHooksClient.getArmorModel(entity, itemStack, equipmentSlot, humanoidModel);
+    public static <T extends LivingEntity, A extends HumanoidModel<T>> HumanoidModel<T> getModel(PoseStack poseStack, MultiBufferSource multiBufferSource, T entity, ItemStack itemStack, EquipmentSlot equipmentSlot, int light, A humanoidModel, Consumer<HumanoidModel<T>> setup) {
+        HumanoidModel<T> ret = ForgeHooksClient.getArmorModel(entity, itemStack, equipmentSlot, humanoidModel);
+        setup.accept(ret);
+        return ret;
     }
 
     public static ResourceLocation armorTextureForge(Entity entity, ItemStack stack, EquipmentSlot slot, @Nullable String type, boolean inner) {
