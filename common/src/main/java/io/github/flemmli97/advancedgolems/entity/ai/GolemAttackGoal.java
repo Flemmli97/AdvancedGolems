@@ -97,7 +97,7 @@ public class GolemAttackGoal<T extends GolemBase> extends AnimatedAttackGoal<T> 
                 if (flag) {
                     this.attacker.releaseUsingItem();
                     if (crossbow)
-                        GolemBase.rangedCrossbow(this.attacker, this.target, 1.5f);
+                        GolemBase.rangedCrossbow(this.attacker, this.target, 1.2f);
                     else
                         GolemBase.rangedArrow(this.attacker, this.target, BowItem.getPowerForTime(this.attacker.getTicksUsingItem()));
                 } else
