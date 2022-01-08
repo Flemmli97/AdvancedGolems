@@ -39,6 +39,7 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.animal.AbstractGolem;
+import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
@@ -382,6 +383,13 @@ public class GolemBase extends AbstractGolem implements IAnimated {
         }
     }
 
+    @Override
+    public boolean isAlliedTo(Entity entity) {
+        if(entity instanceof AbstractGolem && !(entity instanceof Enemy))
+            return true;
+        return super.isAlliedTo(entity);
+    }
+
     private boolean collidesDown() {
         for (VoxelShape shape : this.level.getBlockCollisions(this, this.getBoundingBox().expandTowards(0, -0.2, 0))) {
             if (shape.isEmpty())
@@ -481,7 +489,8 @@ public class GolemBase extends AbstractGolem implements IAnimated {
         double e = target.getY(0.3333333333333333) - abstractArrow.getY();
         double g = target.getZ() - mob.getZ();
         double h = Math.sqrt(d * d + g * g);
-        abstractArrow.shoot(d, e + h * (double) 0.2f, g, 1.6f, 14 - mob.level.getDifficulty().getId() * 4);
+        abstractArrow.shoot(d, e + h * (double) 0.2f, g, 2.7f + mob.getRandom().nextFloat() * 0.4f, 14 - mob.level.getDifficulty().getId() * 4);
+        abstractArrow.setCritArrow(true);
         mob.playSound(SoundEvents.SKELETON_SHOOT, 1.0f, 1.0f / (mob.getRandom().nextFloat() * 0.4f + 0.8f));
         mob.level.addFreshEntity(abstractArrow);
         if (!itemStack.isEmpty() && EnchantmentHelper.getEnchantmentLevel(Enchantments.INFINITY_ARROWS, mob) == 0)
@@ -493,7 +502,7 @@ public class GolemBase extends AbstractGolem implements IAnimated {
         ItemStack itemStack = mob.getItemInHand(interactionHand);
         if (itemStack.getItem() instanceof CrossbowItem) {
             float vel = CrossbowItem.containsChargedProjectile(itemStack, Items.FIREWORK_ROCKET) ? 1.6F : strength;
-            CrossbowItem.performShooting(mob.level, mob, interactionHand, itemStack, vel, 14 - mob.level.getDifficulty().getId() * 4);
+            CrossbowItem.performShooting(mob.level, mob, interactionHand, itemStack, vel, 13.5f - mob.level.getDifficulty().getId() * 4);
             CrossbowItem.setCharged(itemStack, false);
         }
     }

@@ -7,10 +7,12 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.level.pathfinder.Path;
 
 public class GolemAttackGoal<T extends GolemBase> extends AnimatedAttackGoal<T> {
 
@@ -97,7 +99,7 @@ public class GolemAttackGoal<T extends GolemBase> extends AnimatedAttackGoal<T> 
                 if (flag) {
                     this.attacker.releaseUsingItem();
                     if (crossbow)
-                        GolemBase.rangedCrossbow(this.attacker, this.target, 1.5f);
+                        GolemBase.rangedCrossbow(this.attacker, this.target, 1.2f);
                     else
                         GolemBase.rangedArrow(this.attacker, this.target, BowItem.getPowerForTime(this.attacker.getTicksUsingItem()));
                 } else
@@ -207,5 +209,17 @@ public class GolemAttackGoal<T extends GolemBase> extends AnimatedAttackGoal<T> 
         else
             this.attacker.getNavigation().moveTo(target, 1);
         this.attacker.getLookControl().setLookAt(target, 30.0F, 30.0F);
+    }
+
+    @Override
+    protected void moveToWithDelay(double speed) {
+        if (this.pathFindDelay <= 0) {
+            PathNavigation navigation = this.attacker.getNavigation();
+            Path path;
+            if (!((path = navigation.createPath(this.target, 0)) != null && navigation.moveTo(path, speed))) {
+                this.pathFindDelay += 15;
+            }
+            this.pathFindDelay += this.attacker.getRandom().nextInt(10) + 5;
+        }
     }
 }
