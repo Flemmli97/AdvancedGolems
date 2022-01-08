@@ -1,27 +1,24 @@
-modLoader = "javafml"
-loaderVersion = "[38,)"
-license = "ARR"
+modLoader="javafml"
+loaderVersion="[38,)"
+license="ARR"
 issueTrackerURL="https://github.com/Flemmli97/AdvancedGolems/issues"
-displayURL="https://www.curseforge.com/minecraft/mc-mods/advanced-golems"
-credits=""
-authors="Flemmli97"
 [[mods]]
-modId = "advancedgolems"
-version = "${version}"
-displayName = "Advanced Golems"
-authors = "Flemmli97"
-description = '''
-Summon small golems that help defend your base
-'''
-[[dependencies.mobbattle]]
-  modId="minecraft"
-  mandatory=true
-  versionRange="[1.18,)"
-  ordering="NONE"
-  side="BOTH"
-[[dependencies.mobbattle]]
-  modId="tenshilib"
-  mandatory=false
-  versionRange="[1.4.0,)"
-  ordering="NONE"
-  side="BOTH"
+modId="advancedgolems"
+version="${version}"
+displayName="Advanced Golems"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/advanced-golems"
+logoFile="icon.png"
+authors="Flemmli97"
+description='''Summon small golems that help defend your base'''
+[[dependencies.advancedgolems]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.18,)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.advancedgolems]]
+modId="tenshilib"
+mandatory=true
+versionRange="[1.4.0,)"
+ordering="NONE"
+side="BOTH"
