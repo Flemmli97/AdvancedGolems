@@ -12,7 +12,7 @@ public class ModEntities {
 
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, AdvancedGolems.MODID);
 
-    public static final RegistryObject<EntityType<GolemBase>> golem = ENTITIES.register("golem", () -> EntityType.Builder.<GolemBase>of(GolemBase::new, MobCategory.CREATURE).sized(0.5f, 1f).build("golem"));
+    public static final RegistryObject<EntityType<GolemBase>> golem = ENTITIES.register("golem", () -> EntityType.Builder.<GolemBase>of(GolemBase::new, MobCategory.CREATURE).sized(0.5f, 0.9f).build("golem"));
     //public static final RegistryObject<EntityType<EntityGolemAngel>> arrow = ENTITIES.register("golem_angel", ()->EntityType.Builder.<EntityGolemAngel>create(EntityGolemAngel::new, EntityClassification.MISC).build("golem_angel"));
 
 }

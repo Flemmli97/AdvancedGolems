@@ -52,17 +52,17 @@ public class GolemModel<T extends GolemBase> extends EntityModel<T> implements E
         MeshDefinition meshdefinition = new MeshDefinition();
         PartDefinition partdefinition = meshdefinition.getRoot();
 
-        PartDefinition body = partdefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 16).addBox(-5.0F, -7.5F, -4.0F, 10.0F, 15.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 8.0F, 0.0F));
+        PartDefinition body = partdefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 18).addBox(-5.0F, -5.5F, -4.0F, 10.0F, 13.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 8.0F, 0.0F));
 
-        PartDefinition head = body.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -7.5F, -2.0F));
+        PartDefinition head = body.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -5.5F, -2.0F));
 
         PartDefinition bone = head.addOrReplaceChild("bone", CubeListBuilder.create().texOffs(37, 14).addBox(-1.0F, -2.0F, 0.0F, 2.0F, 2.0F, 4.0F, new CubeDeformation(0.0F))
                 .texOffs(49, 14).addBox(-1.0F, -4.0F, 2.0F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
                 .texOffs(0, 56).addBox(-2.0F, -5.0F, 1.0F, 4.0F, 1.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -3.0F, 4.0F));
 
-        PartDefinition armLeft = body.addOrReplaceChild("armLeft", CubeListBuilder.create().texOffs(0, 39).addBox(0.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(5.0F, -3.5F, 0.0F));
+        PartDefinition armLeft = body.addOrReplaceChild("armLeft", CubeListBuilder.create().texOffs(0, 39).addBox(0.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offset(5.0F, -1.5F, 0.0F));
 
-        PartDefinition armRight = body.addOrReplaceChild("armRight", CubeListBuilder.create().texOffs(0, 39).mirror().addBox(-4.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-5.0F, -3.5F, 0.0F));
+        PartDefinition armRight = body.addOrReplaceChild("armRight", CubeListBuilder.create().texOffs(0, 39).mirror().addBox(-4.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(-5.0F, -1.5F, 0.0F));
 
         PartDefinition leg = body.addOrReplaceChild("leg", CubeListBuilder.create().texOffs(44, 50).addBox(-1.0F, -0.5F, -1.0F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
                 .texOffs(44, 46).addBox(-4.0F, 1.5F, -1.0F, 8.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
@@ -73,8 +73,8 @@ public class GolemModel<T extends GolemBase> extends EntityModel<T> implements E
         PartDefinition wheels = leg.addOrReplaceChild("wheels", CubeListBuilder.create().texOffs(38, 0).addBox(-1.0F, -1.0F, -2.5F, 2.0F, 2.0F, 5.0F, new CubeDeformation(0.0F))
                 .texOffs(52, 0).addBox(-1.0F, -2.5F, -1.0F, 2.0F, 5.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 6.5F, 0.0F));
 
-        PartDefinition wheelsDia2 = wheels.addOrReplaceChild("wheelsDia2", CubeListBuilder.create().texOffs(38, 7).addBox(-1.0F, -1.0F, -2.5F, 1.9F, 2.0F, 5.0F, new CubeDeformation(0.0F))
-                .texOffs(52, 7).addBox(-1.0F, -2.5F, -1.0F, 1.9F, 5.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.05F, 0.0F, 0.0F, -0.7854F, 0.0F, 0.0F));
+        PartDefinition wheelsDia2 = wheels.addOrReplaceChild("wheelsDia2", CubeListBuilder.create().texOffs(38, 7).addBox(-1.0F, -1.0F, -2.5F, 1.0F, 2.0F, 5.0F, new CubeDeformation(0.0F))
+                .texOffs(52, 7).addBox(-1.0F, -2.5F, -1.0F, 1.0F, 5.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.05F, 0.0F, 0.0F, -0.7854F, 0.0F, 0.0F));
 
         PartDefinition jetpack = body.addOrReplaceChild("jetpack", CubeListBuilder.create().texOffs(18, 39).addBox(-4.0F, -10.6667F, 0.3333F, 8.0F, 12.0F, 4.0F, new CubeDeformation(0.0F))
                 .texOffs(40, 30).addBox(2.0F, 1.3333F, 2.3333F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
@@ -132,23 +132,24 @@ public class GolemModel<T extends GolemBase> extends EntityModel<T> implements E
     public void copyPropertiesTo(EntityModel<T> entityModel) {
         super.copyPropertiesTo(entityModel);
         if (entityModel instanceof HumanoidModel<?> human) {
+            float yOff = 8 - this.model.getMainPart().y;
             human.head.loadPose(this.head.storePose());
-            human.head.y += 31;
+            human.head.y += 31 - yOff;
             human.head.z -= 0;
             human.body.loadPose(this.model.getMainPart().storePose());
-            human.body.y += 18;
+            human.body.y += 19;
             human.leftArm.loadPose(this.leftArm.storePose());
             human.leftArm.x += 2;
-            human.leftArm.y += 32;
+            human.leftArm.y += 33 - yOff;
             human.rightArm.loadPose(this.rightArm.storePose());
             human.rightArm.x -= 2;
-            human.rightArm.y += 32;
+            human.rightArm.y += 33 - yOff;
             human.leftLeg.loadPose(this.model.getMainPart().storePose());
             human.leftLeg.x += 2;
-            human.leftLeg.y += 70;
+            human.leftLeg.y += 71 - yOff;
             human.rightLeg.loadPose(this.model.getMainPart().storePose());
             human.rightLeg.x -= 2;
-            human.rightLeg.y += 70;
+            human.rightLeg.y += 71 - yOff;
         }
     }
 }

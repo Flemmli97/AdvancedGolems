@@ -15,7 +15,7 @@ public class ModEntities {
 
     public static void register() {
         golem = Registry.register(Registry.ENTITY_TYPE, new ResourceLocation(AdvancedGolems.MODID, "golem"), FabricEntityTypeBuilder.<GolemBase>createMob()
-                .spawnGroup(MobCategory.CREATURE).entityFactory(GolemBase::new).dimensions(EntityDimensions.fixed(0.5f, 1f))
+                .spawnGroup(MobCategory.CREATURE).entityFactory(GolemBase::new).dimensions(EntityDimensions.fixed(0.5f, 0.9f))
                 .defaultAttributes(GolemBase::createAttributes).build());
     }
 }
