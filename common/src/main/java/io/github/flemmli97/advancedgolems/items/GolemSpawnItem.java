@@ -26,9 +26,4 @@ public class GolemSpawnItem extends Item {
         }
         return InteractionResult.SUCCESS;
     }
-
-    @Override
-    public boolean isFoil(ItemStack itemStack) {
-        return true;
-    }
 }

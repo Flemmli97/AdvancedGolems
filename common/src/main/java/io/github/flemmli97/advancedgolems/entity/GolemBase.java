@@ -39,7 +39,6 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.animal.AbstractGolem;
-import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
@@ -385,7 +384,7 @@ public class GolemBase extends AbstractGolem implements IAnimated {
 
     @Override
     public boolean isAlliedTo(Entity entity) {
-        if(entity instanceof AbstractGolem && !(entity instanceof Enemy))
+        if (entity instanceof AbstractGolem && !(entity instanceof Enemy))
             return true;
         return super.isAlliedTo(entity);
     }

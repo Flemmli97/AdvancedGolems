@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -24,13 +25,16 @@ public class ClientRenderHandler {
     private static ItemStack held;
     private static GolemBase golem;
 
+    public static ClampedItemPropertyFunction controllerProps() {
+        return (stack, level, entity, i) -> GolemController.getMode(stack) * 0.1f;
+    }
+
     public static void render(PoseStack poseStack, MultiBufferSource.BufferSource buffer) {
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
         ItemStack stack = player.getMainHandItem();
         if (stack.getItem() == RegistryGet.getController().get()) {
-            GolemController item = (GolemController) stack.getItem();
-            if (item.getMode(stack) == 1) {
+            if (GolemController.getMode(stack) == 1) {
                 if (held != stack) {
                     held = stack;
                     golem = null;

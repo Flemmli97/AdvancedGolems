@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/handheld",
   "textures": {
-    "layer0": "minecraft:item/blaze_rod"
+    "layer0": "advancedgolems:item/golem_spawner"
   }
 }

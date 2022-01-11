@@ -2,5 +2,25 @@
   "parent": "minecraft:item/handheld",
   "textures": {
     "layer0": "minecraft:item/paper"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "advancedgolems:controller_mode": 0.0
+      },
+      "model": "advancedgolems:item/golem_control_remove"
+    },
+    {
+      "predicate": {
+        "advancedgolems:controller_mode": 0.1
+      },
+      "model": "advancedgolems:item/golem_control_home"
+    },
+    {
+      "predicate": {
+        "advancedgolems:controller_mode": 0.2
+      },
+      "model": "advancedgolems:item/golem_control_mode"
+    }
+  ]
 }

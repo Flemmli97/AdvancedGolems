@@ -5,8 +5,10 @@ import io.github.flemmli97.advancedgolems.client.ClientRenderHandler;
 import io.github.flemmli97.advancedgolems.client.model.GolemModel;
 import io.github.flemmli97.advancedgolems.client.render.GolemRenderer;
 import io.github.flemmli97.advancedgolems.forge.registry.ModEntities;
+import io.github.flemmli97.advancedgolems.forge.registry.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RenderLevelLastEvent;
@@ -15,7 +17,10 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 public class ClientInit {
 
     public static void clientInit(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> EntityRenderers.register(ModEntities.golem.get(), ctx -> new GolemRenderer<>(ctx, new ResourceLocation(AdvancedGolems.MODID, "textures/entity/golem.png"))));
+        event.enqueueWork(() -> {
+            ItemProperties.register(ModItems.golemControl.get(), new ResourceLocation(AdvancedGolems.MODID, "controller_mode"), ClientRenderHandler.controllerProps());
+            EntityRenderers.register(ModEntities.golem.get(), ctx -> new GolemRenderer<>(ctx, new ResourceLocation(AdvancedGolems.MODID, "textures/entity/golem.png")));
+        });
     }
 
     public static void layerRegister(EntityRenderersEvent.RegisterLayerDefinitions event) {

@@ -15,6 +15,7 @@ loom {
         launches {
             data {
                 arg "--existing", file("src/main/resources").absolutePath
+                arg "--existing", project(":common").file("src/main/resources").absolutePath
             }
         }
         mixinConfigs = ["advancedgolems.mixins.json"]

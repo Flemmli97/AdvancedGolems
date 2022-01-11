@@ -34,7 +34,7 @@ public class GolemController extends Item {
     @Override
     public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
         super.appendHoverText(itemStack, level, list, tooltipFlag);
-        switch (this.getMode(itemStack)) {
+        switch (getMode(itemStack)) {
             case 0 -> list.add(new TranslatableComponent("controller.mode.0").withStyle(ChatFormatting.GOLD));
             case 1 -> list.add(new TranslatableComponent("controller.mode.1").withStyle(ChatFormatting.GOLD));
             case 2 -> list.add(new TranslatableComponent("controller.mode.2").withStyle(ChatFormatting.GOLD));
@@ -42,14 +42,9 @@ public class GolemController extends Item {
     }
 
     @Override
-    public boolean isFoil(ItemStack itemStack) {
-        return true;
-    }
-
-    @Override
     public InteractionResult useOn(UseOnContext useOnContext) {
         ItemStack stack = useOnContext.getItemInHand();
-        if (this.getMode(stack) == 1 && useOnContext.getLevel() instanceof ServerLevel level) {
+        if (getMode(stack) == 1 && useOnContext.getLevel() instanceof ServerLevel level) {
             UUID uuid = golemUUID(stack);
             if (uuid != null) {
                 Entity e = level.getEntity(uuid);
@@ -74,7 +69,7 @@ public class GolemController extends Item {
 
     public boolean onLeftClickEntity(ItemStack stack, Player player, Entity target) {
         if (target instanceof GolemBase golem && !player.level.isClientSide) {
-            int mode = this.getMode(stack);
+            int mode = getMode(stack);
             if (mode == 0) {
                 if (!player.isCreative()) {
                     golem.onControllerRemove();
@@ -95,7 +90,7 @@ public class GolemController extends Item {
         return false;
     }
 
-    public int getMode(ItemStack stack) {
+    public static int getMode(ItemStack stack) {
         CompoundTag tag = stack.getOrCreateTag().getCompound(AdvancedGolems.MODID);
         if (tag != null)
             return tag.getInt("Mode");

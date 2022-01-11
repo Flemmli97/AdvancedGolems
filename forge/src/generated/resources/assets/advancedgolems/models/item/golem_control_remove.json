@@ -1,0 +1,6 @@
+{
+  "parent": "advancedgolems:item/golem_control",
+  "textures": {
+    "layer1": "advancedgolems:item/golem_remove"
+  }
+}
