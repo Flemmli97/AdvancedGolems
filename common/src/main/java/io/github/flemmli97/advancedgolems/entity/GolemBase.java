@@ -97,14 +97,14 @@ public class GolemBase extends AbstractGolem implements IAnimated {
 
     public GolemBase(EntityType<? extends GolemBase> entityType, Level level) {
         super(entityType, level);
+        this.updateAttributes();
+        this.updateState(this.state);
     }
 
     public GolemBase(Level world, BlockPos pos) {
         this(RegistryGet.golemType().get(), world);
         this.setPos(pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5);
         this.restrictTo(pos, Config.homeRadius);
-        this.updateState(this.state);
-        this.updateAttributes();
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -240,7 +240,7 @@ public class GolemBase extends AbstractGolem implements IAnimated {
 
     @Override
     protected InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
-        if (this.level.isClientSide)
+        if (this.level.isClientSide || interactionHand == InteractionHand.OFF_HAND)
             return InteractionResult.PASS;
         ItemStack stack = player.getItemInHand(interactionHand);
         if (!stack.isEmpty() && player.isSecondaryUseActive()) {
@@ -350,7 +350,7 @@ public class GolemBase extends AbstractGolem implements IAnimated {
         ItemStack stack = this.getItemBySlot(slot);
         if (damageSource.isFire() && stack.getItem().isFireResistant() || !(stack.getItem() instanceof ArmorItem))
             return;
-        stack.hurtAndBreak((int) dmg, this, e -> e.broadcastBreakEvent(EquipmentSlot.byTypeAndIndex(EquipmentSlot.Type.ARMOR, (int) dmg)));
+        stack.hurtAndBreak((int) dmg, this, e -> e.broadcastBreakEvent(EquipmentSlot.byTypeAndIndex(EquipmentSlot.Type.ARMOR, slot.getIndex())));
     }
 
     @Override
@@ -456,6 +456,7 @@ public class GolemBase extends AbstractGolem implements IAnimated {
     public void updateAttributes() {
         this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(Config.golemBaseAttack);
         this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(Config.golemHealth);
+        this.setHealth(this.getMaxHealth());
     }
 
     @Override
