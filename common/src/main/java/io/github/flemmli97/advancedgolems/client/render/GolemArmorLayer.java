@@ -2,9 +2,9 @@ package io.github.flemmli97.advancedgolems.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import io.github.flemmli97.advancedgolems.client.ArmorModelHandler;
 import io.github.flemmli97.advancedgolems.client.model.GolemModel;
 import io.github.flemmli97.advancedgolems.entity.GolemBase;
+import io.github.flemmli97.advancedgolems.platform.ArmorModelHandler;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -50,7 +50,7 @@ public class GolemArmorLayer<T extends GolemBase, M extends GolemModel<T>, A ext
     private void renderArmorPiece(PoseStack poseStack, MultiBufferSource multiBufferSource, T entity, EquipmentSlot equipmentSlot, int light, A humanoidModel) {
         ItemStack itemStack = entity.getItemBySlot(equipmentSlot);
         if (itemStack.getItem() instanceof ArmorItem armor && armor.getSlot() == equipmentSlot) {
-            HumanoidModel<T> model = ArmorModelHandler.getModel(poseStack, multiBufferSource, entity, itemStack, equipmentSlot, light, humanoidModel, theModel -> {
+            HumanoidModel<T> model = ArmorModelHandler.instance().getModel(poseStack, multiBufferSource, entity, itemStack, equipmentSlot, light, humanoidModel, theModel -> {
                 this.getParentModel().copyPropertiesTo(theModel);
                 this.setPartVisibility(theModel, equipmentSlot);
             });
@@ -63,10 +63,10 @@ public class GolemArmorLayer<T extends GolemBase, M extends GolemModel<T>, A ext
                 float f = (float) (j >> 16 & 0xFF) / 255.0f;
                 float g = (float) (j >> 8 & 0xFF) / 255.0f;
                 float h = (float) (j & 0xFF) / 255.0f;
-                this.renderModel(poseStack, multiBufferSource, light, bl2, model, bl, f, g, h, ArmorModelHandler.armorTextureForge(entity, itemStack, equipmentSlot, null, bl));
-                this.renderModel(poseStack, multiBufferSource, light, bl2, model, bl, 1.0f, 1.0f, 1.0f, ArmorModelHandler.armorTextureForge(entity, itemStack, equipmentSlot, "overlay", bl));
+                this.renderModel(poseStack, multiBufferSource, light, bl2, model, bl, f, g, h, ArmorModelHandler.instance().armorTextureForge(entity, itemStack, equipmentSlot, null, bl));
+                this.renderModel(poseStack, multiBufferSource, light, bl2, model, bl, 1.0f, 1.0f, 1.0f, ArmorModelHandler.instance().armorTextureForge(entity, itemStack, equipmentSlot, "overlay", bl));
             } else {
-                this.renderModel(poseStack, multiBufferSource, light, bl2, model, bl, 1.0f, 1.0f, 1.0f, ArmorModelHandler.armorTextureForge(entity, itemStack, equipmentSlot, null, bl));
+                this.renderModel(poseStack, multiBufferSource, light, bl2, model, bl, 1.0f, 1.0f, 1.0f, ArmorModelHandler.instance().armorTextureForge(entity, itemStack, equipmentSlot, null, bl));
             }
         }
     }

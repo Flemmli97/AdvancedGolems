@@ -1,7 +1,8 @@
-package io.github.flemmli97.advancedgolems.client.fabric;
+package io.github.flemmli97.advancedgolems.fabric.platform;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.flemmli97.advancedgolems.mixin.HumanoidArmorLayerMixin;
+import io.github.flemmli97.advancedgolems.platform.ArmorModelHandler;
 import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
 import net.fabricmc.fabric.impl.client.rendering.ArmorRendererRegistryImpl;
 import net.minecraft.client.model.HumanoidModel;
@@ -16,10 +17,15 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-public class ArmorModelHandlerImpl {
+public class ArmorModelHandlerImpl extends ArmorModelHandler {
 
+    public static void init() {
+        INSTANCE = new ArmorModelHandlerImpl();
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
-    public static <T extends LivingEntity, A extends HumanoidModel<T>> HumanoidModel<T> getModel(PoseStack poseStack, MultiBufferSource multiBufferSource, T entity, ItemStack itemStack, EquipmentSlot equipmentSlot, int light, A humanoidModel, Consumer<HumanoidModel<T>> setup) {
+    public <T extends LivingEntity, A extends HumanoidModel<T>> HumanoidModel<T> getModel(PoseStack poseStack, MultiBufferSource multiBufferSource, T entity, ItemStack itemStack, EquipmentSlot equipmentSlot, int light, A humanoidModel, Consumer<HumanoidModel<T>> setup) {
         ArmorRenderer renderer = ArmorRendererRegistryImpl.get(itemStack.getItem());
         setup.accept(humanoidModel);
         if (renderer != null) {
@@ -29,7 +35,8 @@ public class ArmorModelHandlerImpl {
         return humanoidModel;
     }
 
-    public static ResourceLocation armorTextureForge(Entity entity, ItemStack stack, EquipmentSlot slot, @Nullable String type, boolean inner) {
+    @Override
+    public ResourceLocation armorTextureForge(Entity entity, ItemStack stack, EquipmentSlot slot, @Nullable String type, boolean inner) {
         ArmorItem armorItem = (ArmorItem) stack.getItem();
         String string2 = "textures/models/armor/" + armorItem.getMaterial().getName() + "_layer_" + (inner ? 2 : 1) + (type == null ? "" : "_" + type) + ".png";
         return HumanoidArmorLayerMixin.armorResCache().computeIfAbsent(string2, ResourceLocation::new);

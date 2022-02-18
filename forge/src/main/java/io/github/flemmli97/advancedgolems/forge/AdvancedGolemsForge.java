@@ -5,8 +5,9 @@ import io.github.flemmli97.advancedgolems.entity.GolemBase;
 import io.github.flemmli97.advancedgolems.forge.client.ClientInit;
 import io.github.flemmli97.advancedgolems.forge.config.ConfigLoader;
 import io.github.flemmli97.advancedgolems.forge.config.ConfigSpecs;
-import io.github.flemmli97.advancedgolems.forge.registry.ModEntities;
-import io.github.flemmli97.advancedgolems.forge.registry.ModItems;
+import io.github.flemmli97.advancedgolems.forge.platform.ArmorModelHandlerImpl;
+import io.github.flemmli97.advancedgolems.registry.ModEntities;
+import io.github.flemmli97.advancedgolems.registry.ModItems;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -22,10 +23,12 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 public class AdvancedGolemsForge {
 
     public AdvancedGolemsForge() {
+        if (FMLEnvironment.dist == Dist.CLIENT)
+            ArmorModelHandlerImpl.init();
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ConfigSpecs.commonSpec, AdvancedGolems.MODID + ".toml");
         IEventBus modbus = FMLJavaModLoadingContext.get().getModEventBus();
-        ModEntities.ENTITIES.register(modbus);
-        ModItems.ITEMS.register(modbus);
+        ModEntities.ENTITIES.finalize(modbus);
+        ModItems.ITEMS.finalize(modbus);
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modbus.addListener(ClientInit::clientInit);
             modbus.addListener(ClientInit::layerRegister);

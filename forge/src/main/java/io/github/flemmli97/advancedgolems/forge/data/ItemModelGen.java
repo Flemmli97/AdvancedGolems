@@ -1,7 +1,7 @@
 package io.github.flemmli97.advancedgolems.forge.data;
 
 import io.github.flemmli97.advancedgolems.AdvancedGolems;
-import io.github.flemmli97.advancedgolems.forge.registry.ModItems;
+import io.github.flemmli97.advancedgolems.registry.ModItems;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.model.generators.ItemModelProvider;

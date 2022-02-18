@@ -4,7 +4,8 @@ import io.github.flemmli97.advancedgolems.config.Config;
 import io.github.flemmli97.advancedgolems.entity.ai.GoBackHomeGoal;
 import io.github.flemmli97.advancedgolems.entity.ai.GolemAttackGoal;
 import io.github.flemmli97.advancedgolems.entity.ai.NearestTargetInRestriction;
-import io.github.flemmli97.advancedgolems.registry.RegistryGet;
+import io.github.flemmli97.advancedgolems.registry.ModEntities;
+import io.github.flemmli97.advancedgolems.registry.ModItems;
 import io.github.flemmli97.tenshilib.api.entity.AnimatedAction;
 import io.github.flemmli97.tenshilib.api.entity.AnimationHandler;
 import io.github.flemmli97.tenshilib.api.entity.IAnimated;
@@ -102,7 +103,7 @@ public class GolemBase extends AbstractGolem implements IAnimated {
     }
 
     public GolemBase(Level world, BlockPos pos) {
-        this(RegistryGet.golemType().get(), world);
+        this(ModEntities.golem.get(), world);
         this.setPos(pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5);
         this.restrictTo(pos, Config.homeRadius);
     }
@@ -285,7 +286,7 @@ public class GolemBase extends AbstractGolem implements IAnimated {
 
     public void onControllerRemove() {
         this.dropEquipment();
-        this.spawnAtLocation(new ItemStack(RegistryGet.getGolemSpawner().get()), 0.0F);
+        this.spawnAtLocation(new ItemStack(ModItems.golemSpawn.get()), 0.0F);
         this.upgrades.dropUpgrades();
     }
 

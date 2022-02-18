@@ -1,7 +1,8 @@
-package io.github.flemmli97.advancedgolems.client.forge;
+package io.github.flemmli97.advancedgolems.forge.platform;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.flemmli97.advancedgolems.mixin.HumanoidArmorLayerMixin;
+import io.github.flemmli97.advancedgolems.platform.ArmorModelHandler;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.resources.ResourceLocation;
@@ -15,15 +16,21 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-public class ArmorModelHandlerImpl {
+public class ArmorModelHandlerImpl extends ArmorModelHandler {
 
-    public static <T extends LivingEntity, A extends HumanoidModel<T>> HumanoidModel<T> getModel(PoseStack poseStack, MultiBufferSource multiBufferSource, T entity, ItemStack itemStack, EquipmentSlot equipmentSlot, int light, A humanoidModel, Consumer<HumanoidModel<T>> setup) {
+    public static void init() {
+        INSTANCE = new ArmorModelHandlerImpl();
+    }
+
+    @Override
+    public <T extends LivingEntity, A extends HumanoidModel<T>> HumanoidModel<T> getModel(PoseStack poseStack, MultiBufferSource multiBufferSource, T entity, ItemStack itemStack, EquipmentSlot equipmentSlot, int light, A humanoidModel, Consumer<HumanoidModel<T>> setup) {
         HumanoidModel<T> ret = ForgeHooksClient.getArmorModel(entity, itemStack, equipmentSlot, humanoidModel);
         setup.accept(ret);
         return ret;
     }
 
-    public static ResourceLocation armorTextureForge(Entity entity, ItemStack stack, EquipmentSlot slot, @Nullable String type, boolean inner) {
+    @Override
+    public ResourceLocation armorTextureForge(Entity entity, ItemStack stack, EquipmentSlot slot, @Nullable String type, boolean inner) {
         ArmorItem item = (ArmorItem) stack.getItem();
         String texture = item.getMaterial().getName();
         String domain = "minecraft";

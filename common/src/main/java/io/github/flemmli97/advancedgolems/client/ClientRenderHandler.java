@@ -3,7 +3,7 @@ package io.github.flemmli97.advancedgolems.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.flemmli97.advancedgolems.entity.GolemBase;
 import io.github.flemmli97.advancedgolems.items.GolemController;
-import io.github.flemmli97.advancedgolems.registry.RegistryGet;
+import io.github.flemmli97.advancedgolems.registry.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -33,7 +33,7 @@ public class ClientRenderHandler {
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
         ItemStack stack = player.getMainHandItem();
-        if (stack.getItem() == RegistryGet.getController().get()) {
+        if (stack.getItem() == ModItems.golemControl.get()) {
             if (GolemController.getMode(stack) == 1) {
                 if (held != stack) {
                     held = stack;
