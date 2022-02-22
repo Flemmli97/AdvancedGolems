@@ -5,8 +5,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.flemmli97.advancedgolems.client.model.GolemModel;
 import io.github.flemmli97.advancedgolems.entity.GolemBase;
 import io.github.flemmli97.advancedgolems.platform.ArmorModelHandler;
-import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -50,10 +50,9 @@ public class GolemArmorLayer<T extends GolemBase, M extends GolemModel<T>, A ext
     private void renderArmorPiece(PoseStack poseStack, MultiBufferSource multiBufferSource, T entity, EquipmentSlot equipmentSlot, int light, A humanoidModel) {
         ItemStack itemStack = entity.getItemBySlot(equipmentSlot);
         if (itemStack.getItem() instanceof ArmorItem armor && armor.getSlot() == equipmentSlot) {
-            HumanoidModel<T> model = ArmorModelHandler.instance().getModel(poseStack, multiBufferSource, entity, itemStack, equipmentSlot, light, humanoidModel, theModel -> {
-                this.getParentModel().copyPropertiesTo(theModel);
-                this.setPartVisibility(theModel, equipmentSlot);
-            });
+            this.getParentModel().copyPropertiesTo(humanoidModel);
+            this.setPartVisibility(humanoidModel, equipmentSlot);
+            Model model = ArmorModelHandler.instance().getModel(poseStack, multiBufferSource, entity, itemStack, equipmentSlot, light, humanoidModel);
             if (model == null)
                 return;
             boolean bl = equipmentSlot == EquipmentSlot.LEGS;
@@ -90,7 +89,7 @@ public class GolemArmorLayer<T extends GolemBase, M extends GolemModel<T>, A ext
         }
     }
 
-    private void renderModel(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, boolean bl, EntityModel<?> humanoidModel, boolean bl2, float f, float g, float h, ResourceLocation armorTexture) {
+    private void renderModel(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, boolean bl, Model humanoidModel, boolean bl2, float f, float g, float h, ResourceLocation armorTexture) {
         VertexConsumer vertexConsumer = ItemRenderer.getArmorFoilBuffer(multiBufferSource, RenderType.armorCutoutNoCull(armorTexture), false, bl);
         humanoidModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, f, g, h, 1.0f);
     }

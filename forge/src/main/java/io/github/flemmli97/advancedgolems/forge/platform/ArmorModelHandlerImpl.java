@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.flemmli97.advancedgolems.mixin.HumanoidArmorLayerMixin;
 import io.github.flemmli97.advancedgolems.platform.ArmorModelHandler;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -14,8 +15,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.ForgeHooksClient;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Consumer;
-
 public class ArmorModelHandlerImpl extends ArmorModelHandler {
 
     public static void init() {
@@ -23,10 +22,8 @@ public class ArmorModelHandlerImpl extends ArmorModelHandler {
     }
 
     @Override
-    public <T extends LivingEntity, A extends HumanoidModel<T>> HumanoidModel<T> getModel(PoseStack poseStack, MultiBufferSource multiBufferSource, T entity, ItemStack itemStack, EquipmentSlot equipmentSlot, int light, A humanoidModel, Consumer<HumanoidModel<T>> setup) {
-        HumanoidModel<T> ret = ForgeHooksClient.getArmorModel(entity, itemStack, equipmentSlot, humanoidModel);
-        setup.accept(ret);
-        return ret;
+    public <T extends LivingEntity, A extends HumanoidModel<T>> Model getModel(PoseStack poseStack, MultiBufferSource multiBufferSource, T entity, ItemStack itemStack, EquipmentSlot equipmentSlot, int light, A humanoidModel) {
+        return ForgeHooksClient.getArmorModel(entity, itemStack, equipmentSlot, humanoidModel);
     }
 
     @Override
