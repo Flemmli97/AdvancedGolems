@@ -8,10 +8,10 @@ public class ConfigSpecs {
     public static final ForgeConfigSpec commonSpec;
     public static final ConfigSpecs conf;
 
-    public final ForgeConfigSpec.ConfigValue<Double> golemHealth;
-    public final ForgeConfigSpec.ConfigValue<Double> golemBaseAttack;
+    public final ForgeConfigSpec.DoubleValue golemHealth;
+    public final ForgeConfigSpec.DoubleValue golemBaseAttack;
 
-    public final ForgeConfigSpec.ConfigValue<Integer> homeRadius;
+    public final ForgeConfigSpec.IntValue homeRadius;
 
     public final ForgeConfigSpec.BooleanValue shouldGearTakeDamage;
 
@@ -20,17 +20,16 @@ public class ConfigSpecs {
     public final ForgeConfigSpec.IntValue maxSpeedUpgrades;
 
     public ConfigSpecs(ForgeConfigSpec.Builder builder) {
-        this.golemHealth = builder.comment("Health of a golem").define("Golem Health", 40d);
-        this.golemBaseAttack = builder.comment("Base attack of a golem").define("Golem Attack", 2.5);
+        this.golemHealth = builder.comment("Health of a golem").defineInRange("Golem Health", 40d, 0, Double.MAX_VALUE);
+        this.golemBaseAttack = builder.comment("Base attack of a golem").defineInRange("Golem Attack", 2.5, 0, Double.MAX_VALUE);
 
-        this.homeRadius = builder.comment("Home radius of golems").define("Golem Home", 9);
+        this.homeRadius = builder.comment("Home radius of golems").defineInRange("Golem Home", 9, 0, Integer.MAX_VALUE);
 
         this.shouldGearTakeDamage = builder.comment("If equipment given to golems should take durability damage").define("Equipment Damage", true);
 
         this.flyItem = builder.comment("Item to make golems able to fly").define("Fly Item", "minecraft:nether_star");
         this.speedItem = builder.comment("Item to increase golems movement speed").define("Speed Item", "minecraft:sugar");
         this.maxSpeedUpgrades = builder.comment("Max amount of speed upgrades. Each upgrade increases speed by 0.02 and flyspeed by 0.04").defineInRange("Speed Max", 10, 0, Integer.MAX_VALUE);
-
     }
 
     static {
