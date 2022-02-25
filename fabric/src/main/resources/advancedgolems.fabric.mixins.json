@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "io.github.flemmli97.advancedgolems.fabric.polymer",
+  "plugin": "io.github.flemmli97.advancedgolems.fabric.polymer.MixinPlugin",
+  "compatibilityLevel": "JAVA_16",
+  "mixins": [
+    "GolemMixin",
+    "ModPolymerItem",
+    "ZombieAccessors"
+  ],
+  "server": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

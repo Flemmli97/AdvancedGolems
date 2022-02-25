@@ -1,11 +1,14 @@
 package io.github.flemmli97.advancedgolems.items;
 
 import io.github.flemmli97.advancedgolems.entity.GolemBase;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 public class GolemSpawnItem extends Item {
 
@@ -25,5 +28,9 @@ public class GolemSpawnItem extends Item {
             }
         }
         return InteractionResult.SUCCESS;
+    }
+
+    public Item getPolymerItem(ItemStack itemStack, @Nullable ServerPlayer player) {
+        return Items.VILLAGER_SPAWN_EGG;
     }
 }

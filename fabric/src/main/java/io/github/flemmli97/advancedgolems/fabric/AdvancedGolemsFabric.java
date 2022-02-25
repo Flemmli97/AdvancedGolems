@@ -1,5 +1,7 @@
 package io.github.flemmli97.advancedgolems.fabric;
 
+import com.google.gson.TypeAdapter;
+import io.github.flemmli97.advancedgolems.AdvancedGolems;
 import io.github.flemmli97.advancedgolems.entity.GolemBase;
 import io.github.flemmli97.advancedgolems.fabric.config.ConfigSpecs;
 import io.github.flemmli97.advancedgolems.items.GolemController;
@@ -8,6 +10,7 @@ import io.github.flemmli97.advancedgolems.registry.ModItems;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -21,9 +24,10 @@ public class AdvancedGolemsFabric implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        AdvancedGolems.polymer = FabricLoader.getInstance().isModLoaded("polymer");
+        ConfigSpecs.init();
         ModEntities.ENTITIES.finalize(null);
         ModItems.ITEMS.finalize(null);
-        ConfigSpecs.init();
         AttackEntityCallback.EVENT.register(AdvancedGolemsFabric::attackCallback);
         AdvancedGolemsFabric.registerAttributes();
     }

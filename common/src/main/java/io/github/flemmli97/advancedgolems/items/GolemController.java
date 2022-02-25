@@ -6,20 +6,25 @@ import io.github.flemmli97.advancedgolems.entity.GolemBase;
 import io.github.flemmli97.advancedgolems.entity.GolemState;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -90,6 +95,24 @@ public class GolemController extends Item {
         return false;
     }
 
+    @Override
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
+        if (isSelected && AdvancedGolems.polymer && entity.tickCount % 2 == 0 && entity instanceof ServerPlayer player && GolemController.getMode(stack) == 1) {
+            UUID uuid = GolemController.golemUUID(stack);
+            if (uuid != null) {
+                level.getNearbyEntities(GolemBase.class, TargetingConditions.DEFAULT, player, new AABB(-16, -16, -16, 16, 16, 16).move(entity.position()))
+                        .forEach(golem -> {
+                            if (golem.getUUID().equals(uuid)) {
+                                player.getLevel().sendParticles(player, ParticleTypes.FLAME, true,
+                                        golem.getRestrictCenter().getX() + 0.5, golem.getRestrictCenter().getY() + 1.5, golem.getRestrictCenter().getZ() + 0.5,
+                                        1, 0, 0, 0, 0);
+                            }
+                        });
+            }
+        }
+        super.inventoryTick(stack, level, entity, slotId, isSelected);
+    }
+
     public static int getMode(ItemStack stack) {
         CompoundTag tag = stack.getOrCreateTag().getCompound(AdvancedGolems.MODID);
         if (tag != null)
@@ -116,4 +139,16 @@ public class GolemController extends Item {
         stackTag.put(AdvancedGolems.MODID, tag);
     }
 
+    public static String[] skullValues = new String[]{
+            //Mode 0
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTg4MzJjMTQ2NmM4NDFjYzc5ZDVmMTAyOTVkNDY0Mjc5OTY3OTc1YTI0NTFjN2E1MzNjNzk5Njg5NzQwOGJlYSJ9fX0=",
+            //Mode 1
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2I1NmU0OTA4NWY1NWQ1ZGUyMTVhZmQyNmZjNGYxYWZlOWMzNDMxM2VmZjk4ZTNlNTgyNDVkZWYwNmU1ODU4YyJ9fX0=",
+            //Mode 2
+            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNGY3NWE5YjdjZTU0Y2YzYmExMjg4YWIxNmQ5MTk1ODM1ODM3NDNmOWQ1NWZlNDJhZDVlODU5NjExOWZlNzU1ZSJ9fX0="
+    };
+
+    public Item getPolymerItem(ItemStack itemStack, @Nullable ServerPlayer player) {
+        return Items.PLAYER_HEAD;
+    }
 }

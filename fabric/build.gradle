@@ -21,6 +21,7 @@ repositories {
         name = "TenshiLib"
         url "https://gitlab.com/api/v4/projects/21830712/packages/maven"
     }
+    maven { url 'https://maven.nucleoid.xyz' }
 }
 
 dependencies {
@@ -31,10 +32,16 @@ dependencies {
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
     modImplementation "${tenshilib_dep}:fabric"
+    modImplementation "eu.pb4:polymer:0.2.0-beta.26+1.18.1"
+    modImplementation "fr.catcore:server-translations-api:1.4.8+1.18-pre1"
 }
 
 sourceSets.main.resources {
     srcDir project(":forge").file("src/generated/resources")
+    copy {
+        from project(":forge").file("src/generated/resources/assets/advancedgolems/lang")
+        into "$sourceSets.main.output.resourcesDir/data/advancedgolems/lang"
+    }
 }
 
 processResources {

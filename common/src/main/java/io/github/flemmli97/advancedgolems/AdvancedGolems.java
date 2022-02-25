@@ -8,4 +8,5 @@ public class AdvancedGolems {
     public static final String MODID = "advancedgolems";
     public static final Logger logger = LogManager.getLogger(AdvancedGolems.MODID);
 
+    public static boolean polymer;
 }
