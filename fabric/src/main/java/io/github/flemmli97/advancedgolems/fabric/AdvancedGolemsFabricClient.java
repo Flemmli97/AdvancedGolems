@@ -4,7 +4,6 @@ import io.github.flemmli97.advancedgolems.AdvancedGolems;
 import io.github.flemmli97.advancedgolems.client.ClientRenderHandler;
 import io.github.flemmli97.advancedgolems.client.model.GolemModel;
 import io.github.flemmli97.advancedgolems.client.render.GolemRenderer;
-import io.github.flemmli97.advancedgolems.fabric.platform.ArmorModelHandlerImpl;
 import io.github.flemmli97.advancedgolems.registry.ModEntities;
 import io.github.flemmli97.advancedgolems.registry.ModItems;
 import net.fabricmc.api.ClientModInitializer;
@@ -19,7 +18,6 @@ public class AdvancedGolemsFabricClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        ArmorModelHandlerImpl.init();
         EntityRendererRegistry.register(ModEntities.golem.get(), ctx -> new GolemRenderer<>(ctx, new ResourceLocation(AdvancedGolems.MODID, "textures/entity/golem.png")));
         EntityModelLayerRegistry.registerModelLayer(GolemModel.LAYER_LOCATION, GolemModel::createBodyLayer);
         WorldRenderEvents.END.register(ctx -> ClientRenderHandler.render(ctx.matrixStack(), Minecraft.getInstance().renderBuffers().crumblingBufferSource()));

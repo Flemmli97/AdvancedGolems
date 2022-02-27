@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.github.flemmli97.advancedgolems.AdvancedGolems;
 import io.github.flemmli97.advancedgolems.registry.ModItems;
-import io.github.flemmli97.tenshilib.platform.registry.RegistryHelper;
+import io.github.flemmli97.tenshilib.platform.PlatformUtils;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.HashCache;
@@ -33,8 +33,8 @@ public class Lang implements DataProvider {
     }
 
     protected void addTranslations() {
-        this.add("item.advancedgolems." + RegistryHelper.instance().items().getIDFrom(ModItems.golemSpawn.get()).getPath(), "Summon Golem");
-        this.add("item.advancedgolems." + RegistryHelper.instance().items().getIDFrom(ModItems.golemControl.get()).getPath(), "Golem Controller");
+        this.add("item.advancedgolems." + PlatformUtils.INSTANCE.items().getIDFrom(ModItems.golemSpawn.get()).getPath(), "Summon Golem");
+        this.add("item.advancedgolems." + PlatformUtils.INSTANCE.items().getIDFrom(ModItems.golemControl.get()).getPath(), "Golem Controller");
 
         this.add("controller.mode.0", "Mode: Remove");
         this.add("controller.mode.1", "Mode: Home");

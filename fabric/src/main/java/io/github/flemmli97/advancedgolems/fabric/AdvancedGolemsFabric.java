@@ -1,6 +1,5 @@
 package io.github.flemmli97.advancedgolems.fabric;
 
-import com.google.gson.TypeAdapter;
 import io.github.flemmli97.advancedgolems.AdvancedGolems;
 import io.github.flemmli97.advancedgolems.entity.GolemBase;
 import io.github.flemmli97.advancedgolems.fabric.config.ConfigSpecs;

@@ -52,7 +52,7 @@ public class GolemArmorLayer<T extends GolemBase, M extends GolemModel<T>, A ext
         if (itemStack.getItem() instanceof ArmorItem armor && armor.getSlot() == equipmentSlot) {
             this.getParentModel().copyPropertiesTo(humanoidModel);
             this.setPartVisibility(humanoidModel, equipmentSlot);
-            Model model = ArmorModelHandler.instance().getModel(poseStack, multiBufferSource, entity, itemStack, equipmentSlot, light, humanoidModel);
+            Model model = ArmorModelHandler.INSTANCE.getModel(poseStack, multiBufferSource, entity, itemStack, equipmentSlot, light, humanoidModel);
             if (model == null)
                 return;
             boolean bl = equipmentSlot == EquipmentSlot.LEGS;
@@ -62,10 +62,10 @@ public class GolemArmorLayer<T extends GolemBase, M extends GolemModel<T>, A ext
                 float f = (float) (j >> 16 & 0xFF) / 255.0f;
                 float g = (float) (j >> 8 & 0xFF) / 255.0f;
                 float h = (float) (j & 0xFF) / 255.0f;
-                this.renderModel(poseStack, multiBufferSource, light, bl2, model, bl, f, g, h, ArmorModelHandler.instance().armorTextureForge(entity, itemStack, equipmentSlot, null, bl));
-                this.renderModel(poseStack, multiBufferSource, light, bl2, model, bl, 1.0f, 1.0f, 1.0f, ArmorModelHandler.instance().armorTextureForge(entity, itemStack, equipmentSlot, "overlay", bl));
+                this.renderModel(poseStack, multiBufferSource, light, bl2, model, bl, f, g, h, ArmorModelHandler.INSTANCE.armorTextureForge(entity, itemStack, equipmentSlot, null, bl));
+                this.renderModel(poseStack, multiBufferSource, light, bl2, model, bl, 1.0f, 1.0f, 1.0f, ArmorModelHandler.INSTANCE.armorTextureForge(entity, itemStack, equipmentSlot, "overlay", bl));
             } else {
-                this.renderModel(poseStack, multiBufferSource, light, bl2, model, bl, 1.0f, 1.0f, 1.0f, ArmorModelHandler.instance().armorTextureForge(entity, itemStack, equipmentSlot, null, bl));
+                this.renderModel(poseStack, multiBufferSource, light, bl2, model, bl, 1.0f, 1.0f, 1.0f, ArmorModelHandler.INSTANCE.armorTextureForge(entity, itemStack, equipmentSlot, null, bl));
             }
         }
     }

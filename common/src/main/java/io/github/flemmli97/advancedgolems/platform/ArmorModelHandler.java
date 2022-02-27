@@ -1,6 +1,7 @@
 package io.github.flemmli97.advancedgolems.platform;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.flemmli97.tenshilib.platform.InitUtil;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -11,15 +12,13 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class ArmorModelHandler {
+public interface ArmorModelHandler {
 
-    protected static ArmorModelHandler INSTANCE;
+    ArmorModelHandler INSTANCE = InitUtil.getPlatformInstance(ArmorModelHandler.class,
+            "io.github.flemmli97.advancedgolems.fabric.platform.ArmorModelHandlerImpl",
+            "io.github.flemmli97.advancedgolems.forge.platform.ArmorModelHandlerImpl");
 
-    public static ArmorModelHandler instance() {
-        return INSTANCE;
-    }
+    <T extends LivingEntity, A extends HumanoidModel<T>> Model getModel(PoseStack poseStack, MultiBufferSource multiBufferSource, T entity, ItemStack itemStack, EquipmentSlot equipmentSlot, int light, A humanoidModel);
 
-    public abstract <T extends LivingEntity, A extends HumanoidModel<T>> Model getModel(PoseStack poseStack, MultiBufferSource multiBufferSource, T entity, ItemStack itemStack, EquipmentSlot equipmentSlot, int light, A humanoidModel);
-
-    public abstract ResourceLocation armorTextureForge(Entity entity, ItemStack stack, EquipmentSlot slot, @Nullable String type, boolean inner);
+    ResourceLocation armorTextureForge(Entity entity, ItemStack stack, EquipmentSlot slot, @Nullable String type, boolean inner);
 }

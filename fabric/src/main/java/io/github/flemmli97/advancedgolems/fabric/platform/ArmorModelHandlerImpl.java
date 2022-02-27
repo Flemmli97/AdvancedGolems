@@ -16,11 +16,7 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-public class ArmorModelHandlerImpl extends ArmorModelHandler {
-
-    public static void init() {
-        INSTANCE = new ArmorModelHandlerImpl();
-    }
+public class ArmorModelHandlerImpl implements ArmorModelHandler {
 
     @Override
     @SuppressWarnings("unchecked")

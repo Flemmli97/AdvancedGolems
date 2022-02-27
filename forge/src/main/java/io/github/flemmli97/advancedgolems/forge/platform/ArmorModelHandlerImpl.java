@@ -15,11 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.ForgeHooksClient;
 import org.jetbrains.annotations.Nullable;
 
-public class ArmorModelHandlerImpl extends ArmorModelHandler {
-
-    public static void init() {
-        INSTANCE = new ArmorModelHandlerImpl();
-    }
+public class ArmorModelHandlerImpl implements ArmorModelHandler {
 
     @Override
     public <T extends LivingEntity, A extends HumanoidModel<T>> Model getModel(PoseStack poseStack, MultiBufferSource multiBufferSource, T entity, ItemStack itemStack, EquipmentSlot equipmentSlot, int light, A humanoidModel) {
