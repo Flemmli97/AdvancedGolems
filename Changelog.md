@@ -1,7 +1,7 @@
 Advanced Golems 1.1.2
 ================
 - Fabric: Add polymer support. aka this mod can now be server side only
-  You do need to set usePolymer to true in the config
+  You do need to set Polymer to true in the config
 - TenshiLib 1.6.0 compat
 
 Advanced Golems 1.1.1
