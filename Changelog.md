@@ -1,3 +1,7 @@
+Advanced Golems 1.1.3
+================
+- 1.18.2
+
 Advanced Golems 1.1.2
 ================
 - Fabric: Add polymer support. aka this mod can now be server side only

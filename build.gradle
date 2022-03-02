@@ -133,6 +133,7 @@ curseforge {
             "${project.curse_dep_fabric}".split(', ').each {
                 requiredDependency "${it}"
             }
+            optionalDependency "polymer"
         }
     }
     project {

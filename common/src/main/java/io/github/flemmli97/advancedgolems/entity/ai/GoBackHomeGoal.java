@@ -20,9 +20,9 @@ public class GoBackHomeGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        if (this.golem.hasRestriction() && this.golem.getRestrictCenter().distSqr(this.golem.position(), false) > 1 && this.golem.getTarget() == null) {
+        if (this.golem.hasRestriction() && this.golem.getRestrictCenter().distToCenterSqr(this.golem.position()) > 1 && this.golem.getTarget() == null) {
             BlockPos blockpos = this.golem.getRestrictCenter();
-            if (blockpos.distSqr(this.golem.position(), false) >= 256) {
+            if (blockpos.distToCenterSqr(this.golem.position()) >= 256) {
                 Vec3 vec3d = DefaultRandomPos.getPosTowards(this.golem, 16, 7, new Vec3(blockpos.getX(), blockpos.getY(), blockpos.getZ()), 1);
                 if (vec3d == null) {
                     return false;
