@@ -20,6 +20,14 @@ dependencies {
     modCompileOnly "${tenshilib_dep}:fabric"
 }
 
+sourceSets.main.resources {
+    srcDir "src/generated/resources"
+    copy {
+        from project(":forge").file("src/generated/resources/assets/advancedgolems/lang")
+        into "$sourceSets.main.output.resourcesDir/data/advancedgolems/lang"
+    }
+}
+
 publishing {
     publications {
         mavenCommon(MavenPublication) {

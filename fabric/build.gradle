@@ -36,14 +36,6 @@ dependencies {
     modImplementation "fr.catcore:server-translations-api:1.4.8+1.18-pre1"
 }
 
-sourceSets.main.resources {
-    srcDir project(":forge").file("src/generated/resources")
-    copy {
-        from project(":forge").file("src/generated/resources/assets/advancedgolems/lang")
-        into "$sourceSets.main.output.resourcesDir/data/advancedgolems/lang"
-    }
-}
-
 processResources {
     inputs.property "version", project.version
 
