@@ -21,6 +21,9 @@
     ],
     "client": [
       "io.github.flemmli97.advancedgolems.fabric.AdvancedGolemsFabricClient"
+    ],
+    "modmenu": [
+      "io.github.flemmli97.advancedgolems.fabric.integration.ModMenuIntegration"
     ]
   },
   "mixins": [

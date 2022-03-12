@@ -7,5 +7,6 @@
   "golem.state.AGGRESSIVE": "Golem is now aggressive",
   "golem.state.AGGRESSIVESTAND": "Golem is now waiting",
   "golem.state.PASSIVE": "Golem is now passive",
-  "golem.state.PASSIVESTAND": "Golem is now standing"
+  "golem.state.PASSIVESTAND": "Golem is now standing",
+  "config.title.advancedgolems": "Advanced Golems Config"
 }

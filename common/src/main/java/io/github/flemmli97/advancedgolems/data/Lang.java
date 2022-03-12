@@ -43,6 +43,8 @@ public class Lang implements DataProvider {
         this.add("golem.state.AGGRESSIVESTAND", "Golem is now waiting");
         this.add("golem.state.PASSIVE", "Golem is now passive");
         this.add("golem.state.PASSIVESTAND", "Golem is now standing");
+
+        this.add("config.title.advancedgolems", "Advanced Golems Config");
     }
 
     @Override

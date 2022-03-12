@@ -16,6 +16,12 @@ public class ConfigSpecs {
         return config;
     }
 
+    public static JsonConfig<CommentedJsonConfig> getJsonConfig() {
+        if (jsonConfig == null)
+            init();
+        return jsonConfig;
+    }
+
     public static void init() {
         if (jsonConfig == null) {
             Pair<JsonConfig<CommentedJsonConfig>, ConfigSpecs> specs = CommentedJsonConfig.Builder.create(FabricLoader.getInstance().getConfigDir().resolve("advancedgolems.json"), 1, ConfigSpecs::new);
@@ -52,5 +58,7 @@ public class ConfigSpecs {
         this.maxSpeedUpgrades = builder.comment("Max amount of speed upgrades. Each upgrade increases speed by 0.02 and flyspeed by 0.04").defineInRange("Speed Max", 10, 0, Integer.MAX_VALUE);
 
         this.usePolymer = builder.comment("Enable polymer support").define("Polymer", false);
+
+        builder.registerReloadHandler(ConfigLoader::load);
     }
 }

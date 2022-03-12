@@ -19,7 +19,7 @@ public class RecipeGen extends RecipeProvider {
     }
 
     @Override
-    protected void buildCraftingRecipes(Consumer<FinishedRecipe> consumer) {
+    public void buildCraftingRecipes(Consumer<FinishedRecipe> consumer) {
         ShapedRecipeBuilder.shaped(ModItems.golemSpawn.get())
                 .define('L', Items.LAPIS_LAZULI)
                 .define('S', Items.IRON_SWORD)
