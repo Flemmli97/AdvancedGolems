@@ -13,12 +13,12 @@ description='''Summon small golems that help defend your base'''
 [[dependencies.advancedgolems]]
 modId="minecraft"
 mandatory=true
-versionRange="[1.18,)"
+versionRange="[1.18.2,)"
 ordering="NONE"
 side="BOTH"
 [[dependencies.advancedgolems]]
 modId="tenshilib"
 mandatory=true
-versionRange="[1.18.1-1.6.0,)"
+versionRange="[1.18.2-1.6.4,)"
 ordering="NONE"
 side="BOTH"
