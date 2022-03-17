@@ -1,3 +1,7 @@
+Advanced Golems 1.1.4
+================
+- ModMenu support
+
 Advanced Golems 1.1.3
 ================
 - 1.18.2
