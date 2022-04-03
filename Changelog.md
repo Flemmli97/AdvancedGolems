@@ -1,3 +1,9 @@
+Advanced Golems 1.1.5
+================
+- Fix recipe using forge tags on fabric
+- Able to improve base damage (default: diamond), health (default: golden melon) and make
+  golems immune to fire (default: none)
+  
 Advanced Golems 1.1.4
 ================
 - ModMenu support

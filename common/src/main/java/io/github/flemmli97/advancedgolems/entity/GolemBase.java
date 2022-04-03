@@ -355,6 +355,11 @@ public class GolemBase extends AbstractGolem implements IAnimated {
     }
 
     @Override
+    public boolean fireImmune() {
+        return this.upgrades.isFireRes();
+    }
+
+    @Override
     public void baseTick() {
         super.baseTick();
         this.getAnimationHandler().tick();
