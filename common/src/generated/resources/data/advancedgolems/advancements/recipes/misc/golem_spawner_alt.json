@@ -2,7 +2,7 @@
   "parent": "minecraft:recipes/root",
   "rewards": {
     "recipes": [
-      "advancedgolems:golem_spawner_default"
+      "advancedgolems:golem_spawner_alt"
     ]
   },
   "criteria": {
@@ -21,7 +21,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "advancedgolems:golem_spawner_default"
+        "recipe": "advancedgolems:golem_spawner_alt"
       }
     }
   },

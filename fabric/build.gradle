@@ -53,6 +53,7 @@ processResources {
 }
 
 shadowJar {
+    exclude "**/recipes/**_alt.json", "**/advancements/**/**_alt.json"
     configurations = [project.configurations.shadowCommon]
     classifier "dev-shadow"
 }

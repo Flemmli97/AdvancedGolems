@@ -31,7 +31,7 @@ public class RecipeGen extends RecipeProvider {
                 .pattern("LSL")
                 .group("golem_spawner")
                 .unlockedBy("golem_spawner", RecipeProvider.has(Items.PUMPKIN))
-                .save(consumer);
+                .save(consumer, new ResourceLocation(AdvancedGolems.MODID, "golem_spawner_alt"));
         ShapedRecipeBuilder.shaped(ModItems.golemSpawn.get())
                 .define('L', Items.LAPIS_LAZULI)
                 .define('S', Items.IRON_SWORD)
@@ -43,7 +43,7 @@ public class RecipeGen extends RecipeProvider {
                 .pattern("LSL")
                 .group("golem_spawner")
                 .unlockedBy("golem_spawner", RecipeProvider.has(Items.PUMPKIN))
-                .save(consumer, new ResourceLocation(AdvancedGolems.MODID, "golem_spawner_default"));
+                .save(consumer);
         ShapedRecipeBuilder.shaped(ModItems.golemControl.get())
                 .define('P', Items.PUMPKIN)
                 .define('S', Items.PAPER)
