@@ -6,9 +6,7 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.common.Tags;
 
 import java.util.function.Consumer;
 
@@ -25,19 +23,7 @@ public class RecipeGen extends RecipeProvider {
                 .define('S', Items.IRON_SWORD)
                 .define('D', Items.PUMPKIN)
                 .define('G', Items.PAPER)
-                .define('I', Tags.Items.DYES_BLACK)
-                .pattern("LIL")
-                .pattern("GDG")
-                .pattern("LSL")
-                .group("golem_spawner")
-                .unlockedBy("golem_spawner", RecipeProvider.has(Items.PUMPKIN))
-                .save(consumer, new ResourceLocation(AdvancedGolems.MODID, "golem_spawner_alt"));
-        ShapedRecipeBuilder.shaped(ModItems.golemSpawn.get())
-                .define('L', Items.LAPIS_LAZULI)
-                .define('S', Items.IRON_SWORD)
-                .define('D', Items.PUMPKIN)
-                .define('G', Items.PAPER)
-                .define('I', Items.BLACK_DYE)
+                .define('I', AdvancedGolems.blackDyes)
                 .pattern("LIL")
                 .pattern("GDG")
                 .pattern("LSL")

@@ -18,6 +18,7 @@ public class DataGen {
             data.addProvider(new ItemModelGen(data, event.getExistingFileHelper()));
         }
         if (event.includeServer()) {
+            data.addProvider(new ItemTagGen(data, event.getExistingFileHelper()));
             data.addProvider(new RecipeGen(data));
         }
     }
