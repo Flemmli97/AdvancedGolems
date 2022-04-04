@@ -28,6 +28,10 @@ sourceSets.main.resources {
     }
 }
 
+processResources {
+    exclude '.cache'
+}
+
 publishing {
     publications {
         mavenCommon(MavenPublication) {
