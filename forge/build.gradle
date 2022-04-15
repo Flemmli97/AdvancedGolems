@@ -23,7 +23,7 @@ loom {
 
 // Make datagen output to common folder
 configureLaunch.doLast {
-    def file = file(".gradle/loom-cache/launch.cfg");
+    def file = file(".gradle/loom-cache/launch.cfg")
     def cfg = file.getText('UTF-8')
     cfg = cfg.replaceAll(project(":forge").file("src/generated/resources").absolutePath,
             project(":common").file("src/generated/resources").absolutePath)

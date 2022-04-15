@@ -64,7 +64,7 @@ public class GolemAttackGoal<T extends GolemBase> extends AnimatedAttackGoal<T> 
                 this.next = null;
             }
         } else {
-            boolean flag = this.attacker.getSensing().hasLineOfSight(target);
+            boolean flag = this.attacker.getSensing().hasLineOfSight(this.target);
             if (this.attackMoveDelay <= 0)
                 this.attackMoveDelay = this.attacker.getRandom().nextInt(50) + 100;
             if (!flag || this.distanceToTargetSq > this.attackRange) {
@@ -87,13 +87,13 @@ public class GolemAttackGoal<T extends GolemBase> extends AnimatedAttackGoal<T> 
                 this.attacker.doHurtTarget(this.target);
             }
         } else {
-            boolean flag = this.attacker.getSensing().hasLineOfSight(target);
+            boolean flag = this.attacker.getSensing().hasLineOfSight(this.target);
             ItemStack stack = this.attacker.getMainHandItem();
             boolean crossbow = stack.getItem() instanceof CrossbowItem;
             if (!crossbow)
-                this.moveStrafing(target, flag);
+                this.moveStrafing(this.target, flag);
             else
-                this.moveToRange(target, flag);
+                this.moveToRange(this.target, flag);
 
             if (anim.canAttack()) {
                 if (flag) {
@@ -114,7 +114,7 @@ public class GolemAttackGoal<T extends GolemBase> extends AnimatedAttackGoal<T> 
             this.moveToWithDelay(1);
             this.attacker.getLookControl().setLookAt(this.target, 30, 30);
         } else {
-            boolean flag = this.attacker.getSensing().hasLineOfSight(target);
+            boolean flag = this.attacker.getSensing().hasLineOfSight(this.target);
             if (this.attackMoveDelay <= 0)
                 this.attackMoveDelay = this.attacker.getRandom().nextInt(50) + 100;
             if (!flag || this.distanceToTargetSq > this.attackRange) {

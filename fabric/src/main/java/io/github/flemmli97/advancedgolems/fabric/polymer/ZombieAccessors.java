@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface ZombieAccessors {
 
     @Accessor("DATA_BABY_ID")
-    public static EntityDataAccessor<Boolean> getDATA_BABY_ID() {
+    static EntityDataAccessor<Boolean> getDATA_BABY_ID() {
         throw new IllegalStateException();
     }
 }

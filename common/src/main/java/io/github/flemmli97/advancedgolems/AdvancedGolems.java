@@ -14,6 +14,6 @@ public class AdvancedGolems {
 
     public static boolean polymer;
 
-    public static TagKey<Item> blackDyes = PlatformUtils.INSTANCE.itemTag(new ResourceLocation("c", "black_dyes"));
+    public static final TagKey<Item> blackDyes = PlatformUtils.INSTANCE.itemTag(new ResourceLocation("c", "black_dyes"));
 
 }
