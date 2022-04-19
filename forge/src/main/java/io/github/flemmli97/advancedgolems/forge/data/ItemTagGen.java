@@ -20,7 +20,7 @@ public class ItemTagGen extends TagsProvider<Item> {
     protected void addTags() {
         this.tag(AdvancedGolems.blackDyes)
                 .add(Items.BLACK_DYE)
-                .addTag(Tags.Items.DYES_BLACK);
+                .addOptional(Tags.Items.DYES_BLACK.location());
     }
 
     @Override
