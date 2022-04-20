@@ -1,3 +1,7 @@
+Advanced Golems 1.1.6
+================
+- Fix some problems with tags
+
 Advanced Golems 1.1.5
 ================
 - Fix recipe using forge tags on fabric
