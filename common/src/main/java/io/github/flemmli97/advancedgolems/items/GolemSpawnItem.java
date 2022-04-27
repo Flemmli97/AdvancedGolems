@@ -22,6 +22,7 @@ public class GolemSpawnItem extends Item {
         if (!world.isClientSide) {
             ItemStack stack = ctx.getItemInHand();
             GolemBase golem = new GolemBase(world, ctx.getClickedPos());
+            golem.setOwner(ctx.getPlayer());
             world.addFreshEntity(golem);
             if (!ctx.getPlayer().isCreative()) {
                 stack.shrink(1);

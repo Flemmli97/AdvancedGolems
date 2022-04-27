@@ -9,10 +9,14 @@ import io.github.flemmli97.advancedgolems.registry.ModItems;
 import io.github.flemmli97.tenshilib.api.entity.AnimatedAction;
 import io.github.flemmli97.tenshilib.api.entity.AnimationHandler;
 import io.github.flemmli97.tenshilib.api.entity.IAnimated;
+import io.github.flemmli97.tenshilib.common.entity.EntityUtil;
 import io.github.flemmli97.tenshilib.common.utils.MathUtils;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -27,6 +31,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.FlyingMoveControl;
@@ -59,13 +64,16 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Predicate;
 
-public class GolemBase extends AbstractGolem implements IAnimated {
+public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity {
 
     protected static final EntityDataAccessor<BlockPos> home = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.BLOCK_POS);
     protected static final EntityDataAccessor<Float> homeDist = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.FLOAT);
     protected static final EntityDataAccessor<Boolean> canFly = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.BOOLEAN);
+    protected static final EntityDataAccessor<Optional<UUID>> ownerUUID = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.OPTIONAL_UUID);
 
     public static final AnimatedAction melee1 = new AnimatedAction(Mth.ceil(0.68 * 20), (int) (0.48 * 20), "melee1");
     public static final AnimatedAction melee2 = new AnimatedAction(Mth.ceil(0.68 * 20), (int) (0.48 * 20), "melee2");
@@ -95,6 +103,7 @@ public class GolemBase extends AbstractGolem implements IAnimated {
     private final AnimationHandler<GolemBase> animationHandler = new AnimationHandler<>(this, anims);
 
     public final GolemUpgradesHandler upgrades = new GolemUpgradesHandler(this);
+    private LivingEntity owner;
 
     public GolemBase(EntityType<? extends GolemBase> entityType, Level level) {
         super(entityType, level);
@@ -120,6 +129,7 @@ public class GolemBase extends AbstractGolem implements IAnimated {
         this.entityData.define(home, BlockPos.ZERO);
         this.entityData.define(homeDist, -1f);
         this.entityData.define(canFly, false);
+        this.entityData.define(ownerUUID, Optional.empty());
     }
 
     @Override
@@ -243,6 +253,10 @@ public class GolemBase extends AbstractGolem implements IAnimated {
     protected InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
         if (this.level.isClientSide || interactionHand == InteractionHand.OFF_HAND)
             return InteractionResult.PASS;
+        if (!this.entityData.get(ownerUUID).map(uuid -> uuid.equals(player.getUUID())).orElse(true)) {
+            player.sendMessage(new TranslatableComponent("golem.owner.wrong").withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
+            return InteractionResult.FAIL;
+        }
         ItemStack stack = player.getItemInHand(interactionHand);
         if (!stack.isEmpty() && player.isSecondaryUseActive()) {
             if (this.upgrades.onItemUse(player, interactionHand, stack))
@@ -306,8 +320,12 @@ public class GolemBase extends AbstractGolem implements IAnimated {
 
     @Override
     public boolean hurt(DamageSource damageSource, float f) {
-        if (damageSource.getEntity() instanceof Player player && !player.isSecondaryUseActive())
-            return false;
+        if (damageSource.getEntity() instanceof Player player) {
+            if (!this.entityData.get(ownerUUID).map(uuid -> uuid.equals(player.getUUID())).orElse(true))
+                return false;
+            if (!player.isSecondaryUseActive())
+                return false;
+        }
         if (damageSource.getEntity() == this)
             return false;
         if (this.getOffhandItem().getItem() instanceof ShieldItem) {
@@ -427,6 +445,7 @@ public class GolemBase extends AbstractGolem implements IAnimated {
             compoundTag.putIntArray("HomePos", homePos);
         }
         compoundTag.put("GolemUpgrades", this.upgrades.saveData(new CompoundTag()));
+        this.entityData.get(ownerUUID).ifPresent(uuid -> compoundTag.putUUID("Owner", uuid));
     }
 
     @Override
@@ -437,6 +456,8 @@ public class GolemBase extends AbstractGolem implements IAnimated {
             this.restrictTo(new BlockPos(intArray[0], intArray[1], intArray[2]), Config.homeRadius);
         this.updateState(GolemState.values()[compoundTag.getInt("State")]);
         this.upgrades.readData(compoundTag.getCompound("GolemUpgrades"));
+        if (compoundTag.hasUUID("Owner"))
+            this.entityData.set(ownerUUID, Optional.of(compoundTag.getUUID("Owner")));
     }
 
     public boolean hasRangedWeapon() {
@@ -521,5 +542,30 @@ public class GolemBase extends AbstractGolem implements IAnimated {
             return itemStack2.isEmpty() ? new ItemStack(Items.ARROW) : itemStack2;
         }
         return ItemStack.EMPTY;
+    }
+
+    public void setOwner(LivingEntity entity) {
+        if (entity != null) {
+            this.owner = entity;
+            this.entityData.set(ownerUUID, Optional.of(entity.getUUID()));
+        } else {
+            this.owner = null;
+            this.entityData.set(ownerUUID, Optional.empty());
+        }
+    }
+
+    @Nullable
+    @Override
+    public UUID getOwnerUUID() {
+        return this.entityData.get(ownerUUID).orElse(null);
+    }
+
+    @Nullable
+    @Override
+    public LivingEntity getOwner() {
+        if (this.owner == null || this.owner.isRemoved()) {
+            this.entityData.get(ownerUUID).ifPresent((uuid) -> this.owner = EntityUtil.findFromUUID(LivingEntity.class, this.level, uuid));
+        }
+        return this.owner;
     }
 }

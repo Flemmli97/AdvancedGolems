@@ -54,8 +54,10 @@ public class GolemController extends Item {
             if (uuid != null) {
                 Entity e = level.getEntity(uuid);
                 if (e instanceof GolemBase golem) {
-                    golem.restrictTo(useOnContext.getClickedPos(), Config.homeRadius);
-                    return InteractionResult.CONSUME;
+                    if (golem.getOwnerUUID() == null || useOnContext.getPlayer() == null || golem.getOwnerUUID().equals(useOnContext.getPlayer().getUUID())) {
+                        golem.restrictTo(useOnContext.getClickedPos(), Config.homeRadius);
+                        return InteractionResult.CONSUME;
+                    }
                 }
             }
         }
@@ -74,23 +76,26 @@ public class GolemController extends Item {
 
     public boolean onLeftClickEntity(ItemStack stack, Player player, Entity target) {
         if (target instanceof GolemBase golem && !player.level.isClientSide) {
-            int mode = getMode(stack);
-            if (mode == 0) {
-                if (!player.isCreative()) {
-                    golem.onControllerRemove();
-                }
-                golem.remove(Entity.RemovalReason.KILLED);
+            if (golem.getOwnerUUID() == null || golem.getOwnerUUID().equals(player.getUUID())) {
+                int mode = getMode(stack);
+                if (mode == 0) {
+                    if (!player.isCreative()) {
+                        golem.onControllerRemove();
+                    }
+                    golem.remove(Entity.RemovalReason.KILLED);
 
-            } else if (mode == 1) {
-                CompoundTag stackTag = stack.getOrCreateTag();
-                CompoundTag tag = stackTag.getCompound(AdvancedGolems.MODID);
-                tag.putUUID("SelectedEntity", golem.getUUID());
-                stackTag.put(AdvancedGolems.MODID, tag);
-            } else if (mode == 2) {
-                golem.updateState(GolemState.getNextState(golem.getState()));
-                player.sendMessage(new TranslatableComponent("golem.state." + golem.getState()).withStyle(ChatFormatting.GOLD), Util.NIL_UUID);
+                } else if (mode == 1) {
+                    CompoundTag stackTag = stack.getOrCreateTag();
+                    CompoundTag tag = stackTag.getCompound(AdvancedGolems.MODID);
+                    tag.putUUID("SelectedEntity", golem.getUUID());
+                    stackTag.put(AdvancedGolems.MODID, tag);
+                } else if (mode == 2) {
+                    golem.updateState(GolemState.getNextState(golem.getState()));
+                    player.sendMessage(new TranslatableComponent("golem.state." + golem.getState()).withStyle(ChatFormatting.GOLD), Util.NIL_UUID);
+                }
+                return true;
             }
-            return true;
+            player.sendMessage(new TranslatableComponent("golem.owner.wrong").withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
         }
         return false;
     }

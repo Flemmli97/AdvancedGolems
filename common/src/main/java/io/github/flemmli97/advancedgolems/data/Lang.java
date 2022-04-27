@@ -3,6 +3,7 @@ package io.github.flemmli97.advancedgolems.data;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.github.flemmli97.advancedgolems.AdvancedGolems;
+import io.github.flemmli97.advancedgolems.registry.ModEntities;
 import io.github.flemmli97.advancedgolems.registry.ModItems;
 import io.github.flemmli97.tenshilib.platform.PlatformUtils;
 import net.minecraft.data.DataGenerator;
@@ -44,7 +45,10 @@ public class Lang implements DataProvider {
         this.add("golem.state.PASSIVE", "Golem is now passive");
         this.add("golem.state.PASSIVESTAND", "Golem is now standing");
 
+        this.add("golem.owner.wrong", "You don't own this golem");
+
         this.add("config.title.advancedgolems", "Advanced Golems Config");
+        this.add(ModEntities.golem.get().getDescriptionId(), "Golem");
     }
 
     @Override
