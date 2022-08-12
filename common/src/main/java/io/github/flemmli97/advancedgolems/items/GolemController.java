@@ -5,11 +5,9 @@ import io.github.flemmli97.advancedgolems.config.Config;
 import io.github.flemmli97.advancedgolems.entity.GolemBase;
 import io.github.flemmli97.advancedgolems.entity.GolemState;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -40,9 +38,9 @@ public class GolemController extends Item {
     public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
         super.appendHoverText(itemStack, level, list, tooltipFlag);
         switch (getMode(itemStack)) {
-            case 0 -> list.add(new TranslatableComponent("controller.mode.0").withStyle(ChatFormatting.GOLD));
-            case 1 -> list.add(new TranslatableComponent("controller.mode.1").withStyle(ChatFormatting.GOLD));
-            case 2 -> list.add(new TranslatableComponent("controller.mode.2").withStyle(ChatFormatting.GOLD));
+            case 0 -> list.add(Component.translatable("controller.mode.0").withStyle(ChatFormatting.GOLD));
+            case 1 -> list.add(Component.translatable("controller.mode.1").withStyle(ChatFormatting.GOLD));
+            case 2 -> list.add(Component.translatable("controller.mode.2").withStyle(ChatFormatting.GOLD));
         }
     }
 
@@ -91,11 +89,11 @@ public class GolemController extends Item {
                     stackTag.put(AdvancedGolems.MODID, tag);
                 } else if (mode == 2) {
                     golem.updateState(GolemState.getNextState(golem.getState()));
-                    player.sendMessage(new TranslatableComponent("golem.state." + golem.getState()).withStyle(ChatFormatting.GOLD), Util.NIL_UUID);
+                    player.sendSystemMessage(Component.translatable("golem.state." + golem.getState()).withStyle(ChatFormatting.GOLD));
                 }
                 return true;
             }
-            player.sendMessage(new TranslatableComponent("golem.owner.wrong").withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
+            player.sendSystemMessage(Component.translatable("golem.owner.wrong").withStyle(ChatFormatting.DARK_RED));
         }
         return false;
     }

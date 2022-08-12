@@ -1,23 +1,28 @@
 package io.github.flemmli97.advancedgolems.data;
 
+import com.google.common.hash.Hashing;
+import com.google.common.hash.HashingOutputStream;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonWriter;
 import io.github.flemmli97.advancedgolems.AdvancedGolems;
 import io.github.flemmli97.advancedgolems.registry.ModEntities;
 import io.github.flemmli97.advancedgolems.registry.ModItems;
 import io.github.flemmli97.tenshilib.platform.PlatformUtils;
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.data.HashCache;
-import org.apache.commons.lang3.text.translate.JavaUnicodeEscaper;
+import net.minecraft.util.GsonHelper;
 
-import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class Lang implements DataProvider {
 
@@ -52,10 +57,10 @@ public class Lang implements DataProvider {
     }
 
     @Override
-    public void run(HashCache cache) throws IOException {
+    public void run(CachedOutput cache) throws IOException {
         this.addTranslations();
         if (!this.data.isEmpty())
-            this.save(cache, this.data, this.gen.getOutputFolder().resolve("assets/" + this.modid + "/lang/" + this.locale + ".json"));
+            this.save(cache, this.gen.getOutputFolder().resolve("assets/" + this.modid + "/lang/" + this.locale + ".json"));
     }
 
     @Override
@@ -63,24 +68,30 @@ public class Lang implements DataProvider {
         return "Languages: " + this.locale;
     }
 
-    @SuppressWarnings("deprecation")
-    private void save(HashCache cache, Object object, Path target) throws IOException {
-        String data = GSON.toJson(object);
-        data = JavaUnicodeEscaper.outsideOf(0, 0x7f).translate(data); // Escape unicode after the fact so that it's not double escaped by GSON
-        String hash = DataProvider.SHA1.hashUnencodedChars(data).toString();
-        if (!Objects.equals(cache.getHash(target), hash) || !Files.exists(target)) {
-            Files.createDirectories(target.getParent());
-
-            try (BufferedWriter bufferedwriter = Files.newBufferedWriter(target)) {
-                bufferedwriter.write(data);
-            }
+    @SuppressWarnings("UnstableApiUsage")
+    private void save(CachedOutput cache, Path target) throws IOException {
+        JsonObject json = new JsonObject();
+        for (Map.Entry<String, String> pair : this.data.entrySet()) {
+            json.addProperty(pair.getKey(), pair.getValue());
         }
-
-        cache.putNew(target, hash);
+        saveTo(cache, json, target);
     }
 
     public void add(String key, String value) {
         if (this.data.put(key, value) != null)
             throw new IllegalStateException("Duplicate translation key " + key);
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    private static void saveTo(CachedOutput cachedOutput, JsonElement jsonElement, Path path) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        HashingOutputStream hashingOutputStream = new HashingOutputStream(Hashing.sha1(), byteArrayOutputStream);
+        OutputStreamWriter writer = new OutputStreamWriter(hashingOutputStream, StandardCharsets.UTF_8);
+        JsonWriter jsonWriter = new JsonWriter(writer);
+        jsonWriter.setSerializeNulls(false);
+        jsonWriter.setIndent("  ");
+        GsonHelper.writeValue(jsonWriter, jsonElement, null);
+        jsonWriter.close();
+        cachedOutput.writeIfNeeded(path, byteArrayOutputStream.toByteArray(), hashingOutputStream.hash());
     }
 }

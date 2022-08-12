@@ -12,11 +12,10 @@ import io.github.flemmli97.tenshilib.api.entity.IAnimated;
 import io.github.flemmli97.tenshilib.common.entity.EntityUtil;
 import io.github.flemmli97.tenshilib.common.utils.MathUtils;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -254,7 +253,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         if (this.level.isClientSide || interactionHand == InteractionHand.OFF_HAND)
             return InteractionResult.PASS;
         if (!this.entityData.get(ownerUUID).map(uuid -> uuid.equals(player.getUUID())).orElse(true)) {
-            player.sendMessage(new TranslatableComponent("golem.owner.wrong").withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
+            player.sendSystemMessage(Component.translatable("golem.owner.wrong").withStyle(ChatFormatting.DARK_RED));
             return InteractionResult.FAIL;
         }
         ItemStack stack = player.getItemInHand(interactionHand);

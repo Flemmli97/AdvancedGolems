@@ -25,8 +25,8 @@ public class AdvancedGolemsFabric implements ModInitializer {
     public void onInitialize() {
         AdvancedGolems.polymer = FabricLoader.getInstance().isModLoaded("polymer");
         ConfigSpecs.init();
-        ModEntities.ENTITIES.finalize(null);
-        ModItems.ITEMS.finalize(null);
+        ModEntities.ENTITIES.registerContent();
+        ModItems.ITEMS.registerContent();
         AttackEntityCallback.EVENT.register(AdvancedGolemsFabric::attackCallback);
         AdvancedGolemsFabric.registerAttributes();
     }

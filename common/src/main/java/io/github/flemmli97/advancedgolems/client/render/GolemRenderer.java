@@ -16,7 +16,7 @@ public class GolemRenderer<T extends GolemBase> extends MobRenderer<T, GolemMode
     public GolemRenderer(EntityRendererProvider.Context context, ResourceLocation texture) {
         super(context, new GolemModel<>(context.bakeLayer(GolemModel.LAYER_LOCATION)), 0.25f);
         this.texture = texture;
-        this.addLayer(new ItemLayer<>(this));
+        this.addLayer(new ItemLayer<>(this, context.getItemInHandRenderer()));
         this.addLayer(new GolemArmorLayer<>(this, new HumanoidModel<>(context.bakeLayer(ModelLayers.PLAYER_OUTER_ARMOR)),
                 new HumanoidModel<>(context.bakeLayer(ModelLayers.PLAYER_INNER_ARMOR))));
     }
