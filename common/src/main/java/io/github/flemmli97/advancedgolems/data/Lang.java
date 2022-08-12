@@ -68,7 +68,6 @@ public class Lang implements DataProvider {
         return "Languages: " + this.locale;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private void save(CachedOutput cache, Path target) throws IOException {
         JsonObject json = new JsonObject();
         for (Map.Entry<String, String> pair : this.data.entrySet()) {
@@ -82,7 +81,7 @@ public class Lang implements DataProvider {
             throw new IllegalStateException("Duplicate translation key " + key);
     }
 
-    @SuppressWarnings("UnstableApiUsage")
+    @SuppressWarnings({"UnstableApiUsage", "deprecation"})
     private static void saveTo(CachedOutput cachedOutput, JsonElement jsonElement, Path path) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         HashingOutputStream hashingOutputStream = new HashingOutputStream(Hashing.sha1(), byteArrayOutputStream);
