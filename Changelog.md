@@ -2,6 +2,7 @@ Advanced Golems 1.1.7
 ================
 - Make golems be bound to the player who placed them
   so other players cant just modify them
+- Update to 1.19
 
 Advanced Golems 1.1.6
 ================
