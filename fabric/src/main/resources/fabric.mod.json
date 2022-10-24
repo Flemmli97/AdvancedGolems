@@ -27,7 +27,6 @@
     ]
   },
   "mixins": [
-    "advancedgolems.mixins.json",
     "advancedgolems.fabric.mixins.json"
   ],
   "depends": {

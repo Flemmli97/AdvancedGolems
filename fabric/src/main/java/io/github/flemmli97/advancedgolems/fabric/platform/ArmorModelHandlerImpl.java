@@ -1,7 +1,7 @@
 package io.github.flemmli97.advancedgolems.fabric.platform;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import io.github.flemmli97.advancedgolems.mixin.HumanoidArmorLayerMixin;
+import io.github.flemmli97.advancedgolems.ArmorCacheGetter;
 import io.github.flemmli97.advancedgolems.platform.ArmorModelHandler;
 import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
 import net.fabricmc.fabric.impl.client.rendering.ArmorRendererRegistryImpl;
@@ -33,6 +33,6 @@ public class ArmorModelHandlerImpl implements ArmorModelHandler {
     public ResourceLocation armorTextureForge(Entity entity, ItemStack stack, EquipmentSlot slot, @Nullable String type, boolean inner) {
         ArmorItem armorItem = (ArmorItem) stack.getItem();
         String string2 = "textures/models/armor/" + armorItem.getMaterial().getName() + "_layer_" + (inner ? 2 : 1) + (type == null ? "" : "_" + type) + ".png";
-        return HumanoidArmorLayerMixin.armorResCache().computeIfAbsent(string2, ResourceLocation::new);
+        return ArmorCacheGetter.getOrCompute(string2);
     }
 }
