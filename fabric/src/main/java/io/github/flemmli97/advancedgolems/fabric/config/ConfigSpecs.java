@@ -48,6 +48,8 @@ public class ConfigSpecs {
     public final CommentedJsonConfig.CommentedVal<String> healthItem;
     public final CommentedJsonConfig.IntVal maxHealthUpgrades;
     public final CommentedJsonConfig.CommentedVal<String> fireResItem;
+    public final CommentedJsonConfig.CommentedVal<Boolean> immortalGolems;
+    public final CommentedJsonConfig.CommentedVal<String> reviveItem;
 
     public final CommentedJsonConfig.CommentedVal<Boolean> usePolymer;
 
@@ -67,6 +69,8 @@ public class ConfigSpecs {
         this.healthItem = builder.comment("Item to increase golems health").define("Health Item", Config.healthItem.writeToString());
         this.maxHealthUpgrades = builder.comment("Max amount of health upgrades. Each upgrade increases health by 1").defineInRange("Health Max", Config.maxHealthUpgrades, 0, Integer.MAX_VALUE);
         this.fireResItem = builder.comment("Item to make a golem immune to fire damage").define("Fire Resistant Item", Config.fireResItem.writeToString());
+        this.immortalGolems = builder.comment("If true golems shutdown instead of dying. You need to revive them again").define("Immortal Golem", Config.immortalGolems);
+        this.reviveItem = builder.comment("Item needed to revive a shutdown golem").define("Revive Item", Config.reviveItem.writeToString());
 
         this.usePolymer = builder.comment("Enable polymer support").define("Polymer", false);
 

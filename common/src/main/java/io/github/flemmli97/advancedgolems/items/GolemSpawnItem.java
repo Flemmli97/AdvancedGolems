@@ -23,12 +23,19 @@ public class GolemSpawnItem extends Item {
             ItemStack stack = ctx.getItemInHand();
             GolemBase golem = new GolemBase(world, ctx.getClickedPos());
             golem.setOwner(ctx.getPlayer());
+            if (stack.hasTag() && stack.getTag().getBoolean("Shutdown"))
+                golem.shutDownGolem(true);
             world.addFreshEntity(golem);
             if (!ctx.getPlayer().isCreative()) {
                 stack.shrink(1);
             }
         }
         return InteractionResult.SUCCESS;
+    }
+
+    public static ItemStack withFrozenGolem(ItemStack stack) {
+        stack.getOrCreateTag().putBoolean("Shutdown", true);
+        return stack;
     }
 
     public Item getPolymerItem(ItemStack itemStack, @Nullable ServerPlayer player) {
