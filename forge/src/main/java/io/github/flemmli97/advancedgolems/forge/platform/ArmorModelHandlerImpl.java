@@ -1,7 +1,7 @@
 package io.github.flemmli97.advancedgolems.forge.platform;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import io.github.flemmli97.advancedgolems.mixin.HumanoidArmorLayerMixin;
+import io.github.flemmli97.advancedgolems.ArmorCacheGetter;
 import io.github.flemmli97.advancedgolems.platform.ArmorModelHandler;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
@@ -33,11 +33,6 @@ public class ArmorModelHandlerImpl implements ArmorModelHandler {
             texture = texture.substring(idx + 1);
         }
         String s1 = String.format("%s:textures/models/armor/%s_layer_%d%s.png", domain, texture, inner ? 2 : 1, type == null ? "" : String.format("_%s", type));
-        ResourceLocation resourcelocation = HumanoidArmorLayerMixin.armorResCache().get(s1 = ForgeHooksClient.getArmorTexture(entity, stack, s1, slot, type));
-        if (resourcelocation == null) {
-            resourcelocation = new ResourceLocation(s1);
-            HumanoidArmorLayerMixin.armorResCache().put(s1, resourcelocation);
-        }
-        return resourcelocation;
+        return ArmorCacheGetter.getOrCompute(ForgeHooksClient.getArmorTexture(entity, stack, s1, slot, type));
     }
 }
