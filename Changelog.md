@@ -1,4 +1,4 @@
-Advanced Golems 1.1.8
+Advanced Golems 1.2.0
 ================
 - Fixing some config not being applied
 - Fix armor rendering not at right spot
