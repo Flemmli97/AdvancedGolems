@@ -5,6 +5,7 @@ package io.github.flemmli97.advancedgolems.client.model;// Made with Blockbench 
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 import io.github.flemmli97.advancedgolems.AdvancedGolems;
 import io.github.flemmli97.advancedgolems.entity.GolemBase;
 import io.github.flemmli97.tenshilib.api.entity.AnimatedAction;
@@ -38,6 +39,7 @@ public class GolemModel<T extends GolemBase> extends EntityModel<T> implements E
     public final ModelPartHandler.ModelPartExtended leftArm;
     public final ModelPartHandler.ModelPartExtended rightArm;
     public final ModelPartHandler.ModelPartExtended jetPack;
+    public final ModelPartHandler.ModelPartExtended leg;
 
     public GolemModel(ModelPart root) throws NullPointerException {
         this.model = new ModelPartHandler(root.getChild("body"), "body");
@@ -46,6 +48,7 @@ public class GolemModel<T extends GolemBase> extends EntityModel<T> implements E
         this.leftArm = this.model.getPart("armLeft");
         this.rightArm = this.model.getPart("armRight");
         this.jetPack = this.model.getPart("jetpack");
+        this.leg = this.model.getPart("leg");
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -88,7 +91,7 @@ public class GolemModel<T extends GolemBase> extends EntityModel<T> implements E
         this.jetPack.visible = entity.canFlyFlag();
         this.model.resetPoses();
         float partialTicks = Minecraft.getInstance().getFrameTime();
-        if (limbSwingAmount > 0.08) {
+        if (limbSwingAmount > 0.08 && !entity.isShutdown()) {
             this.anim.doAnimation(this, "move", entity.tickCount, partialTicks);
         }
         AnimatedAction anim = entity.getAnimationHandler().getAnimation();
@@ -123,7 +126,7 @@ public class GolemModel<T extends GolemBase> extends EntityModel<T> implements E
         }
     }
 
-    private void adjustModel(PoseStack poseStack) {
+    public void adjustModel(PoseStack poseStack) {
         poseStack.scale(0.5f, 0.5f, 0.5f);
         poseStack.translate(0, 24 / 16f, 0);
     }
@@ -132,24 +135,63 @@ public class GolemModel<T extends GolemBase> extends EntityModel<T> implements E
     public void copyPropertiesTo(EntityModel<T> entityModel) {
         super.copyPropertiesTo(entityModel);
         if (entityModel instanceof HumanoidModel<?> human) {
-            float yOff = 8 - this.model.getMainPart().y;
-            human.head.loadPose(this.head.storePose());
-            human.head.y += 31 - yOff;
-            human.head.z -= 0;
-            human.body.loadPose(this.model.getMainPart().storePose());
-            human.body.y += 19;
-            human.leftArm.loadPose(this.leftArm.storePose());
+            PartPose main = this.model.getMainPart().storePose();
+            human.body.loadPose(main);
+            Vector3f bodyOffset = this.withParentX(main, 0, (21.5f - 16 - 1.1f), 1.4f);//BlockBench pivot point coords with offset
+            human.body.x -= bodyOffset.x();
+            human.body.y -= bodyOffset.y();
+            human.body.z -= bodyOffset.z();
+
+            human.head.loadPose(this.withParent(main, this.head.storePose()));
+
+            human.leftArm.loadPose(this.withParent(main, this.leftArm.storePose()));
             human.leftArm.x += 2;
-            human.leftArm.y += 33 - yOff;
-            human.rightArm.loadPose(this.rightArm.storePose());
+            human.rightArm.loadPose(this.withParent(main, this.rightArm.storePose()));
             human.rightArm.x -= 2;
-            human.rightArm.y += 33 - yOff;
-            human.leftLeg.loadPose(this.model.getMainPart().storePose());
-            human.leftLeg.x += 2;
-            human.leftLeg.y += 71 - yOff;
-            human.rightLeg.loadPose(this.model.getMainPart().storePose());
-            human.rightLeg.x -= 2;
-            human.rightLeg.y += 71 - yOff;
+
+            human.leftLeg.loadPose(this.withParent(main, this.leg.storePose()));
+            human.rightLeg.loadPose(this.withParent(main, this.leg.storePose()));
+
+            Vector3f legOffset = this.withParentX(PartPose.offset(0, 0, 0), 6, 12, 0);
+            human.leftLeg.x -= legOffset.x();
+            human.leftLeg.y -= legOffset.y();
+            human.leftLeg.z -= legOffset.z();
+            human.rightLeg.x += legOffset.x();
+            human.rightLeg.y -= legOffset.y();
+            human.rightLeg.z -= legOffset.z();
         }
+    }
+
+    public void legTransform(PoseStack stack) {
+        this.model.getMainPart().translateAndRotate(stack);
+        this.leg.translateAndRotate(stack);
+    }
+
+    private PartPose withParent(PartPose parentPose, PartPose child) {
+        Vector3f translatedPos = this.withParentX(parentPose, child);
+        return PartPose.offsetAndRotation((parentPose.x + translatedPos.x()),
+                (parentPose.y + translatedPos.y()),
+                (parentPose.z + translatedPos.z()),
+                parentPose.xRot + child.xRot,
+                parentPose.yRot + child.yRot,
+                parentPose.zRot + child.zRot);
+    }
+
+    private Vector3f withParentX(PartPose parentPose, PartPose child) {
+        return this.withParentX(parentPose, child.x, child.y, child.z);
+    }
+
+    private Vector3f withParentX(PartPose parentPose, float x, float y, float z) {
+        Vector3f v = new Vector3f(x, y, z);
+        if (parentPose.zRot != 0.0F) {
+            v.transform(Vector3f.ZP.rotation(parentPose.zRot));
+        }
+        if (parentPose.yRot != 0.0F) {
+            v.transform(Vector3f.YP.rotation(parentPose.yRot));
+        }
+        if (parentPose.xRot != 0.0F) {
+            v.transform(Vector3f.XP.rotation(parentPose.xRot));
+        }
+        return v;
     }
 }

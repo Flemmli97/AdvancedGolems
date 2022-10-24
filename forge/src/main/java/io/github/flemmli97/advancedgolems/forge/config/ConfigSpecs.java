@@ -24,6 +24,8 @@ public class ConfigSpecs {
     public final ForgeConfigSpec.ConfigValue<String> healthItem;
     public final ForgeConfigSpec.IntValue maxHealthUpgrades;
     public final ForgeConfigSpec.ConfigValue<String> fireResItem;
+    public final ForgeConfigSpec.BooleanValue immortalGolems;
+    public final ForgeConfigSpec.ConfigValue<String> reviveItem;
 
     public ConfigSpecs(ForgeConfigSpec.Builder builder) {
         this.golemHealth = builder.comment("Health of a golem").defineInRange("Golem Health", Config.golemHealth, 0, Double.MAX_VALUE);
@@ -41,6 +43,8 @@ public class ConfigSpecs {
         this.healthItem = builder.comment("Item to increase golems health").define("Health Item", Config.healthItem.writeToString());
         this.maxHealthUpgrades = builder.comment("Max amount of health upgrades. Each upgrade increases health by 1").defineInRange("Health Max", Config.maxHealthUpgrades, 0, Integer.MAX_VALUE);
         this.fireResItem = builder.comment("Item to make a golem immune to fire damage").define("Fire Resistant Item", Config.fireResItem.writeToString());
+        this.immortalGolems = builder.comment("If true golems shutdown instead of dying. You need to revive them again").define("Immortal Golem", Config.immortalGolems);
+        this.reviveItem = builder.comment("Item needed to revive a shutdown golem").define("Revive Item", Config.reviveItem.writeToString());
     }
 
     static {

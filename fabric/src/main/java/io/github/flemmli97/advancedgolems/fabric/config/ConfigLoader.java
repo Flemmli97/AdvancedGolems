@@ -16,5 +16,12 @@ public class ConfigLoader {
         Config.flyItem.readFromString(specs.flyItem.get());
         Config.speedItem.readFromString(specs.speedItem.get());
         Config.maxSpeedUpgrades = specs.maxSpeedUpgrades.get();
+        Config.damageItem.readFromString(specs.damageItem.get());
+        Config.maxDamageUpgrades = specs.maxDamageUpgrades.get();
+        Config.healthItem.readFromString(specs.healthItem.get());
+        Config.maxHealthUpgrades = specs.maxHealthUpgrades.get();
+        Config.fireResItem.readFromString(specs.fireResItem.get());
+        Config.immortalGolems = specs.immortalGolems.get();
+        Config.reviveItem.readFromString(specs.reviveItem.get());
     }
 }

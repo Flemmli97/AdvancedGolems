@@ -1,3 +1,11 @@
+Advanced Golems 1.1.8
+================
+- Fixing some config not being applied
+- Fix armor rendering not at right spot
+- Add "immortal golem" config:
+  If true golems will not die and instead shutdown.  
+  Giving it the revive item (default: golden apple) will revive them again
+
 Advanced Golems 1.1.7
 ================
 - Make golems be bound to the player who placed them

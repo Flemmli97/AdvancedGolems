@@ -22,6 +22,7 @@ import net.minecraft.world.item.ItemStack;
 public class GolemArmorLayer<T extends GolemBase, M extends GolemModel<T>, A extends HumanoidModel<T>> extends RenderLayer<T, M> {
 
     private final A outerModel, innerModel;
+    private boolean copiedModelProperties;
 
     public GolemArmorLayer(RenderLayerParent<T, M> renderLayerParent, A outerModel, A innerModel) {
         super(renderLayerParent);
@@ -31,26 +32,28 @@ public class GolemArmorLayer<T extends GolemBase, M extends GolemModel<T>, A ext
 
     @Override
     public void render(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, T entity, float f, float g, float h, float j, float k, float l) {
+        this.copiedModelProperties = false;
         poseStack.pushPose();
-        poseStack.scale(0.5f, 0.5f, 0.7f);
-        this.renderArmorPiece(poseStack, multiBufferSource, entity, EquipmentSlot.CHEST, i, this.outerModel);
-        poseStack.popPose();
-        poseStack.pushPose();
-        poseStack.scale(0.5f, 0.5f, 0.5f);
+        this.getParentModel().adjustModel(poseStack);
         this.renderArmorPiece(poseStack, multiBufferSource, entity, EquipmentSlot.HEAD, i, this.outerModel);
-        poseStack.popPose();
+        this.renderArmorPiece(poseStack, multiBufferSource, entity, EquipmentSlot.CHEST, i, this.outerModel);
         poseStack.pushPose();
-        poseStack.scale(0.6f, 0.2f, 0.85f);
-        poseStack.translate(0, 8 / 16f, 0);
-        this.renderArmorPiece(poseStack, multiBufferSource, entity, EquipmentSlot.LEGS, i, this.innerModel);
+        this.getParentModel().legTransform(poseStack);
+        poseStack.scale(0.5f, 0.5f, 0.5f);
         this.renderArmorPiece(poseStack, multiBufferSource, entity, EquipmentSlot.FEET, i, this.outerModel);
+        this.copiedModelProperties = false;
+        this.renderArmorPiece(poseStack, multiBufferSource, entity, EquipmentSlot.LEGS, i, this.innerModel);
+        poseStack.popPose();
         poseStack.popPose();
     }
 
     private void renderArmorPiece(PoseStack poseStack, MultiBufferSource multiBufferSource, T entity, EquipmentSlot equipmentSlot, int light, A humanoidModel) {
         ItemStack itemStack = entity.getItemBySlot(equipmentSlot);
         if (itemStack.getItem() instanceof ArmorItem armor && armor.getSlot() == equipmentSlot) {
-            this.getParentModel().copyPropertiesTo(humanoidModel);
+            if (!this.copiedModelProperties) {
+                this.getParentModel().copyPropertiesTo(humanoidModel);
+                this.copiedModelProperties = true;
+            }
             this.setPartVisibility(humanoidModel, equipmentSlot);
             Model model = ArmorModelHandler.INSTANCE.getModel(poseStack, multiBufferSource, entity, itemStack, equipmentSlot, light, humanoidModel);
             if (model == null)
@@ -62,10 +65,10 @@ public class GolemArmorLayer<T extends GolemBase, M extends GolemModel<T>, A ext
                 float f = (float) (j >> 16 & 0xFF) / 255.0f;
                 float g = (float) (j >> 8 & 0xFF) / 255.0f;
                 float h = (float) (j & 0xFF) / 255.0f;
-                this.renderModel(poseStack, multiBufferSource, light, bl2, model, bl, f, g, h, ArmorModelHandler.INSTANCE.armorTextureForge(entity, itemStack, equipmentSlot, null, bl));
-                this.renderModel(poseStack, multiBufferSource, light, bl2, model, bl, 1.0f, 1.0f, 1.0f, ArmorModelHandler.INSTANCE.armorTextureForge(entity, itemStack, equipmentSlot, "overlay", bl));
+                this.renderModel(poseStack, multiBufferSource, light, bl2, model, f, g, h, ArmorModelHandler.INSTANCE.armorTextureForge(entity, itemStack, equipmentSlot, null, bl));
+                this.renderModel(poseStack, multiBufferSource, light, bl2, model, 1.0f, 1.0f, 1.0f, ArmorModelHandler.INSTANCE.armorTextureForge(entity, itemStack, equipmentSlot, "overlay", bl));
             } else {
-                this.renderModel(poseStack, multiBufferSource, light, bl2, model, bl, 1.0f, 1.0f, 1.0f, ArmorModelHandler.INSTANCE.armorTextureForge(entity, itemStack, equipmentSlot, null, bl));
+                this.renderModel(poseStack, multiBufferSource, light, bl2, model, 1.0f, 1.0f, 1.0f, ArmorModelHandler.INSTANCE.armorTextureForge(entity, itemStack, equipmentSlot, null, bl));
             }
         }
     }
@@ -78,7 +81,6 @@ public class GolemArmorLayer<T extends GolemBase, M extends GolemModel<T>, A ext
                 humanoidModel.hat.visible = true;
             }
             case CHEST -> {
-                humanoidModel.body.visible = true;
                 humanoidModel.rightArm.visible = true;
                 humanoidModel.leftArm.visible = true;
             }
@@ -89,8 +91,8 @@ public class GolemArmorLayer<T extends GolemBase, M extends GolemModel<T>, A ext
         }
     }
 
-    private void renderModel(PoseStack poseStack, MultiBufferSource multiBufferSource, int i, boolean bl, Model humanoidModel, boolean bl2, float f, float g, float h, ResourceLocation armorTexture) {
-        VertexConsumer vertexConsumer = ItemRenderer.getArmorFoilBuffer(multiBufferSource, RenderType.armorCutoutNoCull(armorTexture), false, bl);
-        humanoidModel.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, f, g, h, 1.0f);
+    private void renderModel(PoseStack poseStack, MultiBufferSource multiBufferSource, int light, boolean glint, Model humanoidModel, float r, float g, float b, ResourceLocation armorTexture) {
+        VertexConsumer vertexConsumer = ItemRenderer.getArmorFoilBuffer(multiBufferSource, RenderType.armorCutoutNoCull(armorTexture), false, glint);
+        humanoidModel.renderToBuffer(poseStack, vertexConsumer, light, OverlayTexture.NO_OVERLAY, r, g, b, 1.0f);
     }
 }

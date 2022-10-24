@@ -20,4 +20,7 @@ public class Config {
     public static int maxHealthUpgrades = 10;
     public static ItemWrapper fireResItem = new ItemWrapper("minecraft:air");
 
+    public static boolean immortalGolems = true;
+    public static ItemWrapper reviveItem = new ItemWrapper("minecraft:golden_apple");
+
 }
