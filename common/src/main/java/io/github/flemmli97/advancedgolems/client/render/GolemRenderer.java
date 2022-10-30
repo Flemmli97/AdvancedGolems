@@ -7,11 +7,10 @@ import io.github.flemmli97.tenshilib.api.entity.AnimatedAction;
 import io.github.flemmli97.tenshilib.client.render.ItemLayer;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
 
 public class GolemRenderer<T extends GolemBase> extends MobRenderer<T, GolemModel<T>> {
 
@@ -36,18 +35,17 @@ public class GolemRenderer<T extends GolemBase> extends MobRenderer<T, GolemMode
         return this.texture;
     }
 
-    @Nullable
     @Override
-    protected RenderType getRenderType(T entity, boolean invis, boolean translucent, boolean glowing) {
+    public boolean shouldRender(T entity, Frustum camera, double camX, double camY, double camZ) {
         AnimatedAction anim = entity.getAnimationHandler().getAnimation();
         if (anim != null && GolemBase.restart.getID().equals(anim.getID())) {
             if (anim.getTick() > 10) {
                 if (anim.getTick() % 2 == 0)
-                    return null;
+                    return false;
             }
             if (anim.getTick() % 3 == 0)
-                return null;
+                return false;
         }
-        return super.getRenderType(entity, invis, translucent, glowing);
+        return super.shouldRender(entity, camera, camX, camY, camZ);
     }
 }
