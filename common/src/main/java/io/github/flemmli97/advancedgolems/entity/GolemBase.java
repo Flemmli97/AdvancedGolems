@@ -395,8 +395,8 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     }
 
     @Override
-    public void baseTick() {
-        super.baseTick();
+    public void aiStep() {
+        super.aiStep();
         this.getAnimationHandler().tick();
         if (!this.level.isClientSide) {
             if (this.combatCounter > 0)
