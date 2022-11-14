@@ -32,7 +32,7 @@ public class ArmorModelHandlerImpl implements ArmorModelHandler {
 
     @Override
     public ResourceLocation armorTextureForge(Entity entity, ItemStack stack, EquipmentSlot slot, @Nullable String type, boolean inner) {
-        if(stack.getItem() instanceof DynamicArmorTextureItem item)
+        if (stack.getItem() instanceof DynamicArmorTextureItem item)
             return ArmorCacheGetter.getOrCompute(item.getArmorTexture(stack, entity, slot, null));
         ArmorItem armorItem = (ArmorItem) stack.getItem();
         String string2 = "textures/models/armor/" + armorItem.getMaterial().getName() + "_layer_" + (inner ? 2 : 1) + (type == null ? "" : "_" + type) + ".png";

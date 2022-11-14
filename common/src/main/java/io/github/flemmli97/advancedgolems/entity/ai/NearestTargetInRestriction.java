@@ -3,6 +3,7 @@ package io.github.flemmli97.advancedgolems.entity.ai;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
@@ -25,5 +26,10 @@ public class NearestTargetInRestriction<T extends LivingEntity> extends NearestA
         } else {
             this.target = null;
         }
+    }
+
+    @Override
+    protected AABB getTargetSearchArea(double targetDistance) {
+        return this.mob.getBoundingBox().inflate(targetDistance, targetDistance, targetDistance);
     }
 }

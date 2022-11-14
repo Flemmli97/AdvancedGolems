@@ -20,6 +20,13 @@ public class ConfigLoader {
         Config.healthItem.readFromString(ConfigSpecs.conf.healthItem.get());
         Config.maxHealthUpgrades = ConfigSpecs.conf.maxHealthUpgrades.get();
         Config.fireResItem.readFromString(ConfigSpecs.conf.fireResItem.get());
+        Config.knockbackItem.readFromString(ConfigSpecs.conf.knockbackItem.get());
+        Config.maxKnockbackUpgrades = ConfigSpecs.conf.maxKnockbackUpgrades.get();
+        Config.flyUpgradeItem.readFromString(ConfigSpecs.conf.flyUpgradeItem.get());
+        Config.maxFlyUpgrades = ConfigSpecs.conf.maxFlyUpgrades.get();
+        Config.regenUpgradeItem.readFromString(ConfigSpecs.conf.regenUpgradeItem.get());
+        Config.maxRegenUpgrades = ConfigSpecs.conf.maxRegenUpgrades.get();
+
         Config.immortalGolems = ConfigSpecs.conf.immortalGolems.get();
         Config.reviveItem.readFromString(ConfigSpecs.conf.reviveItem.get());
     }

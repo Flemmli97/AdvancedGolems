@@ -16,9 +16,15 @@ public class Config {
     public static int maxSpeedUpgrades = 10;
     public static ItemWrapper damageItem = new ItemWrapper("minecraft:diamond");
     public static int maxDamageUpgrades = 5;
-    public static ItemWrapper healthItem = new ItemWrapper("minecraft:golden_melon");
+    public static ItemWrapper healthItem = new ItemWrapper("minecraft:glistering_melon_slice");
     public static int maxHealthUpgrades = 10;
     public static ItemWrapper fireResItem = new ItemWrapper("minecraft:air");
+    public static ItemWrapper knockbackItem = new ItemWrapper("minecraft:obsidian");
+    public static int maxKnockbackUpgrades = 5;
+    public static ItemWrapper flyUpgradeItem = new ItemWrapper("minecraft:feather");
+    public static int maxFlyUpgrades = 10;
+    public static ItemWrapper regenUpgradeItem = new ItemWrapper("minecraft:ghast_tear");
+    public static int maxRegenUpgrades = 10;
 
     public static boolean immortalGolems = true;
     public static ItemWrapper reviveItem = new ItemWrapper("minecraft:golden_apple");

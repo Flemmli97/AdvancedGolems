@@ -1,3 +1,11 @@
+Advanced Golems 1.3.0
+================
+- Add item to increase knockback resistance. default obsidian. up to 5 for 0.5
+- Add item to increase flying duration when fighting. default feather
+- Add item to increase regeneration. default ghast tear
+- Also fix default item for health boost being wrong
+- Decreased arrow target height so it doesnt overshoot mobs as much anymore
+
 Advanced Golems 1.2.0
 ================
 - Fixing some config not being applied
