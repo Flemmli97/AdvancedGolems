@@ -5,6 +5,7 @@ Advanced Golems 1.3.0
 - Add item to increase regeneration. default ghast tear
 - Also fix default item for health boost being wrong
 - Decreased arrow target height so it doesnt overshoot mobs as much anymore
+- Make fire res default item magma cream
 
 Advanced Golems 1.2.0
 ================
