@@ -3,6 +3,7 @@ package io.github.flemmli97.advancedgolems.fabric.platform;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.flemmli97.advancedgolems.ArmorCacheGetter;
 import io.github.flemmli97.advancedgolems.platform.ArmorModelHandler;
+import io.github.flemmli97.tenshilib.api.item.DynamicArmorTextureItem;
 import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
 import net.fabricmc.fabric.impl.client.rendering.ArmorRendererRegistryImpl;
 import net.minecraft.client.model.HumanoidModel;
@@ -31,6 +32,8 @@ public class ArmorModelHandlerImpl implements ArmorModelHandler {
 
     @Override
     public ResourceLocation armorTextureForge(Entity entity, ItemStack stack, EquipmentSlot slot, @Nullable String type, boolean inner) {
+        if (stack.getItem() instanceof DynamicArmorTextureItem item)
+            return ArmorCacheGetter.getOrCompute(item.getArmorTexture(stack, entity, slot, null));
         ArmorItem armorItem = (ArmorItem) stack.getItem();
         String string2 = "textures/models/armor/" + armorItem.getMaterial().getName() + "_layer_" + (inner ? 2 : 1) + (type == null ? "" : "_" + type) + ".png";
         return ArmorCacheGetter.getOrCompute(string2);

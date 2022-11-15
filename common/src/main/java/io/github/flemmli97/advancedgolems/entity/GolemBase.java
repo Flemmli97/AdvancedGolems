@@ -349,7 +349,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         }
         boolean flag = super.hurt(damageSource, f);
         if (flag && !this.level.isClientSide) {
-            this.combatCounter = 600;
+            this.combatCounter = 600 - this.upgrades.regenUpgrades() * 10;
             this.regenTicker = 0;
         }
         return flag;
@@ -403,7 +403,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
             else {
                 if (this.regenTicker == 0) {
                     this.heal(1);
-                    this.regenTicker = 200;
+                    this.regenTicker = 200 - this.upgrades.regenUpgrades() * 5;
                 }
                 if (this.regenTicker > 0)
                     this.regenTicker--;
@@ -536,7 +536,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         double e = target.getY(0.3333333333333333) - abstractArrow.getY();
         double g = target.getZ() - mob.getZ();
         double h = Math.sqrt(d * d + g * g);
-        abstractArrow.shoot(d, e + h * (double) 0.2f, g, 2.7f + mob.getRandom().nextFloat() * 0.4f, 14 - mob.level.getDifficulty().getId() * 4);
+        abstractArrow.shoot(d, e + h * 0.1, g, 2.7f + mob.getRandom().nextFloat() * 0.4f, 14 - mob.level.getDifficulty().getId() * 4);
         abstractArrow.setCritArrow(true);
         mob.playSound(SoundEvents.SKELETON_SHOOT, 1.0f, 1.0f / (mob.getRandom().nextFloat() * 0.4f + 0.8f));
         mob.level.addFreshEntity(abstractArrow);

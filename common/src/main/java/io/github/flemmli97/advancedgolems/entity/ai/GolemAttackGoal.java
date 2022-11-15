@@ -172,7 +172,7 @@ public class GolemAttackGoal<T extends GolemBase> extends AnimatedAttackGoal<T> 
             }
             this.attacker.lookAt(target, 30.0F, 30.0F);
             if (this.hoverTime < -60)
-                this.hoverTime = hoverTimeMax;
+                this.hoverTime = hoverTimeMax + this.attacker.upgrades.flyUpgrades() * 10;
             return;
         }
 
