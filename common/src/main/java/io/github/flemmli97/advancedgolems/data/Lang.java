@@ -34,8 +34,9 @@ public class Lang implements DataProvider {
     }
 
     protected void addTranslations() {
-        this.add("item.advancedgolems." + PlatformUtils.INSTANCE.items().getIDFrom(ModItems.golemSpawn.get()).getPath(), "Summon Golem");
-        this.add("item.advancedgolems." + PlatformUtils.INSTANCE.items().getIDFrom(ModItems.golemControl.get()).getPath(), "Golem Controller");
+        this.add("item.advancedgolems." + PlatformUtils.INSTANCE.items().getIDFrom(ModItems.GOLEM_SPAWNER.get()).getPath(), "Summon Golem");
+        this.add("item.advancedgolems." + PlatformUtils.INSTANCE.items().getIDFrom(ModItems.GOLEM_CONTROLLER.get()).getPath(), "Golem Controller");
+        this.add("item.advancedgolems." + PlatformUtils.INSTANCE.items().getIDFrom(ModItems.GOLEM_BELL.get()).getPath(), "Golem Bell");
 
         this.add("controller.mode.0", "Mode: Remove");
         this.add("controller.mode.1", "Mode: Home");
@@ -46,6 +47,7 @@ public class Lang implements DataProvider {
         this.add("golem.state.PASSIVESTAND", "Golem is now standing");
 
         this.add("golem.owner.wrong", "You don't own this golem");
+        this.add("golem.owner.wrong.owner", "This is %s's golem");
 
         this.add("config.title.advancedgolems", "Advanced Golems Config");
         this.add(ModEntities.golem.get().getDescriptionId(), "Golem");

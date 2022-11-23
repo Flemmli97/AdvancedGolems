@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "golem_bell",
+  "pattern": [
+    "  B",
+    " S ",
+    "S  "
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:bell"
+    },
+    "S": {
+      "tag": "c:wooden_rods"
+    }
+  },
+  "result": {
+    "item": "advancedgolems:golem_bell"
+  }
+}

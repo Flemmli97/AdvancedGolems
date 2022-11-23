@@ -33,7 +33,7 @@ public class ClientRenderHandler {
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
         ItemStack stack = player.getMainHandItem();
-        if (stack.getItem() == ModItems.golemControl.get()) {
+        if (stack.getItem() == ModItems.GOLEM_CONTROLLER.get()) {
             if (GolemController.getMode(stack) == 1) {
                 if (held != stack) {
                     held = stack;

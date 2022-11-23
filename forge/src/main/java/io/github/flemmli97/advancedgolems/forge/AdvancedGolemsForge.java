@@ -24,8 +24,8 @@ public class AdvancedGolemsForge {
     public AdvancedGolemsForge() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ConfigSpecs.commonSpec, AdvancedGolems.MODID + ".toml");
         IEventBus modbus = FMLJavaModLoadingContext.get().getModEventBus();
-        ModEntities.ENTITIES.finalize(modbus);
-        ModItems.ITEMS.finalize(modbus);
+        ModEntities.ENTITIES.registerContent();
+        ModItems.ITEMS.registerContent();
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modbus.addListener(ClientInit::clientInit);
             modbus.addListener(ClientInit::layerRegister);

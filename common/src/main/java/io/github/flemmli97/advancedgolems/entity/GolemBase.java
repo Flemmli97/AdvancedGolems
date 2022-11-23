@@ -1,5 +1,6 @@
 package io.github.flemmli97.advancedgolems.entity;
 
+import com.mojang.authlib.GameProfile;
 import io.github.flemmli97.advancedgolems.config.Config;
 import io.github.flemmli97.advancedgolems.entity.ai.GoBackHomeGoal;
 import io.github.flemmli97.advancedgolems.entity.ai.GolemAttackGoal;
@@ -17,6 +18,7 @@ import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -259,7 +261,9 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         if (this.level.isClientSide || interactionHand == InteractionHand.OFF_HAND)
             return InteractionResult.PASS;
         if (!this.entityData.get(ownerUUID).map(uuid -> uuid.equals(player.getUUID())).orElse(true)) {
-            player.sendMessage(new TranslatableComponent("golem.owner.wrong").withStyle(ChatFormatting.DARK_RED), Util.NIL_UUID);
+            Optional<GameProfile> optProf = player.getServer().getProfileCache().get(this.entityData.get(ownerUUID).get());
+            Component txt = optProf.map(p -> new TranslatableComponent("golem.owner.wrong.owner", p.getName())).orElse(new TranslatableComponent("golem.owner.wrong")).withStyle(ChatFormatting.DARK_RED);
+            player.sendMessage(txt, Util.NIL_UUID);
             return InteractionResult.FAIL;
         }
         ItemStack stack = player.getItemInHand(interactionHand);
@@ -312,7 +316,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
 
     public void onControllerRemove() {
         this.dropEquipment();
-        ItemStack stack = new ItemStack(ModItems.golemSpawn.get());
+        ItemStack stack = new ItemStack(ModItems.GOLEM_SPAWNER.get());
         if (this.isShutdown())
             GolemSpawnItem.withFrozenGolem(stack);
         this.spawnAtLocation(stack, 0.0F);

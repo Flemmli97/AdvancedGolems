@@ -1,3 +1,8 @@
+Advanced Golems 1.4.0
+================
+- Add golem bell: Highlights all golems in a 32 block radius
+- Display golem owner when trying to interact with another players golem
+
 Advanced Golems 1.3.0
 ================
 - Add item to increase knockback resistance. default obsidian. up to 5 for 0.5

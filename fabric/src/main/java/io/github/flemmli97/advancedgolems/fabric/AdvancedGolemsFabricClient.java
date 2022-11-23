@@ -21,6 +21,6 @@ public class AdvancedGolemsFabricClient implements ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.golem.get(), ctx -> new GolemRenderer<>(ctx, new ResourceLocation(AdvancedGolems.MODID, "textures/entity/golem.png")));
         EntityModelLayerRegistry.registerModelLayer(GolemModel.LAYER_LOCATION, GolemModel::createBodyLayer);
         WorldRenderEvents.END.register(ctx -> ClientRenderHandler.render(ctx.matrixStack(), Minecraft.getInstance().renderBuffers().crumblingBufferSource()));
-        FabricModelPredicateProviderRegistry.register(ModItems.golemControl.get(), new ResourceLocation(AdvancedGolems.MODID, "controller_mode"), ClientRenderHandler.controllerProps());
+        FabricModelPredicateProviderRegistry.register(ModItems.GOLEM_CONTROLLER.get(), new ResourceLocation(AdvancedGolems.MODID, "controller_mode"), ClientRenderHandler.controllerProps());
     }
 }
