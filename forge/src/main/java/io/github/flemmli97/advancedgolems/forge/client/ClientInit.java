@@ -18,7 +18,7 @@ public class ClientInit {
 
     public static void clientInit(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            ItemProperties.register(ModItems.golemControl.get(), new ResourceLocation(AdvancedGolems.MODID, "controller_mode"), ClientRenderHandler.controllerProps());
+            ItemProperties.register(ModItems.GOLEM_CONTROLLER.get(), new ResourceLocation(AdvancedGolems.MODID, "controller_mode"), ClientRenderHandler.controllerProps());
             EntityRenderers.register(ModEntities.golem.get(), ctx -> new GolemRenderer<>(ctx, new ResourceLocation(AdvancedGolems.MODID, "textures/entity/golem.png")));
         });
     }

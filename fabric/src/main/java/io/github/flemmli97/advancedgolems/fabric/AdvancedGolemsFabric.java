@@ -33,7 +33,7 @@ public class AdvancedGolemsFabric implements ModInitializer {
 
     public static InteractionResult attackCallback(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
         ItemStack stack = player.getItemInHand(hand);
-        if (stack.getItem() == ModItems.golemControl.get()) {
+        if (stack.getItem() == ModItems.GOLEM_CONTROLLER.get()) {
             if (((GolemController) stack.getItem()).onLeftClickEntity(stack, player, entity))
                 return InteractionResult.SUCCESS;
         }

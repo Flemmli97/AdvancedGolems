@@ -1,6 +1,7 @@
 {
   "item.advancedgolems.golem_spawner": "Summon Golem",
   "item.advancedgolems.golem_control": "Golem Controller",
+  "item.advancedgolems.golem_bell": "Golem Bell",
   "controller.mode.0": "Mode: Remove",
   "controller.mode.1": "Mode: Home",
   "controller.mode.2": "Mode: Behaviour",
@@ -9,6 +10,7 @@
   "golem.state.PASSIVE": "Golem is now passive",
   "golem.state.PASSIVESTAND": "Golem is now standing",
   "golem.owner.wrong": "You don't own this golem",
+  "golem.owner.wrong.owner": "This is %s's golem",
   "config.title.advancedgolems": "Advanced Golems Config",
   "entity.advancedgolems.golem": "Golem"
 }

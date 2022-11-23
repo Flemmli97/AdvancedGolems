@@ -21,6 +21,10 @@ public class ItemTagGen extends TagsProvider<Item> {
         this.tag(AdvancedGolems.blackDyes)
                 .add(Items.BLACK_DYE)
                 .addOptional(Tags.Items.DYES_BLACK.location());
+
+        this.tag(AdvancedGolems.rodsWooden)
+                .add(Items.STICK)
+                .addOptional(Tags.Items.RODS_WOODEN.location());
     }
 
     @Override

@@ -1,5 +1,6 @@
 package io.github.flemmli97.advancedgolems.entity;
 
+import com.mojang.authlib.GameProfile;
 import io.github.flemmli97.advancedgolems.config.Config;
 import io.github.flemmli97.advancedgolems.entity.ai.GoBackHomeGoal;
 import io.github.flemmli97.advancedgolems.entity.ai.GolemAttackGoal;
@@ -258,7 +259,9 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         if (this.level.isClientSide || interactionHand == InteractionHand.OFF_HAND)
             return InteractionResult.PASS;
         if (!this.entityData.get(ownerUUID).map(uuid -> uuid.equals(player.getUUID())).orElse(true)) {
-            player.sendSystemMessage(Component.translatable("golem.owner.wrong").withStyle(ChatFormatting.DARK_RED));
+            Optional<GameProfile> optProf = player.getServer().getProfileCache().get(this.entityData.get(ownerUUID).get());
+            Component txt = optProf.map(p -> Component.translatable("golem.owner.wrong.owner", p.getName())).orElse(Component.translatable("golem.owner.wrong")).withStyle(ChatFormatting.DARK_RED);
+            player.sendSystemMessage(txt);
             return InteractionResult.FAIL;
         }
         ItemStack stack = player.getItemInHand(interactionHand);
@@ -311,7 +314,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
 
     public void onControllerRemove() {
         this.dropEquipment();
-        ItemStack stack = new ItemStack(ModItems.golemSpawn.get());
+        ItemStack stack = new ItemStack(ModItems.GOLEM_SPAWNER.get());
         if (this.isShutdown())
             GolemSpawnItem.withFrozenGolem(stack);
         this.spawnAtLocation(stack, 0.0F);
