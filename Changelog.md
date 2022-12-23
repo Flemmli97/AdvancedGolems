@@ -1,3 +1,13 @@
+Advanced Golems 1.5.0
+================
+- Add item to increase a golems home radius: default glass
+- Add item to make a golems projectile piercing. Piercing projectiles only hurt whatever the golem 
+  is targeting at that time. default: flint
+- Add item to make golem enrage nearby hostile mobs making them all go after the golem. Makes the golem more useful in
+  protecting an area from mobs. default: carved pumpkin
+- Golems having a shield now take reduced damage (default 25% less) and have a chance of blocking
+  projectiles (default 25% chance)
+
 Advanced Golems 1.4.0
 ================
 - Add golem bell: Highlights all golems in a 32 block radius

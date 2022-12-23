@@ -30,6 +30,12 @@ public class ConfigSpecs {
     public final ForgeConfigSpec.IntValue maxFlyUpgrades;
     public final ForgeConfigSpec.ConfigValue<String> regenUpgradeItem;
     public final ForgeConfigSpec.IntValue maxRegenUpgrades;
+    public final ForgeConfigSpec.ConfigValue<String> homeRadiusItem;
+    public final ForgeConfigSpec.IntValue maxHomeRadius;
+    public final ForgeConfigSpec.ConfigValue<String> rageItem;
+    public final ForgeConfigSpec.ConfigValue<String> piercingItem;
+    public final ForgeConfigSpec.DoubleValue shieldDamageReduction;
+    public final ForgeConfigSpec.DoubleValue shieldProjectileBlockChance;
 
     public final ForgeConfigSpec.BooleanValue immortalGolems;
     public final ForgeConfigSpec.ConfigValue<String> reviveItem;
@@ -56,6 +62,12 @@ public class ConfigSpecs {
         this.maxFlyUpgrades = builder.comment("Max amount of fly duration upgrades. Each upgrade increases the time to fly by 10 ticks. 10 upgrades doubles the fly time").defineInRange("Fly Duration Max", Config.maxFlyUpgrades, 0, Integer.MAX_VALUE);
         this.regenUpgradeItem = builder.comment("Item to increase golems regenerative abilities").define("Regen Item", Config.regenUpgradeItem.writeToString());
         this.maxRegenUpgrades = builder.comment("Max amount of regen upgrades. Each upgrade decreases the out of combat time to heal by 10 and decreases the heal delay by 3").defineInRange("Regen Max", Config.maxRegenUpgrades, 0, Integer.MAX_VALUE);
+        this.homeRadiusItem = builder.comment("Item to increase the home radius").define("Home Radius Item", Config.homeRadiusItem.writeToString());
+        this.maxHomeRadius = builder.comment("Max amount of home radius increases").defineInRange("Home Radius Increase Max", Config.maxHomeRadius, 0, Integer.MAX_VALUE);
+        this.rageItem = builder.comment("Item make the golem enrage nearby hostile mobs making them go after the golem").define("Enrage Item", Config.rageItem.writeToString());
+        this.piercingItem = builder.comment("Item to make a golems projectile piercing: Piercing projectiles pass through all mobs except the golems current target").define("Piercing Projectiles Item", Config.piercingItem.writeToString());
+        this.shieldDamageReduction = builder.comment("Amount of damage in percent that a golem with a shield reduces").defineInRange("Shield Damage Reduction", Config.shieldDamageReduction, 0, 1);
+        this.shieldProjectileBlockChance = builder.comment("Chance that a golem blocks an incoming projectile").defineInRange("Projectile Block Chance", Config.shieldProjectileBlockChance, 0, 1);
 
         this.immortalGolems = builder.comment("If true golems shutdown instead of dying. You need to revive them again").define("Immortal Golem", Config.immortalGolems);
         this.reviveItem = builder.comment("Item needed to revive a shutdown golem").define("Revive Item", Config.reviveItem.writeToString());
