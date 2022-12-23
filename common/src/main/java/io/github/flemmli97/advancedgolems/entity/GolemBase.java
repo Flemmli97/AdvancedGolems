@@ -21,6 +21,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -45,6 +46,7 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomFlyingGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.AbstractGolem;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Creeper;
@@ -62,20 +64,23 @@ import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.entity.EntityTypeTest;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity {
 
-    protected static final EntityDataAccessor<BlockPos> home = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.BLOCK_POS);
-    protected static final EntityDataAccessor<Float> homeDist = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.FLOAT);
-    protected static final EntityDataAccessor<Boolean> canFly = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.BOOLEAN);
-    protected static final EntityDataAccessor<Optional<UUID>> ownerUUID = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.OPTIONAL_UUID);
-    private static final EntityDataAccessor<Boolean> shutDown = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.BOOLEAN);
+    protected static final EntityDataAccessor<BlockPos> HOME = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.BLOCK_POS);
+    protected static final EntityDataAccessor<Float> HOME_DIST = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.FLOAT);
+    protected static final EntityDataAccessor<Boolean> CAN_FLY = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.BOOLEAN);
+    protected static final EntityDataAccessor<Optional<UUID>> OWNER_UUID = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.OPTIONAL_UUID);
+    private static final EntityDataAccessor<Boolean> SHUT_DOWN = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.BOOLEAN);
 
     public static final AnimatedAction melee1 = new AnimatedAction(Mth.ceil(0.68 * 20), (int) (0.48 * 20), "melee1");
     public static final AnimatedAction melee2 = new AnimatedAction(Mth.ceil(0.68 * 20), (int) (0.48 * 20), "melee2");
@@ -88,9 +93,11 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
 
     private final Predicate<LivingEntity> pred = e -> e instanceof Enemy && !(e instanceof Creeper);
 
+    private final TargetingConditions enragerTest = TargetingConditions.forCombat().selector(this.pred);
+
     private int combatCounter;
     private GolemState state = GolemState.AGGRESSIVE;
-    private int regenTicker = 0;
+    private int regenTicker = 0, enrageCooldown;
 
     public GolemAttackGoal<GolemBase> attackGoal = new GolemAttackGoal<>(this);
 
@@ -130,11 +137,11 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(home, BlockPos.ZERO);
-        this.entityData.define(homeDist, -1f);
-        this.entityData.define(canFly, false);
-        this.entityData.define(ownerUUID, Optional.empty());
-        this.entityData.define(shutDown, false);
+        this.entityData.define(HOME, BlockPos.ZERO);
+        this.entityData.define(HOME_DIST, -1f);
+        this.entityData.define(CAN_FLY, false);
+        this.entityData.define(OWNER_UUID, Optional.empty());
+        this.entityData.define(SHUT_DOWN, false);
     }
 
     @Override
@@ -230,23 +237,23 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     @Override
     public void restrictTo(BlockPos blockPos, int i) {
         super.restrictTo(blockPos, i);
-        this.entityData.set(home, blockPos);
-        this.entityData.set(homeDist, (float) i);
+        this.entityData.set(HOME, blockPos);
+        this.entityData.set(HOME_DIST, (float) i);
     }
 
     @Override
     public BlockPos getRestrictCenter() {
-        return this.entityData.get(home);
+        return this.entityData.get(HOME);
     }
 
     @Override
     public float getRestrictRadius() {
-        return this.entityData.get(homeDist);
+        return this.entityData.get(HOME_DIST);
     }
 
     @Override
     public void clearRestriction() {
-        this.entityData.set(homeDist, -1f);
+        this.entityData.set(HOME_DIST, -1f);
     }
 
     @Override
@@ -258,8 +265,8 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     protected InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
         if (this.level.isClientSide || interactionHand == InteractionHand.OFF_HAND)
             return InteractionResult.PASS;
-        if (!this.entityData.get(ownerUUID).map(uuid -> uuid.equals(player.getUUID())).orElse(true)) {
-            Optional<GameProfile> optProf = player.getServer().getProfileCache().get(this.entityData.get(ownerUUID).get());
+        if (!this.entityData.get(OWNER_UUID).map(uuid -> uuid.equals(player.getUUID())).orElse(true)) {
+            Optional<GameProfile> optProf = player.getServer().getProfileCache().get(this.entityData.get(OWNER_UUID).get());
             Component txt = optProf.map(p -> Component.translatable("golem.owner.wrong.owner", p.getName())).orElse(Component.translatable("golem.owner.wrong")).withStyle(ChatFormatting.DARK_RED);
             player.sendSystemMessage(txt);
             return InteractionResult.FAIL;
@@ -338,7 +345,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     @Override
     public boolean hurt(DamageSource damageSource, float f) {
         if (damageSource.getEntity() instanceof Player player) {
-            if (!this.entityData.get(ownerUUID).map(uuid -> uuid.equals(player.getUUID())).orElse(true))
+            if (!this.entityData.get(OWNER_UUID).map(uuid -> uuid.equals(player.getUUID())).orElse(true))
                 return false;
             if (!player.isSecondaryUseActive())
                 return false;
@@ -348,7 +355,15 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         if (this.isShutdown() && damageSource != DamageSource.OUT_OF_WORLD)
             return false;
         if (this.getOffhandItem().getItem() instanceof ShieldItem) {
-            //Do something fancy with the shield
+            if (damageSource.isProjectile()) {
+                if (this.random.nextFloat() < Config.shieldProjectileBlockChance) {
+                    if (!this.level.isClientSide)
+                        this.playSound(SoundEvents.SHIELD_BLOCK, 1, 1);
+                    return false;
+                }
+            } else {
+                f *= Math.max(0, 1 - Config.shieldDamageReduction);
+            }
         }
         boolean flag = super.hurt(damageSource, f);
         if (flag && !this.level.isClientSide) {
@@ -404,12 +419,34 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
             if (this.combatCounter > 0)
                 this.combatCounter--;
             else {
-                if (this.regenTicker == 0) {
-                    this.heal(1);
-                    this.regenTicker = 200 - this.upgrades.regenUpgrades() * 5;
+                if (!this.isShutdown() || this.getHealth() < this.getMaxHealth() * 0.3) {
+                    if (this.regenTicker == 0) {
+                        this.heal(1);
+                        this.regenTicker = 200 - this.upgrades.regenUpgrades() * 5;
+                    }
+                    if (this.regenTicker > 0)
+                        this.regenTicker--;
                 }
-                if (this.regenTicker > 0)
-                    this.regenTicker--;
+            }
+            if (!this.isShutdown() && this.upgrades.enragesNearbyHostiles() && --this.enrageCooldown <= 0) {
+                AABB aabb = new AABB(this.getRestrictCenter()).inflate(this.getRestrictRadius() + 3);
+                boolean insideArea = aabb.contains(this.position());
+                double maxDist = this.getRestrictRadius() + 4;
+                Consumer<Mob> target = m -> {
+                    if (m.getTarget() != this && (insideArea || m.distanceToSqr(this) < maxDist * maxDist)) {
+                        //If we manually set the attack target the mob will keep attack even if golem is shutdown.
+                        //Need to invoke any kind of revenge ai goals
+                        m.setLastHurtByMob(this);
+                        for (int i = 0; i < 3; ++i) {
+                            double d0 = this.random.nextGaussian() * 0.02D;
+                            double d1 = this.random.nextGaussian() * 0.02D;
+                            double d2 = this.random.nextGaussian() * 0.02D;
+                            ((ServerLevel) this.level).sendParticles(ParticleTypes.ANGRY_VILLAGER, m.getRandomX(1.0D), m.getRandomY() + 1.0D, m.getRandomZ(1.0D), 0, d0, d1, d2, 1);
+                        }
+                    }
+                };
+                this.level.getEntities(EntityTypeTest.forClass(Mob.class), aabb, m -> this.enragerTest.test(this, m)).forEach(target);
+                this.enrageCooldown = 20 + this.random.nextInt(40);
             }
         } else {
             if (!this.isShutdown()) {
@@ -466,20 +503,20 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
             compoundTag.putIntArray("HomePos", homePos);
         }
         compoundTag.put("GolemUpgrades", this.upgrades.saveData(new CompoundTag()));
-        this.entityData.get(ownerUUID).ifPresent(uuid -> compoundTag.putUUID("Owner", uuid));
-        compoundTag.putBoolean("ShutDown", this.entityData.get(shutDown));
+        this.entityData.get(OWNER_UUID).ifPresent(uuid -> compoundTag.putUUID("Owner", uuid));
+        compoundTag.putBoolean("ShutDown", this.entityData.get(SHUT_DOWN));
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compoundTag) {
         super.readAdditionalSaveData(compoundTag);
+        this.upgrades.readData(compoundTag.getCompound("GolemUpgrades"));
         int[] intArray = compoundTag.getIntArray("HomePos");
         if (intArray.length == 3)
-            this.restrictTo(new BlockPos(intArray[0], intArray[1], intArray[2]), Config.homeRadius);
+            this.restrictTo(new BlockPos(intArray[0], intArray[1], intArray[2]), Config.homeRadius + this.upgrades.homeRadiusIncrease());
         this.updateState(GolemState.values()[compoundTag.getInt("State")]);
-        this.upgrades.readData(compoundTag.getCompound("GolemUpgrades"));
         if (compoundTag.hasUUID("Owner"))
-            this.entityData.set(ownerUUID, Optional.of(compoundTag.getUUID("Owner")));
+            this.entityData.set(OWNER_UUID, Optional.of(compoundTag.getUUID("Owner")));
         this.shutDownGolem(compoundTag.getBoolean("ShutDown"));
     }
 
@@ -525,11 +562,11 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
             }
         };
         this.moveControl = new FlyingMoveControl(this, 20, true);
-        this.entityData.set(canFly, true);
+        this.entityData.set(CAN_FLY, true);
     }
 
     public boolean canFlyFlag() {
-        return this.entityData.get(canFly);
+        return this.entityData.get(CAN_FLY);
     }
 
     public static void rangedArrow(Mob mob, LivingEntity target, float strength) {
@@ -570,24 +607,24 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     public void setOwner(LivingEntity entity) {
         if (entity != null) {
             this.owner = entity;
-            this.entityData.set(ownerUUID, Optional.of(entity.getUUID()));
+            this.entityData.set(OWNER_UUID, Optional.of(entity.getUUID()));
         } else {
             this.owner = null;
-            this.entityData.set(ownerUUID, Optional.empty());
+            this.entityData.set(OWNER_UUID, Optional.empty());
         }
     }
 
     @Nullable
     @Override
     public UUID getOwnerUUID() {
-        return this.entityData.get(ownerUUID).orElse(null);
+        return this.entityData.get(OWNER_UUID).orElse(null);
     }
 
     @Nullable
     @Override
     public LivingEntity getOwner() {
         if (this.owner == null || this.owner.isRemoved()) {
-            this.entityData.get(ownerUUID).ifPresent((uuid) -> this.owner = EntityUtil.findFromUUID(LivingEntity.class, this.level, uuid));
+            this.entityData.get(OWNER_UUID).ifPresent((uuid) -> this.owner = EntityUtil.findFromUUID(LivingEntity.class, this.level, uuid));
         }
         return this.owner;
     }
@@ -622,16 +659,16 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     }
 
     public boolean isShutdown() {
-        return this.entityData.get(shutDown);
+        return this.entityData.get(SHUT_DOWN);
     }
 
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
         if (this.level.isClientSide) {
-            if (key == shutDown) {
+            if (key == SHUT_DOWN) {
                 //This case only happens during load. At that point we want to skip right to the end of the animation
-                if (this.entityData.get(shutDown) && !this.getAnimationHandler().hasAnimation()) {
+                if (this.entityData.get(SHUT_DOWN) && !this.getAnimationHandler().hasAnimation()) {
                     this.getAnimationHandler().setAnimation(shutdownAction);
                     AnimatedAction anim = this.getAnimationHandler().getAnimation();
                     while (anim.getTick() < anim.getLength())
@@ -642,7 +679,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     }
 
     public void shutDownGolem(boolean flag) {
-        this.entityData.set(shutDown, flag);
+        this.entityData.set(SHUT_DOWN, flag);
         if (flag) {
             this.setTarget(null);
             this.getNavigation().stop();

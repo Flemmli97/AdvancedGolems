@@ -25,8 +25,11 @@ public class GolemUpgradesHandler {
 
     private final BooleanHolder flyingHolder;
     private final BooleanHolder fireResHolder;
+    private final BooleanHolder piercingProjectilesHolder;
+    private final BooleanHolder enrageHostilesHolder;
     private final IntegerHolder flyUpgradeHolder;
     private final IntegerHolder regenResHolder;
+    private final IntegerHolder homeRadiusIncreaseHolder;
     private final List<UpgradeHolder<?>> holders;
 
     public GolemUpgradesHandler(GolemBase golem) {
@@ -34,6 +37,10 @@ public class GolemUpgradesHandler {
         this.holders = new LinkedList<>();
         this.holders.add(this.flyingHolder = new BooleanHolder(Config.flyItem, "CanFly", this.golem::updateToFlyingPathing));
         this.holders.add(this.fireResHolder = new BooleanHolder(Config.fireResItem, "FireResistant", () -> {
+        }));
+        this.holders.add(this.piercingProjectilesHolder = new BooleanHolder(Config.piercingItem, "PiercingProjectiles", () -> {
+        }));
+        this.holders.add(this.enrageHostilesHolder = new BooleanHolder(Config.rageItem, "EnrangeHostiles", () -> {
         }));
         this.holders.add(new IntegerHolder(Config.speedItem, () -> Config.maxSpeedUpgrades, "SpeedUpgrades", val -> {
             this.modifyAtt(Attributes.MOVEMENT_SPEED, 0.02 * val);
@@ -46,6 +53,7 @@ public class GolemUpgradesHandler {
         }));
         this.holders.add(this.regenResHolder = new IntegerHolder(Config.regenUpgradeItem, () -> Config.maxRegenUpgrades, "RegenUpgrades", val -> {
         }));
+        this.holders.add(this.homeRadiusIncreaseHolder = new IntegerHolder(Config.homeRadiusItem, () -> Config.maxHomeRadius, "HomeRadiusIncrease", val -> this.golem.restrictTo(this.golem.getRestrictCenter(), (int) (this.golem.getRestrictRadius() + 1))));
     }
 
     public boolean canFly() {
@@ -56,12 +64,24 @@ public class GolemUpgradesHandler {
         return this.fireResHolder.value;
     }
 
+    public boolean usesPiercingProjectiles() {
+        return this.piercingProjectilesHolder.value;
+    }
+
+    public boolean enragesNearbyHostiles() {
+        return this.enrageHostilesHolder.value;
+    }
+
     public int flyUpgrades() {
         return this.flyUpgradeHolder.value;
     }
 
     public int regenUpgrades() {
         return this.regenResHolder.value;
+    }
+
+    public int homeRadiusIncrease() {
+        return this.homeRadiusIncreaseHolder.value;
     }
 
     public boolean onItemUse(Player player, InteractionHand hand, ItemStack stack) {

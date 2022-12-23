@@ -26,6 +26,12 @@ public class ConfigLoader {
         Config.maxFlyUpgrades = ConfigSpecs.conf.maxFlyUpgrades.get();
         Config.regenUpgradeItem.readFromString(ConfigSpecs.conf.regenUpgradeItem.get());
         Config.maxRegenUpgrades = ConfigSpecs.conf.maxRegenUpgrades.get();
+        Config.homeRadiusItem.readFromString(ConfigSpecs.conf.homeRadiusItem.get());
+        Config.maxHomeRadius = ConfigSpecs.conf.maxHomeRadius.get();
+        Config.rageItem.readFromString(ConfigSpecs.conf.rageItem.get());
+        Config.piercingItem.readFromString(ConfigSpecs.conf.piercingItem.get());
+        Config.shieldDamageReduction = ConfigSpecs.conf.shieldDamageReduction.get().floatValue();
+        Config.shieldProjectileBlockChance = ConfigSpecs.conf.shieldProjectileBlockChance.get().floatValue();
 
         Config.immortalGolems = ConfigSpecs.conf.immortalGolems.get();
         Config.reviveItem.readFromString(ConfigSpecs.conf.reviveItem.get());

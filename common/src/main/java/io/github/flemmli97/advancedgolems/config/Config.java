@@ -25,6 +25,12 @@ public class Config {
     public static int maxFlyUpgrades = 10;
     public static ItemWrapper regenUpgradeItem = new ItemWrapper("minecraft:ghast_tear");
     public static int maxRegenUpgrades = 10;
+    public static ItemWrapper homeRadiusItem = new ItemWrapper("minecraft:glass");
+    public static int maxHomeRadius = 5;
+    public static ItemWrapper rageItem = new ItemWrapper("minecraft:carved_pumpkin");
+    public static ItemWrapper piercingItem = new ItemWrapper("minecraft:flint");
+    public static float shieldDamageReduction = 0.25f;
+    public static float shieldProjectileBlockChance = 0.25f;
 
     public static boolean immortalGolems = true;
     public static ItemWrapper reviveItem = new ItemWrapper("minecraft:golden_apple");
