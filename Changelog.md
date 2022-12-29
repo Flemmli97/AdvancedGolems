@@ -1,3 +1,7 @@
+Advanced Golems 1.5.1
+================
+- Make golem also set target instead of just last hurt
+
 Advanced Golems 1.5.0
 ================
 - Add item to increase a golems home radius: default glass

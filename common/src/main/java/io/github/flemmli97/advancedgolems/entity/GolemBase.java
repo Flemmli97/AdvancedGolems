@@ -437,6 +437,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
                         //If we manually set the attack target the mob will keep attack even if golem is shutdown.
                         //Need to invoke any kind of revenge ai goals
                         m.setLastHurtByMob(this);
+                        m.setTarget(this);
                         for (int i = 0; i < 3; ++i) {
                             double d0 = this.random.nextGaussian() * 0.02D;
                             double d1 = this.random.nextGaussian() * 0.02D;
