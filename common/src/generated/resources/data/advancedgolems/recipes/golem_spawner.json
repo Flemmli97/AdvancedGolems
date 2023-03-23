@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "misc",
   "group": "golem_spawner",
   "key": {
     "D": {
@@ -25,5 +26,6 @@
   ],
   "result": {
     "item": "advancedgolems:golem_spawner"
-  }
+  },
+  "show_notification": true
 }

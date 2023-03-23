@@ -5,7 +5,7 @@ package io.github.flemmli97.advancedgolems.client.model;// Made with Blockbench 
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 import io.github.flemmli97.advancedgolems.AdvancedGolems;
 import io.github.flemmli97.advancedgolems.entity.GolemBase;
 import io.github.flemmli97.tenshilib.api.entity.AnimatedAction;
@@ -27,6 +27,7 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.HumanoidArm;
+import org.joml.Vector3f;
 
 public class GolemModel<T extends GolemBase> extends EntityModel<T> implements ExtendedModel, IItemArmModel {
 
@@ -184,13 +185,13 @@ public class GolemModel<T extends GolemBase> extends EntityModel<T> implements E
     private Vector3f withParentX(PartPose parentPose, float x, float y, float z) {
         Vector3f v = new Vector3f(x, y, z);
         if (parentPose.zRot != 0.0F) {
-            v.transform(Vector3f.ZP.rotation(parentPose.zRot));
+            v.rotate(Axis.ZP.rotation(parentPose.zRot));
         }
         if (parentPose.yRot != 0.0F) {
-            v.transform(Vector3f.YP.rotation(parentPose.yRot));
+            v.rotate(Axis.YP.rotation(parentPose.yRot));
         }
         if (parentPose.xRot != 0.0F) {
-            v.transform(Vector3f.XP.rotation(parentPose.xRot));
+            v.rotate(Axis.XP.rotation(parentPose.xRot));
         }
         return v;
     }

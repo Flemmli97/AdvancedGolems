@@ -8,9 +8,11 @@ import io.github.flemmli97.advancedgolems.forge.config.ConfigLoader;
 import io.github.flemmli97.advancedgolems.forge.config.ConfigSpecs;
 import io.github.flemmli97.advancedgolems.registry.ModEntities;
 import io.github.flemmli97.advancedgolems.registry.ModItems;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -20,6 +22,9 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @Mod(value = AdvancedGolems.MODID)
 public class AdvancedGolemsForge {
@@ -36,6 +41,7 @@ public class AdvancedGolemsForge {
         }
         modbus.addListener(AdvancedGolemsForge::configReload);
         modbus.addListener(AdvancedGolemsForge::attributeEvent);
+        modbus.addListener(AdvancedGolemsForge::creativeTabRegister);
         MinecraftForge.EVENT_BUS.addListener(AdvancedGolemsForge::projectileEvent);
     }
 
@@ -51,5 +57,11 @@ public class AdvancedGolemsForge {
     public static void projectileEvent(ProjectileImpactEvent event) {
         if (event.getRayTraceResult() instanceof EntityHitResult entityHitResult && !EventCalls.canProjectileHit(event.getProjectile(), entityHitResult))
             event.setCanceled(true);
+    }
+
+    public static void creativeTabRegister(CreativeModeTabEvent.BuildContents event) {
+        Consumer<Consumer<Supplier<? extends ItemLike>>> m = EventCalls.getPopulatedTabs().get(event.getTab());
+        if (m != null)
+            m.accept(event::accept);
     }
 }

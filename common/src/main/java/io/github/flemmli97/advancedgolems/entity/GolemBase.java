@@ -24,6 +24,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -352,10 +353,10 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         }
         if (damageSource.getEntity() == this)
             return false;
-        if (this.isShutdown() && damageSource != DamageSource.OUT_OF_WORLD)
+        if (this.isShutdown() && damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY))
             return false;
         if (this.getOffhandItem().getItem() instanceof ShieldItem) {
-            if (damageSource.isProjectile()) {
+            if (damageSource.is(DamageTypeTags.IS_PROJECTILE)) {
                 if (this.random.nextFloat() < Config.shieldProjectileBlockChance) {
                     if (!this.level.isClientSide)
                         this.playSound(SoundEvents.SHIELD_BLOCK, 1, 1);
@@ -374,7 +375,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     }
 
     @Override
-    protected void hurtArmor(DamageSource damageSource, float f) {
+    public void hurtArmor(DamageSource damageSource, float f) {
         if (Config.shouldGearTakeDamage && f > 0) {
             if ((f /= 4.0f) < 1.0f) {
                 f = 1.0f;
@@ -389,7 +390,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     }
 
     @Override
-    protected void hurtHelmet(DamageSource damageSource, float f) {
+    public void hurtHelmet(DamageSource damageSource, float f) {
         if (Config.shouldGearTakeDamage && f > 0) {
             if ((f /= 4.0f) < 1.0f) {
                 f = 1.0f;
@@ -401,7 +402,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
 
     private void damageItemArmor(DamageSource damageSource, EquipmentSlot slot, float dmg) {
         ItemStack stack = this.getItemBySlot(slot);
-        if (damageSource.isFire() && stack.getItem().isFireResistant() || !(stack.getItem() instanceof ArmorItem))
+        if (damageSource.is(DamageTypeTags.IS_FIRE) && stack.getItem().isFireResistant() || !(stack.getItem() instanceof ArmorItem))
             return;
         stack.hurtAndBreak((int) dmg, this, e -> e.broadcastBreakEvent(EquipmentSlot.byTypeAndIndex(EquipmentSlot.Type.ARMOR, slot.getIndex())));
     }
@@ -633,7 +634,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     @Override
     protected void actuallyHurt(DamageSource damageSrc, float damageAmount) {
         super.actuallyHurt(damageSrc, damageAmount);
-        if (Config.immortalGolems && damageSrc != DamageSource.OUT_OF_WORLD && this.getHealth() <= 0) {
+        if (Config.immortalGolems && !damageSrc.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && this.getHealth() <= 0) {
             this.setHealth(0.01f);
             this.shutDownGolem(true);
         }

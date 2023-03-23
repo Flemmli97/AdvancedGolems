@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "misc",
   "group": "golem_controller",
   "key": {
     "P": {
@@ -16,5 +17,6 @@
   ],
   "result": {
     "item": "advancedgolems:golem_control"
-  }
+  },
+  "show_notification": true
 }

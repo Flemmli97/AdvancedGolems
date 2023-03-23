@@ -49,7 +49,7 @@ public class GolemArmorLayer<T extends GolemBase, M extends GolemModel<T>, A ext
 
     private void renderArmorPiece(PoseStack poseStack, MultiBufferSource multiBufferSource, T entity, EquipmentSlot equipmentSlot, int light, A humanoidModel) {
         ItemStack itemStack = entity.getItemBySlot(equipmentSlot);
-        if (itemStack.getItem() instanceof ArmorItem armor && armor.getSlot() == equipmentSlot) {
+        if (itemStack.getItem() instanceof ArmorItem armor && armor.getEquipmentSlot() == equipmentSlot) {
             if (!this.copiedModelProperties) {
                 this.getParentModel().copyPropertiesTo(humanoidModel);
                 this.copiedModelProperties = true;
