@@ -1,6 +1,9 @@
 Advanced Golems 1.5.1
 ================
-- Make golem also set target instead of just last hurt
+- Update to 1.19.4
+<i>
+  - Make golem also set target instead of just last hurt
+  </i>
 
 Advanced Golems 1.5.0
 ================
