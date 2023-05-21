@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[40,)"
+loaderVersion="[${loader_version},)"
 license="ARR"
 issueTrackerURL="https://github.com/Flemmli97/AdvancedGolems/issues"
 [[mods]]
@@ -13,7 +13,13 @@ description='''Summon small golems that help defend your base'''
 [[dependencies.advancedgolems]]
 modId="minecraft"
 mandatory=true
-versionRange="[1.18.2,)"
+versionRange="[${mcversion},)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.advancedgolems]]
+modId="forge"
+mandatory=true
+versionRange="[${forge_version},)"
 ordering="NONE"
 side="BOTH"
 [[dependencies.advancedgolems]]
