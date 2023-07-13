@@ -73,7 +73,7 @@ public class GolemController extends Item {
     }
 
     public boolean onLeftClickEntity(ItemStack stack, Player player, Entity target) {
-        if (target instanceof GolemBase golem && !player.level.isClientSide) {
+        if (target instanceof GolemBase golem && !player.level().isClientSide) {
             if (golem.getOwnerUUID() == null || golem.getOwnerUUID().equals(player.getUUID())) {
                 int mode = getMode(stack);
                 if (mode == 0) {
@@ -106,7 +106,7 @@ public class GolemController extends Item {
                 level.getNearbyEntities(GolemBase.class, TargetingConditions.DEFAULT, player, new AABB(-16, -16, -16, 16, 16, 16).move(entity.position()))
                         .forEach(golem -> {
                             if (golem.getUUID().equals(uuid)) {
-                                player.getLevel().sendParticles(player, ParticleTypes.FLAME, true,
+                                player.serverLevel().sendParticles(player, ParticleTypes.FLAME, true,
                                         golem.getRestrictCenter().getX() + 0.5, golem.getRestrictCenter().getY() + 1.5, golem.getRestrictCenter().getZ() + 0.5,
                                         1, 0, 0, 0, 0);
                             }

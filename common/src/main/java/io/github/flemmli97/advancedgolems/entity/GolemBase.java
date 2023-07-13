@@ -157,7 +157,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     }
 
     public void updateState(GolemState state) {
-        if (this.level == null || this.level.isClientSide)
+        if (this.level() == null || this.level().isClientSide)
             return;
         this.state = state;
         this.resetAI();
@@ -264,7 +264,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
 
     @Override
     protected InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
-        if (this.level.isClientSide || interactionHand == InteractionHand.OFF_HAND)
+        if (this.level().isClientSide || interactionHand == InteractionHand.OFF_HAND)
             return InteractionResult.PASS;
         if (!this.entityData.get(OWNER_UUID).map(uuid -> uuid.equals(player.getUUID())).orElse(true)) {
             Optional<GameProfile> optProf = player.getServer().getProfileCache().get(this.entityData.get(OWNER_UUID).get());
@@ -292,9 +292,9 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     private void equipItem(Player player, ItemStack stack, EquipmentSlot slot) {
         ItemStack current = this.getItemBySlot(slot);
         if (!current.isEmpty()) {
-            ItemEntity entityitem = new ItemEntity(this.level, this.getX(), this.getY(), this.getZ(), current);
+            ItemEntity entityitem = new ItemEntity(this.level(), this.getX(), this.getY(), this.getZ(), current);
             entityitem.setNoPickUpDelay();
-            this.level.addFreshEntity(entityitem);
+            this.level().addFreshEntity(entityitem);
         }
         ItemStack copy = stack.copy();
         this.setItemSlot(slot, copy);
@@ -332,7 +332,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     @Override
     public boolean doHurtTarget(Entity entity) {
         boolean res = super.doHurtTarget(entity);
-        if (res && !this.level.isClientSide && Config.shouldGearTakeDamage) {
+        if (res && !this.level().isClientSide && Config.shouldGearTakeDamage) {
             ItemStack stack = this.getMainHandItem();
             if (!stack.isEmpty() && entity instanceof LivingEntity target) {
                 stack.getItem().hurtEnemy(stack, target, this);
@@ -358,7 +358,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         if (this.getOffhandItem().getItem() instanceof ShieldItem) {
             if (damageSource.is(DamageTypeTags.IS_PROJECTILE)) {
                 if (this.random.nextFloat() < Config.shieldProjectileBlockChance) {
-                    if (!this.level.isClientSide)
+                    if (!this.level().isClientSide)
                         this.playSound(SoundEvents.SHIELD_BLOCK, 1, 1);
                     return false;
                 }
@@ -367,7 +367,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
             }
         }
         boolean flag = super.hurt(damageSource, f);
-        if (flag && !this.level.isClientSide) {
+        if (flag && !this.level().isClientSide) {
             this.combatCounter = 600 - this.upgrades.regenUpgrades() * 10;
             this.regenTicker = 0;
         }
@@ -416,7 +416,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     public void aiStep() {
         super.aiStep();
         this.getAnimationHandler().tick();
-        if (!this.level.isClientSide) {
+        if (!this.level().isClientSide) {
             if (this.combatCounter > 0)
                 this.combatCounter--;
             else {
@@ -443,24 +443,24 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
                             double d0 = this.random.nextGaussian() * 0.02D;
                             double d1 = this.random.nextGaussian() * 0.02D;
                             double d2 = this.random.nextGaussian() * 0.02D;
-                            ((ServerLevel) this.level).sendParticles(ParticleTypes.ANGRY_VILLAGER, m.getRandomX(1.0D), m.getRandomY() + 1.0D, m.getRandomZ(1.0D), 0, d0, d1, d2, 1);
+                            ((ServerLevel) this.level()).sendParticles(ParticleTypes.ANGRY_VILLAGER, m.getRandomX(1.0D), m.getRandomY() + 1.0D, m.getRandomZ(1.0D), 0, d0, d1, d2, 1);
                         }
                     }
                 };
-                this.level.getEntities(EntityTypeTest.forClass(Mob.class), aabb, m -> this.enragerTest.test(this, m)).forEach(target);
+                this.level().getEntities(EntityTypeTest.forClass(Mob.class), aabb, m -> this.enragerTest.test(this, m)).forEach(target);
                 this.enrageCooldown = 20 + this.random.nextInt(40);
             }
         } else {
             if (!this.isShutdown()) {
                 if (this.random.nextBoolean()) {
                     double[] off = MathUtils.rotate2d(0, -2.5 / 16f, MathUtils.degToRad(this.yBodyRot));
-                    this.level.addParticle(ParticleTypes.SMOKE, this.getX() + off[0], this.getY() + this.getBbHeight() + 0.1, this.getZ() + off[1], 0.0, 0.0, 0.0);
+                    this.level().addParticle(ParticleTypes.SMOKE, this.getX() + off[0], this.getY() + this.getBbHeight() + 0.1, this.getZ() + off[1], 0.0, 0.0, 0.0);
                 }
                 if (this.canFlyFlag() && this.tickCount % 4 == 0 && this.getDeltaMovement().y > -0.01 && !this.collidesDown()) {
                     double[] off = MathUtils.rotate2d(1.5 / 16f, -3.5 / 16f, MathUtils.degToRad(this.yBodyRot));
-                    this.level.addParticle(ParticleTypes.FLAME, this.getX() + off[0], this.getY() + 4 / 16f, this.getZ() + off[1], 0.0, 0.0, 0.0);
+                    this.level().addParticle(ParticleTypes.FLAME, this.getX() + off[0], this.getY() + 4 / 16f, this.getZ() + off[1], 0.0, 0.0, 0.0);
                     off = MathUtils.rotate2d(-1.5 / 16f, -3.5 / 16f, MathUtils.degToRad(this.yBodyRot));
-                    this.level.addParticle(ParticleTypes.FLAME, this.getX() + off[0], this.getY() + 4 / 16f, this.getZ() + off[1], 0.0, 0.0, 0.0);
+                    this.level().addParticle(ParticleTypes.FLAME, this.getX() + off[0], this.getY() + 4 / 16f, this.getZ() + off[1], 0.0, 0.0, 0.0);
                 }
             }
         }
@@ -474,7 +474,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     }
 
     private boolean collidesDown() {
-        for (VoxelShape shape : this.level.getBlockCollisions(this, this.getBoundingBox().expandTowards(0, -0.2, 0))) {
+        for (VoxelShape shape : this.level().getBlockCollisions(this, this.getBoundingBox().expandTowards(0, -0.2, 0))) {
             if (shape.isEmpty())
                 continue;
             if (shape.bounds().intersects(this.getBoundingBox().expandTowards(0, -0.05, 0)))
@@ -554,9 +554,9 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     }
 
     public void updateToFlyingPathing() {
-        if (this.level.isClientSide || !this.upgrades.canFly())
+        if (this.level().isClientSide || !this.upgrades.canFly())
             return;
-        this.navigation = new FlyingPathNavigation(this, this.level) {
+        this.navigation = new FlyingPathNavigation(this, this.level()) {
 
             @Override
             public boolean isStableDestination(BlockPos blockPos) {
@@ -578,10 +578,10 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         double e = target.getY(0.3333333333333333) - abstractArrow.getY();
         double g = target.getZ() - mob.getZ();
         double h = Math.sqrt(d * d + g * g);
-        abstractArrow.shoot(d, e + h * 0.1, g, 2.7f + mob.getRandom().nextFloat() * 0.4f, 14 - mob.level.getDifficulty().getId() * 4);
+        abstractArrow.shoot(d, e + h * 0.1, g, 2.7f + mob.getRandom().nextFloat() * 0.4f, 14 - mob.level().getDifficulty().getId() * 4);
         abstractArrow.setCritArrow(true);
         mob.playSound(SoundEvents.SKELETON_SHOOT, 1.0f, 1.0f / (mob.getRandom().nextFloat() * 0.4f + 0.8f));
-        mob.level.addFreshEntity(abstractArrow);
+        mob.level().addFreshEntity(abstractArrow);
         if (!itemStack.isEmpty() && EnchantmentHelper.getEnchantmentLevel(Enchantments.INFINITY_ARROWS, mob) == 0)
             itemStack.shrink(1);
     }
@@ -591,7 +591,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         ItemStack itemStack = mob.getItemInHand(interactionHand);
         if (itemStack.getItem() instanceof CrossbowItem) {
             float vel = CrossbowItem.containsChargedProjectile(itemStack, Items.FIREWORK_ROCKET) ? 1.6F : strength;
-            CrossbowItem.performShooting(mob.level, mob, interactionHand, itemStack, vel, 13.5f - mob.level.getDifficulty().getId() * 4);
+            CrossbowItem.performShooting(mob.level(), mob, interactionHand, itemStack, vel, 13.5f - mob.level().getDifficulty().getId() * 4);
             CrossbowItem.setCharged(itemStack, false);
         }
     }
@@ -626,7 +626,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     @Override
     public LivingEntity getOwner() {
         if (this.owner == null || this.owner.isRemoved()) {
-            this.entityData.get(OWNER_UUID).ifPresent((uuid) -> this.owner = EntityUtil.findFromUUID(LivingEntity.class, this.level, uuid));
+            this.entityData.get(OWNER_UUID).ifPresent((uuid) -> this.owner = EntityUtil.findFromUUID(LivingEntity.class, this.level(), uuid));
         }
         return this.owner;
     }
@@ -667,7 +667,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     @Override
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
-        if (this.level.isClientSide) {
+        if (this.level().isClientSide) {
             if (key == SHUT_DOWN) {
                 //This case only happens during load. At that point we want to skip right to the end of the animation
                 if (this.entityData.get(SHUT_DOWN) && !this.getAnimationHandler().hasAnimation()) {

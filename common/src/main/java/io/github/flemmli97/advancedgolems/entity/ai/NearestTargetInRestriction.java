@@ -20,7 +20,7 @@ public class NearestTargetInRestriction<T extends LivingEntity> extends NearestA
             this.target = this.mob.getTarget();
             return;
         }
-        LivingEntity target = this.mob.level.getNearestEntity(this.mob.level.getEntitiesOfClass(this.targetType, this.getTargetSearchArea(this.getFollowDistance()), livingEntity -> true), this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
+        LivingEntity target = this.mob.level().getNearestEntity(this.mob.level().getEntitiesOfClass(this.targetType, this.getTargetSearchArea(this.getFollowDistance()), livingEntity -> true), this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
         if (target != null && this.mob.isWithinRestriction(target.blockPosition())) {
             this.target = target;
         } else {
