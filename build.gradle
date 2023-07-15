@@ -150,8 +150,10 @@ curseforge {
             releaseType = 'release'
         }
         relations {
-            "${project.curse_dep_forge}".split(', ').each {
-                requiredDependency "${it}"
+            if (!"${project.curse_dep_forge}".isEmpty()) {
+                "${project.curse_dep_forge}".split(', ').each {
+                    requiredDependency "${it}"
+                }
             }
         }
     }
