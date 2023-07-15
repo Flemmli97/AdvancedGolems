@@ -19,7 +19,3 @@ sourceSets.main.resources {
         into "$sourceSets.main.output.resourcesDir/data/advancedgolems/lang"
     }
 }
-
-processResources {
-    exclude '.cache'
-}
