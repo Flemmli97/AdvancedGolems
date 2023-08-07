@@ -1,3 +1,7 @@
+Advanced Golems 1.5.2
+================
+- Update for library changes
+
 Advanced Golems 1.5.1
 ================
 - Update to 1.19.4
