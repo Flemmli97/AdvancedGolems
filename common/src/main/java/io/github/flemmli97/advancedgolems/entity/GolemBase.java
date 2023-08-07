@@ -88,7 +88,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     public static final AnimatedAction melee2 = new AnimatedAction(Mth.ceil(0.68 * 20), (int) (0.48 * 20), "melee2");
     public static final AnimatedAction rangedAttack = new AnimatedAction(25, 20, "ranged");
     public static final AnimatedAction rangedCrossbow = new AnimatedAction(30, 25, "ranged_crossbow");
-    public static final AnimatedAction shutdownAction = new AnimatedAction(36, 1, "shutdown", "shutdown", 1, false);
+    public static final AnimatedAction shutdownAction = AnimatedAction.builder(36, "shutdown").marker(1).infinite().build();
     public static final AnimatedAction restart = new AnimatedAction(24, 1, "restart");
 
     public static final AnimatedAction[] anims = new AnimatedAction[]{melee1, melee2, rangedAttack, shutdownAction, restart};

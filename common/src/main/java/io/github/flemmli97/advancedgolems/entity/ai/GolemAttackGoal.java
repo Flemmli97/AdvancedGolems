@@ -109,7 +109,7 @@ public class GolemAttackGoal<T extends GolemBase> extends AnimatedAttackGoal<T> 
     }
 
     @Override
-    public void handleIddle() {
+    public void handleIdle() {
         if (!this.hasRangedWeapon) {
             this.moveToWithDelay(1);
             this.attacker.getLookControl().setLookAt(this.target, 30, 30);
