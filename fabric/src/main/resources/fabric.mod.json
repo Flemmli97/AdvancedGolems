@@ -27,6 +27,7 @@
     ]
   },
   "mixins": [
+    "advancedgolems.mixins.json",
     "advancedgolems.fabric.mixins.json",
     "advancedgolems.fabric.polymer.mixins.json"
   ],

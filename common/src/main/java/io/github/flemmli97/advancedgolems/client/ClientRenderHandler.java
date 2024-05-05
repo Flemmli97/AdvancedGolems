@@ -1,9 +1,11 @@
 package io.github.flemmli97.advancedgolems.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import io.github.flemmli97.advancedgolems.entity.GolemBase;
 import io.github.flemmli97.advancedgolems.items.GolemController;
 import io.github.flemmli97.advancedgolems.registry.ModItems;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -26,7 +28,7 @@ public class ClientRenderHandler {
     private static GolemBase golem;
 
     public static ClampedItemPropertyFunction controllerProps() {
-        return (stack, level, entity, i) -> GolemController.getMode(stack) * 0.1f;
+        return (stack, level, entity, i) -> GolemController.getMode(stack).ordinal() * 0.1f;
     }
 
     public static void render(PoseStack poseStack, MultiBufferSource.BufferSource buffer) {
@@ -34,7 +36,7 @@ public class ClientRenderHandler {
         Player player = mc.player;
         ItemStack stack = player.getMainHandItem();
         if (stack.getItem() == ModItems.GOLEM_CONTROLLER.get()) {
-            if (GolemController.getMode(stack) == 1) {
+            if (GolemController.getMode(stack) == GolemController.Mode.HOME) {
                 if (held != stack) {
                     held = stack;
                     golem = null;
@@ -51,9 +53,14 @@ public class ClientRenderHandler {
                 }
                 if (golem != null && golem.isAlive()) {
                     BlockPos pos = golem.getRestrictCenter();
+                    poseStack.pushPose();
+                    Camera cam = mc.gameRenderer.getMainCamera();
+                    poseStack.mulPose(Axis.XP.rotationDegrees(cam.getXRot()));
+                    poseStack.mulPose(Axis.YP.rotationDegrees(cam.getYRot() + 180.0F));
                     renderBlockPos(mc.level, poseStack, buffer, pos);
                     renderArea(poseStack, buffer, golem.getRestrictRadius(), pos);
                     buffer.endBatch(RenderType.LINES);
+                    poseStack.popPose();
                     return;
                 }
             }

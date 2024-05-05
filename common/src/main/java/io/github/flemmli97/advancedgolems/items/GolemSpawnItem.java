@@ -1,6 +1,7 @@
 package io.github.flemmli97.advancedgolems.items;
 
 import io.github.flemmli97.advancedgolems.entity.GolemBase;
+import io.github.flemmli97.advancedgolems.registry.ModDataComponents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
@@ -23,7 +24,7 @@ public class GolemSpawnItem extends Item {
             ItemStack stack = ctx.getItemInHand();
             GolemBase golem = new GolemBase(world, ctx.getClickedPos());
             golem.setOwner(ctx.getPlayer());
-            if (stack.hasTag() && stack.getTag().getBoolean("Shutdown"))
+            if (stack.getOrDefault(ModDataComponents.SHUTDOWN.get(), false))
                 golem.shutDownGolem(true);
             world.addFreshEntity(golem);
             if (!ctx.getPlayer().isCreative()) {
@@ -34,7 +35,7 @@ public class GolemSpawnItem extends Item {
     }
 
     public static ItemStack withFrozenGolem(ItemStack stack) {
-        stack.getOrCreateTag().putBoolean("Shutdown", true);
+        stack.set(ModDataComponents.SHUTDOWN.get(), true);
         return stack;
     }
 

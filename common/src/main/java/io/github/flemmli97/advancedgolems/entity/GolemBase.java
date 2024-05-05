@@ -6,6 +6,7 @@ import io.github.flemmli97.advancedgolems.entity.ai.GoBackHomeGoal;
 import io.github.flemmli97.advancedgolems.entity.ai.GolemAttackGoal;
 import io.github.flemmli97.advancedgolems.entity.ai.NearestTargetInRestriction;
 import io.github.flemmli97.advancedgolems.items.GolemSpawnItem;
+import io.github.flemmli97.advancedgolems.mixin.LivingEntityAccessor;
 import io.github.flemmli97.advancedgolems.registry.ModEntities;
 import io.github.flemmli97.advancedgolems.registry.ModItems;
 import io.github.flemmli97.tenshilib.api.entity.AnimatedAction;
@@ -15,6 +16,7 @@ import io.github.flemmli97.tenshilib.common.entity.EntityUtil;
 import io.github.flemmli97.tenshilib.common.utils.MathUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -62,6 +64,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.ShieldItem;
+import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
@@ -124,7 +127,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     }
 
     public GolemBase(Level world, BlockPos pos) {
-        this(ModEntities.golem.get(), world);
+        this(ModEntities.GOLEM.get(), world);
         this.setPos(pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5);
         this.restrictTo(pos, Config.homeRadius);
     }
@@ -136,13 +139,13 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(HOME, BlockPos.ZERO);
-        this.entityData.define(HOME_DIST, -1f);
-        this.entityData.define(CAN_FLY, false);
-        this.entityData.define(OWNER_UUID, Optional.empty());
-        this.entityData.define(SHUT_DOWN, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(HOME, BlockPos.ZERO);
+        builder.define(HOME_DIST, -1f);
+        builder.define(CAN_FLY, false);
+        builder.define(OWNER_UUID, Optional.empty());
+        builder.define(SHUT_DOWN, false);
     }
 
     @Override
@@ -274,7 +277,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         }
         ItemStack stack = player.getItemInHand(interactionHand);
         if (!stack.isEmpty() && player.isSecondaryUseActive()) {
-            if (stack.getItem() == Config.reviveItem.getItem() && this.isShutdown()) {
+            if (Config.reviveItem.is(stack.getItem()) && this.isShutdown()) {
                 this.heal(this.getMaxHealth());
                 this.shutDownGolem(false);
                 if (!player.isCreative())
@@ -402,9 +405,9 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
 
     private void damageItemArmor(DamageSource damageSource, EquipmentSlot slot, float dmg) {
         ItemStack stack = this.getItemBySlot(slot);
-        if (damageSource.is(DamageTypeTags.IS_FIRE) && stack.getItem().isFireResistant() || !(stack.getItem() instanceof ArmorItem))
+        if (damageSource.is(DamageTypeTags.IS_FIRE) && stack.has(DataComponents.FIRE_RESISTANT) || !(stack.getItem() instanceof ArmorItem))
             return;
-        stack.hurtAndBreak((int) dmg, this, e -> e.broadcastBreakEvent(EquipmentSlot.byTypeAndIndex(EquipmentSlot.Type.ARMOR, slot.getIndex())));
+        stack.hurtAndBreak((int) dmg, this, slot);
     }
 
     @Override
@@ -526,6 +529,10 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         return this.getMainHandItem().getItem() instanceof ProjectileWeaponItem;
     }
 
+    public boolean isWithinMeleeAttackRange(LivingEntity entity, double hInc, double vInc) {
+        return this.getAttackBoundingBox().inflate(hInc, vInc, hInc).intersects(((LivingEntityAccessor) entity).getEntityHitbox());
+    }
+
     public AnimatedAction getAttack(boolean ranged) {
         if (ranged) {
             if (this.getMainHandItem().getItem() instanceof CrossbowItem)
@@ -582,17 +589,17 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         abstractArrow.setCritArrow(true);
         mob.playSound(SoundEvents.SKELETON_SHOOT, 1.0f, 1.0f / (mob.getRandom().nextFloat() * 0.4f + 0.8f));
         mob.level().addFreshEntity(abstractArrow);
-        if (!itemStack.isEmpty() && EnchantmentHelper.getEnchantmentLevel(Enchantments.INFINITY_ARROWS, mob) == 0)
+        if (!itemStack.isEmpty() && EnchantmentHelper.getEnchantmentLevel(Enchantments.INFINITY, mob) == 0)
             itemStack.shrink(1);
     }
 
     public static void rangedCrossbow(Mob mob, LivingEntity target, float strength) {
         InteractionHand interactionHand = ProjectileUtil.getWeaponHoldingHand(mob, Items.CROSSBOW);
         ItemStack itemStack = mob.getItemInHand(interactionHand);
-        if (itemStack.getItem() instanceof CrossbowItem) {
-            float vel = CrossbowItem.containsChargedProjectile(itemStack, Items.FIREWORK_ROCKET) ? 1.6F : strength;
-            CrossbowItem.performShooting(mob.level(), mob, interactionHand, itemStack, vel, 13.5f - mob.level().getDifficulty().getId() * 4);
-            CrossbowItem.setCharged(itemStack, false);
+        if (itemStack.getItem() instanceof CrossbowItem crossbow) {
+            ChargedProjectiles projectile = itemStack.set(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY);
+            float vel = projectile != null && projectile.contains(Items.FIREWORK_ROCKET) ? 1.6F : strength;
+            crossbow.performShooting(mob.level(), mob, interactionHand, itemStack, vel, 13.5f - mob.level().getDifficulty().getId() * 4, target);
         }
     }
 

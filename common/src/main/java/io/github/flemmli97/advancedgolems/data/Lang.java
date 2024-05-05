@@ -2,15 +2,13 @@ package io.github.flemmli97.advancedgolems.data;
 
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashingOutputStream;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
 import io.github.flemmli97.advancedgolems.AdvancedGolems;
 import io.github.flemmli97.advancedgolems.registry.ModEntities;
 import io.github.flemmli97.advancedgolems.registry.ModItems;
-import io.github.flemmli97.tenshilib.platform.PlatformUtils;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
@@ -27,7 +25,6 @@ import java.util.concurrent.CompletableFuture;
 
 public class Lang implements DataProvider {
 
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     private final Map<String, String> data = new LinkedHashMap<>();
     private final PackOutput packOutput;
     private final String modid;
@@ -40,13 +37,13 @@ public class Lang implements DataProvider {
     }
 
     protected void addTranslations() {
-        this.add("item.advancedgolems." + PlatformUtils.INSTANCE.items().getIDFrom(ModItems.GOLEM_SPAWNER.get()).getPath(), "Summon Golem");
-        this.add("item.advancedgolems." + PlatformUtils.INSTANCE.items().getIDFrom(ModItems.GOLEM_CONTROLLER.get()).getPath(), "Golem Controller");
-        this.add("item.advancedgolems." + PlatformUtils.INSTANCE.items().getIDFrom(ModItems.GOLEM_BELL.get()).getPath(), "Golem Bell");
+        this.add("item.advancedgolems." + BuiltInRegistries.ITEM.getKey(ModItems.GOLEM_SPAWNER.get()).getPath(), "Summon Golem");
+        this.add("item.advancedgolems." + BuiltInRegistries.ITEM.getKey(ModItems.GOLEM_CONTROLLER.get()).getPath(), "Golem Controller");
+        this.add("item.advancedgolems." + BuiltInRegistries.ITEM.getKey(ModItems.GOLEM_BELL.get()).getPath(), "Golem Bell");
 
-        this.add("controller.mode.0", "Mode: Remove");
-        this.add("controller.mode.1", "Mode: Home");
-        this.add("controller.mode.2", "Mode: Behaviour");
+        this.add("controller.mode.remove", "Mode: Remove");
+        this.add("controller.mode.home", "Mode: Home");
+        this.add("controller.mode.behaviour", "Mode: Behaviour");
         this.add("golem.state.AGGRESSIVE", "Golem is now aggressive");
         this.add("golem.state.AGGRESSIVESTAND", "Golem is now waiting");
         this.add("golem.state.PASSIVE", "Golem is now passive");
@@ -56,7 +53,7 @@ public class Lang implements DataProvider {
         this.add("golem.owner.wrong.owner", "This is %s's golem");
 
         this.add("config.title.advancedgolems", "Advanced Golems Config");
-        this.add(ModEntities.golem.get().getDescriptionId(), "Golem");
+        this.add(ModEntities.GOLEM.get().getDescriptionId(), "Golem");
     }
 
     @Override

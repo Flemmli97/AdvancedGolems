@@ -22,7 +22,7 @@ public class GolemRenderer<T extends GolemBase> extends MobRenderer<T, GolemMode
         this.texture = texture;
         this.addLayer(new ItemLayer<>(this, context.getItemInHandRenderer()));
         this.addLayer(new GolemArmorLayer<>(this, new HumanoidModel<>(context.bakeLayer(ModelLayers.PLAYER_OUTER_ARMOR)),
-                new HumanoidModel<>(context.bakeLayer(ModelLayers.PLAYER_INNER_ARMOR))));
+                new HumanoidModel<>(context.bakeLayer(ModelLayers.PLAYER_INNER_ARMOR)), context.getModelManager()));
     }
 
     @Override

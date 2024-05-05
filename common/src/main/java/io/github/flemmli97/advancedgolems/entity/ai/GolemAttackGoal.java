@@ -16,7 +16,7 @@ import net.minecraft.world.level.pathfinder.Path;
 
 public class GolemAttackGoal<T extends GolemBase> extends AnimatedAttackGoal<T> {
 
-    private static final int hoverTimeMax = 100;
+    private static final int HOVER_TIME_MAX = 100;
 
     private boolean hasRangedWeapon;
     protected int attackMoveDelay;
@@ -25,7 +25,7 @@ public class GolemAttackGoal<T extends GolemBase> extends AnimatedAttackGoal<T> 
     private int seeTime;
     private boolean strafingClockwise, strafingBackwards;
     private int strafingTime = -1;
-    private int hoverTime = hoverTimeMax;
+    private int hoverTime = HOVER_TIME_MAX;
 
     public GolemAttackGoal(T entity) {
         super(entity);
@@ -41,7 +41,7 @@ public class GolemAttackGoal<T extends GolemBase> extends AnimatedAttackGoal<T> 
     public void stop() {
         super.stop();
         this.seeTime = 0;
-        this.hoverTime = hoverTimeMax;
+        this.hoverTime = HOVER_TIME_MAX;
     }
 
     @Override
@@ -56,7 +56,7 @@ public class GolemAttackGoal<T extends GolemBase> extends AnimatedAttackGoal<T> 
             this.attacker.getLookControl().setLookAt(this.target, 30, 30);
             if (this.attackMoveDelay <= 0)
                 this.attackMoveDelay = this.attacker.getRandom().nextInt(50) + 100;
-            if (this.distanceToTargetSq <= this.attackRange) {
+            if (this.attacker.isWithinMeleeAttackRange(this.target, -0.3, 0)) {
                 this.movementDone = true;
                 this.attacker.getLookControl().setLookAt(this.target, 360, 90);
             } else if (this.attackMoveDelay-- == 1) {
@@ -83,7 +83,7 @@ public class GolemAttackGoal<T extends GolemBase> extends AnimatedAttackGoal<T> 
     public void handleAttack(AnimatedAction anim) {
         if (!this.hasRangedWeapon) {
             this.attacker.getNavigation().stop();
-            if (this.distanceToTargetSq <= this.attackRange * 3 && anim.canAttack()) {
+            if (this.attacker.isWithinMeleeAttackRange(this.target) && anim.canAttack()) {
                 this.attacker.doHurtTarget(this.target);
             }
         } else {
@@ -140,7 +140,7 @@ public class GolemAttackGoal<T extends GolemBase> extends AnimatedAttackGoal<T> 
         ProjectileWeaponItem item;
         this.attackRange = this.hasRangedWeapon ?
                 (item = (ProjectileWeaponItem) this.attacker.getMainHandItem().getItem()).getDefaultProjectileRange() *
-                        item.getDefaultProjectileRange() : this.attacker.getMeleeAttackRangeSqr(this.target);
+                        item.getDefaultProjectileRange() : 1;
     }
 
     private void moveStrafing(LivingEntity target, boolean canSee) {
@@ -172,7 +172,7 @@ public class GolemAttackGoal<T extends GolemBase> extends AnimatedAttackGoal<T> 
             }
             this.attacker.lookAt(target, 30.0F, 30.0F);
             if (this.hoverTime < -60)
-                this.hoverTime = hoverTimeMax + this.attacker.upgrades.flyUpgrades() * 10;
+                this.hoverTime = HOVER_TIME_MAX + this.attacker.upgrades.flyUpgrades() * 10;
             return;
         }
 

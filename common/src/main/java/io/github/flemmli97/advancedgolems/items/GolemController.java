@@ -4,9 +4,9 @@ import io.github.flemmli97.advancedgolems.AdvancedGolems;
 import io.github.flemmli97.advancedgolems.config.Config;
 import io.github.flemmli97.advancedgolems.entity.GolemBase;
 import io.github.flemmli97.advancedgolems.entity.GolemState;
+import io.github.flemmli97.advancedgolems.registry.ModDataComponents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -35,19 +35,19 @@ public class GolemController extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> list, TooltipFlag tooltipFlag) {
-        super.appendHoverText(itemStack, level, list, tooltipFlag);
+    public void appendHoverText(ItemStack itemStack, TooltipContext ctx, List<Component> list, TooltipFlag tooltipFlag) {
+        super.appendHoverText(itemStack, ctx, list, tooltipFlag);
         switch (getMode(itemStack)) {
-            case 0 -> list.add(Component.translatable("controller.mode.0").withStyle(ChatFormatting.GOLD));
-            case 1 -> list.add(Component.translatable("controller.mode.1").withStyle(ChatFormatting.GOLD));
-            case 2 -> list.add(Component.translatable("controller.mode.2").withStyle(ChatFormatting.GOLD));
+            case REMOVE -> list.add(Component.translatable("controller.mode.remove").withStyle(ChatFormatting.GOLD));
+            case HOME -> list.add(Component.translatable("controller.mode.home").withStyle(ChatFormatting.GOLD));
+            case BEHAVIOUR -> list.add(Component.translatable("controller.mode.state").withStyle(ChatFormatting.GOLD));
         }
     }
 
     @Override
     public InteractionResult useOn(UseOnContext useOnContext) {
         ItemStack stack = useOnContext.getItemInHand();
-        if (getMode(stack) == 1 && useOnContext.getLevel() instanceof ServerLevel level) {
+        if (getMode(stack) == Mode.HOME && useOnContext.getLevel() instanceof ServerLevel level) {
             UUID uuid = golemUUID(stack);
             if (uuid != null) {
                 Entity e = level.getEntity(uuid);
@@ -75,21 +75,18 @@ public class GolemController extends Item {
     public boolean onLeftClickEntity(ItemStack stack, Player player, Entity target) {
         if (target instanceof GolemBase golem && !player.level().isClientSide) {
             if (golem.getOwnerUUID() == null || golem.getOwnerUUID().equals(player.getUUID())) {
-                int mode = getMode(stack);
-                if (mode == 0) {
-                    if (!player.isCreative()) {
-                        golem.onControllerRemove();
+                switch (getMode(stack)) {
+                    case REMOVE -> {
+                        if (!player.isCreative()) {
+                            golem.onControllerRemove();
+                        }
+                        golem.remove(Entity.RemovalReason.KILLED);
                     }
-                    golem.remove(Entity.RemovalReason.KILLED);
-
-                } else if (mode == 1) {
-                    CompoundTag stackTag = stack.getOrCreateTag();
-                    CompoundTag tag = stackTag.getCompound(AdvancedGolems.MODID);
-                    tag.putUUID("SelectedEntity", golem.getUUID());
-                    stackTag.put(AdvancedGolems.MODID, tag);
-                } else if (mode == 2) {
-                    golem.updateState(GolemState.getNextState(golem.getState()));
-                    player.sendSystemMessage(Component.translatable("golem.state." + golem.getState()).withStyle(ChatFormatting.GOLD));
+                    case HOME -> stack.set(ModDataComponents.CONTROLLER_ENTITY.get(), golem.getUUID());
+                    case BEHAVIOUR -> {
+                        golem.updateState(GolemState.getNextState(golem.getState()));
+                        player.sendSystemMessage(Component.translatable("golem.state." + golem.getState()).withStyle(ChatFormatting.GOLD));
+                    }
                 }
                 return true;
             }
@@ -100,7 +97,7 @@ public class GolemController extends Item {
 
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
-        if (isSelected && AdvancedGolems.polymer && entity.tickCount % 2 == 0 && entity instanceof ServerPlayer player && GolemController.getMode(stack) == 1) {
+        if (isSelected && AdvancedGolems.polymer && entity.tickCount % 2 == 0 && entity instanceof ServerPlayer player && GolemController.getMode(stack) == Mode.HOME) {
             UUID uuid = GolemController.golemUUID(stack);
             if (uuid != null) {
                 level.getNearbyEntities(GolemBase.class, TargetingConditions.DEFAULT, player, new AABB(-16, -16, -16, 16, 16, 16).move(entity.position()))
@@ -116,30 +113,17 @@ public class GolemController extends Item {
         super.inventoryTick(stack, level, entity, slotId, isSelected);
     }
 
-    public static int getMode(ItemStack stack) {
-        CompoundTag tag = stack.getOrCreateTag().getCompound(AdvancedGolems.MODID);
-        if (tag != null)
-            return tag.getInt("Mode");
-        return 0;
+    public static Mode getMode(ItemStack stack) {
+        return stack.getOrDefault(ModDataComponents.CONTROLLER_MODE.get(), Mode.REMOVE);
     }
 
     public static UUID golemUUID(ItemStack stack) {
-        CompoundTag tag = stack.getOrCreateTag().getCompound(AdvancedGolems.MODID);
-        if (tag.hasUUID("SelectedEntity"))
-            return tag.getUUID("SelectedEntity");
-        return null;
+        return stack.get(ModDataComponents.CONTROLLER_ENTITY.get());
     }
 
     private static void cycleModes(ItemStack stack) {
-        CompoundTag stackTag = stack.getOrCreateTag();
-        CompoundTag tag = stackTag.getCompound(AdvancedGolems.MODID);
-        int mode = tag.getInt("Mode");
-        mode++;
-        if (mode > 2)
-            mode = 0;
-        tag.putInt("Mode", mode);
-        tag.remove("SelectedEntity");
-        stackTag.put(AdvancedGolems.MODID, tag);
+        Mode mode = getMode(stack);
+        stack.set(ModDataComponents.CONTROLLER_MODE.get(), Mode.values()[(mode.ordinal() + 1) % Mode.values().length]);
     }
 
     public static String[] skullValues = new String[]{
@@ -153,5 +137,11 @@ public class GolemController extends Item {
 
     public Item getPolymerItem(ItemStack itemStack, @Nullable ServerPlayer player) {
         return Items.PLAYER_HEAD;
+    }
+
+    public enum Mode {
+        REMOVE,
+        HOME,
+        BEHAVIOUR
     }
 }

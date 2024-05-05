@@ -1,71 +1,47 @@
-package io.github.flemmli97.advancedgolems.fabric.config;
+package io.github.flemmli97.advancedgolems.forge.config;
 
 import io.github.flemmli97.advancedgolems.config.Config;
-import io.github.flemmli97.tenshilib.common.config.CommentedJsonConfig;
-import io.github.flemmli97.tenshilib.common.config.JsonConfig;
-import net.fabricmc.loader.api.FabricLoader;
+import net.neoforged.fml.config.IConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class ConfigSpecs {
 
-    private static JsonConfig<CommentedJsonConfig> jsonConfig;
-    private static ConfigSpecs config;
+    public static final IConfigSpec<?> COMMON_SPEC;
+    public static final ConfigSpecs CONF;
 
-    public static ConfigSpecs get() {
-        if (jsonConfig == null)
-            init();
-        return config;
-    }
+    public final ModConfigSpec.DoubleValue golemHealth;
+    public final ModConfigSpec.DoubleValue golemBaseAttack;
 
-    public static JsonConfig<CommentedJsonConfig> getJsonConfig() {
-        if (jsonConfig == null)
-            init();
-        return jsonConfig;
-    }
+    public final ModConfigSpec.IntValue homeRadius;
 
-    public static void init() {
-        if (jsonConfig == null) {
-            Pair<JsonConfig<CommentedJsonConfig>, ConfigSpecs> specs = CommentedJsonConfig.Builder.create(FabricLoader.getInstance().getConfigDir().resolve("advancedgolems.json"), 1, ConfigSpecs::new);
-            jsonConfig = specs.getKey();
-            config = specs.getValue();
-        }
-        ConfigLoader.load();
-    }
+    public final ModConfigSpec.BooleanValue shouldGearTakeDamage;
 
-    public final CommentedJsonConfig.DoubleVal golemHealth;
-    public final CommentedJsonConfig.DoubleVal golemBaseAttack;
+    public final ModConfigSpec.ConfigValue<String> flyItem;
+    public final ModConfigSpec.ConfigValue<String> speedItem;
+    public final ModConfigSpec.IntValue maxSpeedUpgrades;
+    public final ModConfigSpec.ConfigValue<String> damageItem;
+    public final ModConfigSpec.IntValue maxDamageUpgrades;
+    public final ModConfigSpec.ConfigValue<String> healthItem;
+    public final ModConfigSpec.IntValue maxHealthUpgrades;
+    public final ModConfigSpec.ConfigValue<String> fireResItem;
+    public final ModConfigSpec.ConfigValue<String> knockbackItem;
+    public final ModConfigSpec.IntValue maxKnockbackUpgrades;
+    public final ModConfigSpec.ConfigValue<String> flyUpgradeItem;
+    public final ModConfigSpec.IntValue maxFlyUpgrades;
+    public final ModConfigSpec.ConfigValue<String> regenUpgradeItem;
+    public final ModConfigSpec.IntValue maxRegenUpgrades;
+    public final ModConfigSpec.ConfigValue<String> homeRadiusItem;
+    public final ModConfigSpec.IntValue maxHomeRadius;
+    public final ModConfigSpec.ConfigValue<String> rageItem;
+    public final ModConfigSpec.ConfigValue<String> piercingItem;
+    public final ModConfigSpec.DoubleValue shieldDamageReduction;
+    public final ModConfigSpec.DoubleValue shieldProjectileBlockChance;
 
-    public final CommentedJsonConfig.IntVal homeRadius;
+    public final ModConfigSpec.BooleanValue immortalGolems;
+    public final ModConfigSpec.ConfigValue<String> reviveItem;
 
-    public final CommentedJsonConfig.CommentedVal<Boolean> shouldGearTakeDamage;
-
-    public final CommentedJsonConfig.CommentedVal<String> flyItem;
-    public final CommentedJsonConfig.CommentedVal<String> speedItem;
-    public final CommentedJsonConfig.IntVal maxSpeedUpgrades;
-    public final CommentedJsonConfig.CommentedVal<String> damageItem;
-    public final CommentedJsonConfig.IntVal maxDamageUpgrades;
-    public final CommentedJsonConfig.CommentedVal<String> healthItem;
-    public final CommentedJsonConfig.IntVal maxHealthUpgrades;
-    public final CommentedJsonConfig.CommentedVal<String> fireResItem;
-    public final CommentedJsonConfig.CommentedVal<String> knockbackItem;
-    public final CommentedJsonConfig.IntVal maxKnockbackUpgrades;
-    public final CommentedJsonConfig.CommentedVal<String> flyUpgradeItem;
-    public final CommentedJsonConfig.IntVal maxFlyUpgrades;
-    public final CommentedJsonConfig.CommentedVal<String> regenUpgradeItem;
-    public final CommentedJsonConfig.IntVal maxRegenUpgrades;
-    public final CommentedJsonConfig.CommentedVal<String> homeRadiusItem;
-    public final CommentedJsonConfig.IntVal maxHomeRadius;
-    public final CommentedJsonConfig.CommentedVal<String> rageItem;
-    public final CommentedJsonConfig.CommentedVal<String> piercingItem;
-    public final CommentedJsonConfig.DoubleVal shieldDamageReduction;
-    public final CommentedJsonConfig.DoubleVal shieldProjectileBlockChance;
-
-    public final CommentedJsonConfig.CommentedVal<Boolean> immortalGolems;
-    public final CommentedJsonConfig.CommentedVal<String> reviveItem;
-
-    public final CommentedJsonConfig.CommentedVal<Boolean> usePolymer;
-
-    private ConfigSpecs(CommentedJsonConfig.Builder builder) {
+    public ConfigSpecs(ModConfigSpec.Builder builder) {
         this.golemHealth = builder.comment("Health of a golem").defineInRange("Golem Health", Config.golemHealth, 0, Double.MAX_VALUE);
         this.golemBaseAttack = builder.comment("Base attack of a golem").defineInRange("Golem Attack", Config.golemBaseAttack, 0, Double.MAX_VALUE);
 
@@ -96,9 +72,11 @@ public class ConfigSpecs {
 
         this.immortalGolems = builder.comment("If true golems shutdown instead of dying. You need to revive them again").define("Immortal Golem", Config.immortalGolems);
         this.reviveItem = builder.comment("Item needed to revive a shutdown golem").define("Revive Item", Config.reviveItem.toString());
+    }
 
-        this.usePolymer = builder.comment("Enable polymer support").define("Polymer", false);
-
-        builder.registerReloadHandler(ConfigLoader::load);
+    static {
+        Pair<ConfigSpecs, ModConfigSpec> specPair2 = new ModConfigSpec.Builder().configure(ConfigSpecs::new);
+        COMMON_SPEC = specPair2.getRight();
+        CONF = specPair2.getLeft();
     }
 }

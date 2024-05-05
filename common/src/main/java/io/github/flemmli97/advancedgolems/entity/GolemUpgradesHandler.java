@@ -1,7 +1,8 @@
 package io.github.flemmli97.advancedgolems.entity;
 
 import io.github.flemmli97.advancedgolems.config.Config;
-import io.github.flemmli97.tenshilib.api.config.ItemWrapper;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -96,11 +97,11 @@ public class GolemUpgradesHandler {
             holder.dropItems();
     }
 
-    private void modifyAtt(Attribute att, double val) {
+    private void modifyAtt(Holder<Attribute> att, double val) {
         AttributeInstance inst = this.golem.getAttribute(att);
         if (inst != null) {
             inst.removeModifier(itemMod);
-            inst.addPermanentModifier(new AttributeModifier(itemMod, "golem.modifier", val, AttributeModifier.Operation.ADDITION));
+            inst.addPermanentModifier(new AttributeModifier(itemMod, "golem.modifier", val, AttributeModifier.Operation.ADD_VALUE));
         }
     }
 
@@ -118,10 +119,10 @@ public class GolemUpgradesHandler {
 
     private abstract static class UpgradeHolder<T> {
 
-        protected final ItemWrapper config;
+        protected final Config.ItemConfig config;
         protected final String tagString;
 
-        public UpgradeHolder(ItemWrapper config, String tagString) {
+        public UpgradeHolder(Config.ItemConfig config, String tagString) {
             this.config = config;
             this.tagString = tagString;
         }
@@ -140,14 +141,14 @@ public class GolemUpgradesHandler {
         protected boolean value;
         protected final Runnable onApply;
 
-        public BooleanHolder(ItemWrapper config, String tagString, Runnable onApply) {
+        public BooleanHolder(Config.ItemConfig config, String tagString, Runnable onApply) {
             super(config, tagString);
             this.onApply = onApply;
         }
 
         @Override
         public boolean tryApply(Player player, InteractionHand hand, ItemStack stack) {
-            if (stack.getItem() == this.config.getItem() && !this.value) {
+            if (this.config.is(stack.getItem()) && !this.value) {
                 this.value = true;
                 this.onApply.run();
                 if (!player.isCreative())
@@ -170,7 +171,7 @@ public class GolemUpgradesHandler {
         @Override
         public void dropItems() {
             if (this.value)
-                GolemUpgradesHandler.this.golem.spawnAtLocation(this.config.getStack());
+                GolemUpgradesHandler.this.golem.spawnAtLocation(this.config.asItem());
         }
     }
 
@@ -180,7 +181,7 @@ public class GolemUpgradesHandler {
         private final Supplier<Integer> pred;
         protected final Consumer<Integer> onApply;
 
-        public IntegerHolder(ItemWrapper config, Supplier<Integer> pred, String tagString, Consumer<Integer> onApply) {
+        public IntegerHolder(Config.ItemConfig config, Supplier<Integer> pred, String tagString, Consumer<Integer> onApply) {
             super(config, tagString);
             this.pred = pred;
             this.onApply = onApply;
@@ -188,7 +189,7 @@ public class GolemUpgradesHandler {
 
         @Override
         public boolean tryApply(Player player, InteractionHand hand, ItemStack stack) {
-            if (stack.getItem() == this.config.getItem() && this.value < this.pred.get()) {
+            if (this.config.is(stack.getItem()) && this.value < this.pred.get()) {
                 this.value++;
                 this.onApply.accept(this.value);
                 if (!player.isCreative())
@@ -211,7 +212,7 @@ public class GolemUpgradesHandler {
         @Override
         public void dropItems() {
             for (int i = 0; i < this.value; i++)
-                GolemUpgradesHandler.this.golem.spawnAtLocation(this.config.getStack());
+                GolemUpgradesHandler.this.golem.spawnAtLocation(this.config.asItem());
         }
     }
 }

@@ -14,8 +14,8 @@ public class ModItems {
 
     public static final PlatformRegistry<Item> ITEMS = PlatformUtils.INSTANCE.of(BuiltInRegistries.ITEM.key(), AdvancedGolems.MODID);
 
-    public static final RegistryEntrySupplier<Item> GOLEM_SPAWNER = ITEMS.register("golem_spawner", () -> new GolemSpawnItem(new Item.Properties().stacksTo(16)));
-    public static final RegistryEntrySupplier<Item> GOLEM_CONTROLLER = ITEMS.register("golem_control", () -> new GolemController(new Item.Properties().stacksTo(1)));
-    public static final RegistryEntrySupplier<Item> GOLEM_BELL = ITEMS.register("golem_bell", () -> new GolemBell(new Item.Properties().stacksTo(1)));
+    public static final RegistryEntrySupplier<Item, GolemSpawnItem> GOLEM_SPAWNER = ITEMS.register("golem_spawner", () -> new GolemSpawnItem(new Item.Properties().stacksTo(16)));
+    public static final RegistryEntrySupplier<Item, GolemController> GOLEM_CONTROLLER = ITEMS.register("golem_control", () -> new GolemController(new Item.Properties().stacksTo(1)));
+    public static final RegistryEntrySupplier<Item, GolemBell> GOLEM_BELL = ITEMS.register("golem_bell", () -> new GolemBell(new Item.Properties().stacksTo(1)));
 
 }

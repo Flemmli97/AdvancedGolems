@@ -9,25 +9,38 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.DyeableArmorItem;
+import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.armortrim.ArmorTrim;
+import net.minecraft.world.item.armortrim.TrimPattern;
+import net.minecraft.world.item.component.DyedItemColor;
 
 public class GolemArmorLayer<T extends GolemBase, M extends GolemModel<T>, A extends HumanoidModel<T>> extends RenderLayer<T, M> {
 
     private final A outerModel, innerModel;
     private boolean copiedModelProperties;
 
-    public GolemArmorLayer(RenderLayerParent<T, M> renderLayerParent, A outerModel, A innerModel) {
+    private final TextureAtlas armorTrimAtlas;
+
+    public GolemArmorLayer(RenderLayerParent<T, M> renderLayerParent, A outerModel, A innerModel, ModelManager modelManager) {
         super(renderLayerParent);
         this.outerModel = outerModel;
         this.innerModel = innerModel;
+        this.armorTrimAtlas = modelManager.getAtlas(Sheets.ARMOR_TRIMS_SHEET);
     }
 
     @Override
@@ -47,7 +60,7 @@ public class GolemArmorLayer<T extends GolemBase, M extends GolemModel<T>, A ext
         poseStack.popPose();
     }
 
-    private void renderArmorPiece(PoseStack poseStack, MultiBufferSource multiBufferSource, T entity, EquipmentSlot equipmentSlot, int light, A humanoidModel) {
+    private void renderArmorPiece(PoseStack poseStack, MultiBufferSource buffer, T entity, EquipmentSlot equipmentSlot, int light, A humanoidModel) {
         ItemStack itemStack = entity.getItemBySlot(equipmentSlot);
         if (itemStack.getItem() instanceof ArmorItem armor && armor.getEquipmentSlot() == equipmentSlot) {
             if (!this.copiedModelProperties) {
@@ -55,20 +68,31 @@ public class GolemArmorLayer<T extends GolemBase, M extends GolemModel<T>, A ext
                 this.copiedModelProperties = true;
             }
             this.setPartVisibility(humanoidModel, equipmentSlot);
-            Model model = ArmorModelHandler.INSTANCE.getModel(poseStack, multiBufferSource, entity, itemStack, equipmentSlot, light, humanoidModel);
+            Model model = ArmorModelHandler.INSTANCE.getModel(poseStack, buffer, entity, itemStack, equipmentSlot, light, humanoidModel);
             if (model == null)
                 return;
-            boolean bl = equipmentSlot == EquipmentSlot.LEGS;
-            boolean bl2 = itemStack.hasFoil();
-            if (armor instanceof DyeableArmorItem dyeable) {
-                int j = dyeable.getColor(itemStack);
-                float f = (float) (j >> 16 & 0xFF) / 255.0f;
-                float g = (float) (j >> 8 & 0xFF) / 255.0f;
-                float h = (float) (j & 0xFF) / 255.0f;
-                this.renderModel(poseStack, multiBufferSource, light, bl2, model, f, g, h, ArmorModelHandler.INSTANCE.armorTextureForge(entity, itemStack, equipmentSlot, null, bl));
-                this.renderModel(poseStack, multiBufferSource, light, bl2, model, 1.0f, 1.0f, 1.0f, ArmorModelHandler.INSTANCE.armorTextureForge(entity, itemStack, equipmentSlot, "overlay", bl));
-            } else {
-                this.renderModel(poseStack, multiBufferSource, light, bl2, model, 1.0f, 1.0f, 1.0f, ArmorModelHandler.INSTANCE.armorTextureForge(entity, itemStack, equipmentSlot, null, bl));
+            ArmorMaterial armorMaterial = armor.getMaterial().value();
+            int color = itemStack.is(ItemTags.DYEABLE) ? DyedItemColor.getOrDefault(itemStack, -6265536) : -1;
+            boolean inner = equipmentSlot == EquipmentSlot.LEGS;
+            float r, g, b;
+            for (ArmorMaterial.Layer layer : armorMaterial.layers()) {
+                if (layer.dyeable() && color != -1) {
+                    r = (float) FastColor.ARGB32.red(color) / 255.0F;
+                    g = (float) FastColor.ARGB32.green(color) / 255.0F;
+                    b = (float) FastColor.ARGB32.blue(color) / 255.0F;
+                } else {
+                    r = 1.0F;
+                    g = 1.0F;
+                    b = 1.0F;
+                }
+                this.renderModel(poseStack, buffer, light, model, r, g, b, layer.texture(inner));
+            }
+            ArmorTrim armorTrim = itemStack.get(DataComponents.TRIM);
+            if (armorTrim != null) {
+                this.renderTrim(armor.getMaterial(), poseStack, buffer, light, armorTrim, model, inner);
+            }
+            if (itemStack.hasFoil()) {
+                this.renderGlint(poseStack, buffer, light, model);
             }
         }
     }
@@ -91,8 +115,18 @@ public class GolemArmorLayer<T extends GolemBase, M extends GolemModel<T>, A ext
         }
     }
 
-    private void renderModel(PoseStack poseStack, MultiBufferSource multiBufferSource, int light, boolean glint, Model humanoidModel, float r, float g, float b, ResourceLocation armorTexture) {
-        VertexConsumer vertexConsumer = ItemRenderer.getArmorFoilBuffer(multiBufferSource, RenderType.armorCutoutNoCull(armorTexture), false, glint);
-        humanoidModel.renderToBuffer(poseStack, vertexConsumer, light, OverlayTexture.NO_OVERLAY, r, g, b, 1.0f);
+    private void renderModel(PoseStack poseStack, MultiBufferSource buffer, int packedLight, Model armorItem, float red, float green, float blue, ResourceLocation texture) {
+        VertexConsumer vertexConsumer = buffer.getBuffer(RenderType.armorCutoutNoCull(texture));
+        armorItem.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, red, green, blue, 1.0F);
+    }
+
+    private void renderTrim(Holder<ArmorMaterial> armorMaterial, PoseStack poseStack, MultiBufferSource buffer, int packedLight, ArmorTrim trim, Model model, boolean innerTexture) {
+        TextureAtlasSprite textureAtlasSprite = this.armorTrimAtlas.getSprite(innerTexture ? trim.innerTexture(armorMaterial) : trim.outerTexture(armorMaterial));
+        VertexConsumer vertexConsumer = textureAtlasSprite.wrap(buffer.getBuffer(Sheets.armorTrimsSheet(((TrimPattern) trim.pattern().value()).decal())));
+        model.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    private void renderGlint(PoseStack poseStack, MultiBufferSource buffer, int packedLight, Model model) {
+        model.renderToBuffer(poseStack, buffer.getBuffer(RenderType.armorEntityGlint()), packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
     }
 }

@@ -2,6 +2,8 @@ modLoader="javafml"
 loaderVersion="[${loader_version},)"
 license="ARR"
 issueTrackerURL="https://github.com/Flemmli97/AdvancedGolems/issues"
+[[mixins]]
+config = "advancedgolems.mixins.json"
 [[mods]]
 modId="advancedgolems"
 version="${version}"
@@ -17,14 +19,14 @@ versionRange="[${mcversion},)"
 ordering="NONE"
 side="BOTH"
 [[dependencies.advancedgolems]]
-modId="forge"
-mandatory=true
+modId="neoforge"
+type="required"
 versionRange="[${forge_version},)"
 ordering="NONE"
 side="BOTH"
 [[dependencies.advancedgolems]]
 modId="tenshilib"
-mandatory=true
+type="required"
 versionRange="[${tenshilib_version},)"
 ordering="NONE"
 side="BOTH"
