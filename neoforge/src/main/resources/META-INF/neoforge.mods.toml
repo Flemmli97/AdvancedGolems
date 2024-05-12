@@ -14,7 +14,7 @@ authors="Flemmli97"
 description='''Summon small golems that help defend your base'''
 [[dependencies.advancedgolems]]
 modId="minecraft"
-mandatory=true
+type="required"
 versionRange="[${mcversion},)"
 ordering="NONE"
 side="BOTH"
