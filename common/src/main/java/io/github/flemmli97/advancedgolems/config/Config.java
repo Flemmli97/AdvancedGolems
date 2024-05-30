@@ -1,11 +1,9 @@
 package io.github.flemmli97.advancedgolems.config;
 
 import io.github.flemmli97.advancedgolems.AdvancedGolems;
-import io.github.flemmli97.tenshilib.TenshiLib;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 
 import java.util.Optional;
 
@@ -65,8 +63,7 @@ public class Config {
                 if (opt.isEmpty()) {
                     AdvancedGolems.LOGGER.error("No such item {}", this.id);
                     this.id = null;
-                }
-                else
+                } else
                     this.item = opt.get();
             }
             return this.item;

@@ -2,7 +2,6 @@ package io.github.flemmli97.advancedgolems.entity;
 
 import io.github.flemmli97.advancedgolems.config.Config;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.attributes.Attribute;
