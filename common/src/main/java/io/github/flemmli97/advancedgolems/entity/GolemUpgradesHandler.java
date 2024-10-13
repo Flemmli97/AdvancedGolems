@@ -1,8 +1,10 @@
 package io.github.flemmli97.advancedgolems.entity;
 
+import io.github.flemmli97.advancedgolems.AdvancedGolems;
 import io.github.flemmli97.advancedgolems.config.Config;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -13,13 +15,12 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class GolemUpgradesHandler {
 
-    private static final UUID itemMod = UUID.fromString("9e969e16-cf32-4f52-a22d-85d996556f98");
+    private static final ResourceLocation ITEM_MOD = AdvancedGolems.modRes("golem_modifier");
 
     private final GolemBase golem;
 
@@ -99,8 +100,8 @@ public class GolemUpgradesHandler {
     private void modifyAtt(Holder<Attribute> att, double val) {
         AttributeInstance inst = this.golem.getAttribute(att);
         if (inst != null) {
-            inst.removeModifier(itemMod);
-            inst.addPermanentModifier(new AttributeModifier(itemMod, "golem.modifier", val, AttributeModifier.Operation.ADD_VALUE));
+            inst.removeModifier(ITEM_MOD);
+            inst.addPermanentModifier(new AttributeModifier(ITEM_MOD, val, AttributeModifier.Operation.ADD_VALUE));
         }
     }
 

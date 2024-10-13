@@ -7,7 +7,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class ConfigSpecs {
 
-    public static final IConfigSpec<?> COMMON_SPEC;
+    public static final IConfigSpec COMMON_SPEC;
     public static final ConfigSpecs CONF;
 
     public final ModConfigSpec.DoubleValue golemHealth;

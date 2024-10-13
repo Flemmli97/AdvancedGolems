@@ -15,7 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 public class GolemRenderer<T extends GolemBase> extends MobRenderer<T, GolemModel<T>> {
 
     private final ResourceLocation texture;
-    private final ResourceLocation textureShutdown = new ResourceLocation(AdvancedGolems.MODID, "textures/entity/golem_shutdown.png");
+    private final ResourceLocation textureShutdown = AdvancedGolems.modRes("textures/entity/golem_shutdown.png");
 
     public GolemRenderer(EntityRendererProvider.Context context, ResourceLocation texture) {
         super(context, new GolemModel<>(context.bakeLayer(GolemModel.LAYER_LOCATION)), 0.25f);

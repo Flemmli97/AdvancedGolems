@@ -14,7 +14,7 @@ import io.github.flemmli97.tenshilib.client.model.BlockBenchAnimations;
 import io.github.flemmli97.tenshilib.client.model.ExtendedModel;
 import io.github.flemmli97.tenshilib.client.model.IItemArmModel;
 import io.github.flemmli97.tenshilib.client.model.ModelPartHandler;
-import net.minecraft.client.Minecraft;
+import io.github.flemmli97.tenshilib.client.render.RenderUtils;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -25,13 +25,12 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.HumanoidArm;
 import org.joml.Vector3f;
 
 public class GolemModel<T extends GolemBase> extends EntityModel<T> implements ExtendedModel, IItemArmModel {
 
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(AdvancedGolems.MODID, "golem_model"), "body");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(AdvancedGolems.modRes("golem_model"), "body");
 
     private final ModelPartHandler model;
     private final BlockBenchAnimations anim;
@@ -44,7 +43,7 @@ public class GolemModel<T extends GolemBase> extends EntityModel<T> implements E
 
     public GolemModel(ModelPart root) throws NullPointerException {
         this.model = new ModelPartHandler(root.getChild("body"), "body");
-        this.anim = AnimationManager.getInstance().getAnimation(new ResourceLocation(AdvancedGolems.MODID, "golem"));
+        this.anim = AnimationManager.getInstance().getAnimation(AdvancedGolems.modRes("golem"));
         this.head = this.model.getPart("head");
         this.leftArm = this.model.getPart("armLeft");
         this.rightArm = this.model.getPart("armRight");
@@ -91,7 +90,7 @@ public class GolemModel<T extends GolemBase> extends EntityModel<T> implements E
     public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
         this.jetPack.visible = entity.canFlyFlag();
         this.model.resetPoses();
-        float partialTicks = Minecraft.getInstance().getFrameTime();
+        float partialTicks = RenderUtils.getPartialTicks(entity);
         if (limbSwingAmount > 0.08 && !entity.isShutdown()) {
             this.anim.doAnimation(this, "move", entity.tickCount, partialTicks);
         }
@@ -102,7 +101,7 @@ public class GolemModel<T extends GolemBase> extends EntityModel<T> implements E
     }
 
     @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
         poseStack.pushPose();
         this.adjustModel(poseStack);
         this.model.getMainPart().render(poseStack, buffer, packedLight, packedOverlay);

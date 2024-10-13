@@ -8,7 +8,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
-import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
@@ -101,7 +100,7 @@ public class GolemAttackGoal<T extends GolemBase> extends AnimatedAttackGoal<T> 
                     if (crossbow)
                         GolemBase.rangedCrossbow(this.attacker, this.target, 1.2f);
                     else
-                        GolemBase.rangedArrow(this.attacker, this.target, BowItem.getPowerForTime(this.attacker.getTicksUsingItem()));
+                        GolemBase.rangedArrow(this.attacker, this.target);
                 } else
                     this.attacker.stopUsingItem();
             }

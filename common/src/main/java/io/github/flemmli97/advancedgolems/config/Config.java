@@ -46,7 +46,7 @@ public class Config {
         private Item item;
 
         public ItemConfig(String id) {
-            this(id.isEmpty() ? null : new ResourceLocation(id));
+            this(id.isEmpty() ? null : ResourceLocation.parse(id));
         }
 
         public ItemConfig(ResourceLocation id) {

@@ -12,15 +12,14 @@ import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemProperties;
-import net.minecraft.resources.ResourceLocation;
 
 public class AdvancedGolemsFabricClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        EntityRendererRegistry.register(ModEntities.GOLEM.get(), ctx -> new GolemRenderer<>(ctx, new ResourceLocation(AdvancedGolems.MODID, "textures/entity/golem.png")));
+        EntityRendererRegistry.register(ModEntities.GOLEM.get(), ctx -> new GolemRenderer<>(ctx, AdvancedGolems.modRes("textures/entity/golem.png")));
         EntityModelLayerRegistry.registerModelLayer(GolemModel.LAYER_LOCATION, GolemModel::createBodyLayer);
         WorldRenderEvents.END.register(ctx -> ClientRenderHandler.render(ctx.matrixStack(), Minecraft.getInstance().renderBuffers().crumblingBufferSource()));
-        ItemProperties.register(ModItems.GOLEM_CONTROLLER.get(), new ResourceLocation(AdvancedGolems.MODID, "controller_mode"), ClientRenderHandler.controllerProps());
+        ItemProperties.register(ModItems.GOLEM_CONTROLLER.get(), AdvancedGolems.modRes("controller_mode"), ClientRenderHandler.controllerProps());
     }
 }

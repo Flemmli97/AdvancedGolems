@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 public class EventCalls {
 
     private static final Supplier<Map<ResourceKey<CreativeModeTab>, Consumer<Consumer<Supplier<? extends ItemLike>>>>> CREATIVE_TAB_CONTENTS = Suppliers.memoize(() ->
-            Map.of(ResourceKey.create(Registries.CREATIVE_MODE_TAB, new ResourceLocation("tools_and_utilities")), c -> ModItems.ITEMS.getEntries().forEach(c)));
+            Map.of(ResourceKey.create(Registries.CREATIVE_MODE_TAB, ResourceLocation.parse("tools_and_utilities")), c -> ModItems.ITEMS.getEntries().forEach(c)));
 
     public static boolean canProjectileHit(Projectile proj, EntityHitResult hitResult) {
         if (proj.getOwner() instanceof GolemBase golem && golem.upgrades.usesPiercingProjectiles())

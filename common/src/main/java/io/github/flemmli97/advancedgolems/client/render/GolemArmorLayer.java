@@ -74,18 +74,14 @@ public class GolemArmorLayer<T extends GolemBase, M extends GolemModel<T>, A ext
             ArmorMaterial armorMaterial = armor.getMaterial().value();
             int color = itemStack.is(ItemTags.DYEABLE) ? DyedItemColor.getOrDefault(itemStack, -6265536) : -1;
             boolean inner = equipmentSlot == EquipmentSlot.LEGS;
-            float r, g, b;
             for (ArmorMaterial.Layer layer : armorMaterial.layers()) {
+                int color2;
                 if (layer.dyeable() && color != -1) {
-                    r = (float) FastColor.ARGB32.red(color) / 255.0F;
-                    g = (float) FastColor.ARGB32.green(color) / 255.0F;
-                    b = (float) FastColor.ARGB32.blue(color) / 255.0F;
+                    color2 = color;
                 } else {
-                    r = 1.0F;
-                    g = 1.0F;
-                    b = 1.0F;
+                    color2 = FastColor.ARGB32.color(255, 255, 255);
                 }
-                this.renderModel(poseStack, buffer, light, model, r, g, b, layer.texture(inner));
+                this.renderModel(poseStack, buffer, light, model, color2, layer.texture(inner));
             }
             ArmorTrim armorTrim = itemStack.get(DataComponents.TRIM);
             if (armorTrim != null) {
@@ -115,18 +111,18 @@ public class GolemArmorLayer<T extends GolemBase, M extends GolemModel<T>, A ext
         }
     }
 
-    private void renderModel(PoseStack poseStack, MultiBufferSource buffer, int packedLight, Model armorItem, float red, float green, float blue, ResourceLocation texture) {
+    private void renderModel(PoseStack poseStack, MultiBufferSource buffer, int packedLight, Model armorItem, int color, ResourceLocation texture) {
         VertexConsumer vertexConsumer = buffer.getBuffer(RenderType.armorCutoutNoCull(texture));
-        armorItem.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, red, green, blue, 1.0F);
+        armorItem.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, color);
     }
 
     private void renderTrim(Holder<ArmorMaterial> armorMaterial, PoseStack poseStack, MultiBufferSource buffer, int packedLight, ArmorTrim trim, Model model, boolean innerTexture) {
         TextureAtlasSprite textureAtlasSprite = this.armorTrimAtlas.getSprite(innerTexture ? trim.innerTexture(armorMaterial) : trim.outerTexture(armorMaterial));
         VertexConsumer vertexConsumer = textureAtlasSprite.wrap(buffer.getBuffer(Sheets.armorTrimsSheet(((TrimPattern) trim.pattern().value()).decal())));
-        model.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+        model.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, 0xffffffff);
     }
 
     private void renderGlint(PoseStack poseStack, MultiBufferSource buffer, int packedLight, Model model) {
-        model.renderToBuffer(poseStack, buffer.getBuffer(RenderType.armorEntityGlint()), packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+        model.renderToBuffer(poseStack, buffer.getBuffer(RenderType.armorEntityGlint()), packedLight, OverlayTexture.NO_OVERLAY, 0xffffffff);
     }
 }

@@ -1,5 +1,6 @@
 package io.github.flemmli97.advancedgolems;
 
+import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -10,4 +11,7 @@ public class AdvancedGolems {
 
     public static boolean polymer;
 
+    public static ResourceLocation modRes(String path) {
+        return ResourceLocation.fromNamespaceAndPath(MODID, path);
+    }
 }

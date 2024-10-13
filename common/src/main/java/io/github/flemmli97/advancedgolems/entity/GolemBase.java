@@ -5,8 +5,10 @@ import io.github.flemmli97.advancedgolems.config.Config;
 import io.github.flemmli97.advancedgolems.entity.ai.GoBackHomeGoal;
 import io.github.flemmli97.advancedgolems.entity.ai.GolemAttackGoal;
 import io.github.flemmli97.advancedgolems.entity.ai.NearestTargetInRestriction;
+import io.github.flemmli97.advancedgolems.items.BowHelper;
 import io.github.flemmli97.advancedgolems.items.GolemSpawnItem;
 import io.github.flemmli97.advancedgolems.mixin.LivingEntityAccessor;
+import io.github.flemmli97.advancedgolems.mixin.ProjectileWeaponItemAccessor;
 import io.github.flemmli97.advancedgolems.registry.ModEntities;
 import io.github.flemmli97.advancedgolems.registry.ModItems;
 import io.github.flemmli97.tenshilib.api.entity.AnimatedAction;
@@ -56,7 +58,7 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.CrossbowItem;
@@ -66,13 +68,13 @@ import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.component.ChargedProjectiles;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -313,7 +315,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         if (stack.getItem() == Items.TOTEM_OF_UNDYING) {
             return EquipmentSlot.OFFHAND;
         }
-        return Mob.getEquipmentSlotForItem(stack);
+        return this.getEquipmentSlotForItem(stack);
     }
 
     @Override
@@ -384,7 +386,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
                 f = 1.0f;
             }
             for (EquipmentSlot slot : EquipmentSlot.values()) {
-                if (slot.getType() != EquipmentSlot.Type.ARMOR)
+                if (slot.getType() != EquipmentSlot.Type.HUMANOID_ARMOR)
                     continue;
                 this.damageItemArmor(damageSource, slot, f);
             }
@@ -578,19 +580,44 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         return this.entityData.get(CAN_FLY);
     }
 
-    public static void rangedArrow(Mob mob, LivingEntity target, float strength) {
-        ItemStack itemStack = mob.getProjectile(mob.getItemInHand(ProjectileUtil.getWeaponHoldingHand(mob, Items.BOW)));
-        AbstractArrow abstractArrow = ProjectileUtil.getMobArrow(mob, itemStack, strength);
-        double d = target.getX() - mob.getX();
-        double e = target.getY(0.3333333333333333) - abstractArrow.getY();
-        double g = target.getZ() - mob.getZ();
-        double h = Math.sqrt(d * d + g * g);
-        abstractArrow.shoot(d, e + h * 0.1, g, 2.7f + mob.getRandom().nextFloat() * 0.4f, 14 - mob.level().getDifficulty().getId() * 4);
-        abstractArrow.setCritArrow(true);
-        mob.playSound(SoundEvents.SKELETON_SHOOT, 1.0f, 1.0f / (mob.getRandom().nextFloat() * 0.4f + 0.8f));
-        mob.level().addFreshEntity(abstractArrow);
-        if (!itemStack.isEmpty() && EnchantmentHelper.getEnchantmentLevel(Enchantments.INFINITY, mob) == 0)
-            itemStack.shrink(1);
+    public static void rangedArrow(Mob mob, LivingEntity target) {
+        InteractionHand hand = mob.getMainHandItem().getItem() instanceof ProjectileWeaponItem ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+        ItemStack weapon = mob.getItemInHand(hand);
+        if (!(weapon.getItem() instanceof ProjectileWeaponItem projectileWeaponItem))
+            return;
+        ItemStack arrowItem = mob.getProjectile(weapon);
+        if (arrowItem.isEmpty())
+            return;
+        List<ItemStack> list = BowHelper.doDraw(weapon, arrowItem, mob);
+        if (!list.isEmpty()) {
+            shoot((ServerLevel) mob.level(), mob, hand, weapon, list, (ProjectileWeaponItemAccessor) projectileWeaponItem, target);
+            mob.playSound(SoundEvents.SKELETON_SHOOT, 1.0f, 1.0f / (mob.getRandom().nextFloat() * 0.4f + 0.8f));
+        }
+    }
+
+    private static void shoot(ServerLevel level, LivingEntity shooter, InteractionHand hand, ItemStack weaponStack, List<ItemStack> projectileItems,
+                              ProjectileWeaponItemAccessor weapon, LivingEntity target) {
+        float spread = EnchantmentHelper.processProjectileSpread(level, weaponStack, shooter, 0.0f);
+        float angleInc = projectileItems.size() == 1 ? 0.0f : 2.0f * spread / (float) (projectileItems.size() - 1);
+        float angleOffset = (float) ((projectileItems.size() - 1) % 2) * angleInc / 2.0f;
+        float i = 1.0f;
+        for (int j = 0; j < projectileItems.size(); ++j) {
+            ItemStack itemStack = projectileItems.get(j);
+            if (itemStack.isEmpty()) continue;
+            float angle = angleOffset + i * (float) ((j + 1) / 2) * angleInc;
+            i = -i;
+            Projectile projectile = weapon.createProjectileInv(level, shooter, weaponStack, itemStack, true);
+            double dX = target.getX() - shooter.getX();
+            double e = target.getY(0.3333333333333333) - projectile.getY();
+            double dZ = target.getZ() - shooter.getZ();
+            double h = Math.sqrt(dX * dX + dZ * dZ);
+            projectile.shoot(dX, e + h * 0.1 + angle, dZ, 1.7f + shooter.getRandom().nextFloat() * 0.4f, 14 - shooter.level().getDifficulty().getId() * 4);
+            level.addFreshEntity(projectile);
+            if (Config.shouldGearTakeDamage) {
+                weaponStack.hurtAndBreak(weapon.getDurabilityUseInv(itemStack), shooter, LivingEntity.getSlotForHand(hand));
+                if (weaponStack.isEmpty()) break;
+            }
+        }
     }
 
     public static void rangedCrossbow(Mob mob, LivingEntity target, float strength) {
