@@ -1,3 +1,7 @@
+Advanced Golems 1.5.3
+================
+- Update for library changes. AI will be a bit different
+
 Advanced Golems 1.5.2
 ================
 - Update for library changes
