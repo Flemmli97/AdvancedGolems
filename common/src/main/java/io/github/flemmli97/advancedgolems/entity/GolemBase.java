@@ -3,7 +3,9 @@ package io.github.flemmli97.advancedgolems.entity;
 import com.mojang.authlib.GameProfile;
 import io.github.flemmli97.advancedgolems.config.Config;
 import io.github.flemmli97.advancedgolems.entity.ai.GoBackHomeGoal;
-import io.github.flemmli97.advancedgolems.entity.ai.GolemAttackGoal;
+import io.github.flemmli97.advancedgolems.entity.ai.GolemMoveControl;
+import io.github.flemmli97.advancedgolems.entity.ai.GolemRangedMover;
+import io.github.flemmli97.advancedgolems.entity.ai.GolemRangedStrafing;
 import io.github.flemmli97.advancedgolems.entity.ai.NearestTargetInRestriction;
 import io.github.flemmli97.advancedgolems.items.GolemSpawnItem;
 import io.github.flemmli97.advancedgolems.registry.ModEntities;
@@ -12,6 +14,12 @@ import io.github.flemmli97.tenshilib.api.entity.AnimatedAction;
 import io.github.flemmli97.tenshilib.api.entity.AnimationHandler;
 import io.github.flemmli97.tenshilib.api.entity.IAnimated;
 import io.github.flemmli97.tenshilib.common.entity.EntityUtil;
+import io.github.flemmli97.tenshilib.common.entity.ai.animated.AnimatedAttackGoal;
+import io.github.flemmli97.tenshilib.common.entity.ai.animated.GoalAttackAction;
+import io.github.flemmli97.tenshilib.common.entity.ai.animated.IdleAction;
+import io.github.flemmli97.tenshilib.common.entity.ai.animated.impl.DoNothingRunner;
+import io.github.flemmli97.tenshilib.common.entity.ai.animated.impl.MoveToTargetRunner;
+import io.github.flemmli97.tenshilib.common.entity.ai.animated.impl.WrappedRunner;
 import io.github.flemmli97.tenshilib.common.utils.MathUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -26,7 +34,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
+import net.minecraft.util.random.WeightedEntry;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -38,7 +46,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.control.FlyingMoveControl;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
@@ -48,6 +55,7 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomFlyingGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.AbstractGolem;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -58,6 +66,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -71,6 +80,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -84,14 +94,49 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     protected static final EntityDataAccessor<Optional<UUID>> OWNER_UUID = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.OPTIONAL_UUID);
     private static final EntityDataAccessor<Boolean> SHUT_DOWN = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.BOOLEAN);
 
-    public static final AnimatedAction melee1 = new AnimatedAction(Mth.ceil(0.68 * 20), (int) (0.48 * 20), "melee1");
-    public static final AnimatedAction melee2 = new AnimatedAction(Mth.ceil(0.68 * 20), (int) (0.48 * 20), "melee2");
-    public static final AnimatedAction rangedAttack = new AnimatedAction(25, 20, "ranged");
-    public static final AnimatedAction rangedCrossbow = new AnimatedAction(30, 25, "ranged_crossbow");
-    public static final AnimatedAction shutdownAction = AnimatedAction.builder(36, "shutdown").marker(1).infinite().build();
-    public static final AnimatedAction restart = new AnimatedAction(24, 1, "restart");
+    public static final AnimatedAction MELEE_1 = AnimatedAction.builder(0.64, "melee1").marker("attack", 0.48).build();
+    public static final AnimatedAction MELEE_2 = AnimatedAction.builder(0.64, "melee2").marker("attack", 0.48).build();
+    public static final AnimatedAction RANGED_ATTACK = AnimatedAction.builder(1.4, "ranged").marker("attack", 1).build();
+    public static final AnimatedAction RANGED_CROSSBOW = AnimatedAction.builder(1.7, "ranged_crossbow").marker("attack", 1.5).build();
+    public static final AnimatedAction SHUTDOWN = AnimatedAction.builder(1.8, "shutdown").infinite().build();
+    public static final AnimatedAction RESTART = new AnimatedAction(1.2, "restart");
 
-    public static final AnimatedAction[] anims = new AnimatedAction[]{melee1, melee2, rangedAttack, shutdownAction, restart};
+    public static final AnimatedAction[] ANIMS = new AnimatedAction[]{MELEE_1, MELEE_2, RANGED_ATTACK, RANGED_CROSSBOW, SHUTDOWN, RESTART};
+
+    public static final List<WeightedEntry.Wrapper<GoalAttackAction<GolemBase>>> ATTACKS = List.of(
+            WeightedEntry.wrap(new GoalAttackAction<GolemBase>(GolemBase.MELEE_1)
+                    .cooldown(e -> e.getRandom().nextInt(20) + 10)
+                    .withCondition(((goal, target, prev) -> AttackAIType.from(goal.attacker) == AttackAIType.MELEE))
+                    .prepare(() -> new WrappedRunner<>(new MoveToTargetRunner<>(1, 1.5))), 5),
+            WeightedEntry.wrap(new GoalAttackAction<GolemBase>(GolemBase.MELEE_2)
+                    .cooldown(e -> e.getRandom().nextInt(20) + 10)
+                    .withCondition(((goal, target, prev) -> AttackAIType.from(goal.attacker) == AttackAIType.MELEE))
+                    .prepare(() -> new WrappedRunner<>(new MoveToTargetRunner<>(1, 1.5))), 5),
+            WeightedEntry.wrap(new GoalAttackAction<GolemBase>(GolemBase.RANGED_ATTACK)
+                    .cooldown(e -> e.getRandom().nextInt(20) + 10)
+                    .withCondition(((goal, target, prev) -> AttackAIType.from(goal.attacker) == AttackAIType.BOW))
+                    .prepare(() -> new WrappedRunner<>(new GolemRangedMover<>(7, 16))), 2),
+            WeightedEntry.wrap(new GoalAttackAction<GolemBase>(GolemBase.RANGED_ATTACK)
+                    .cooldown(e -> e.getRandom().nextInt(20) + 10)
+                    .withCondition(((goal, target, prev) -> AttackAIType.from(goal.attacker) == AttackAIType.BOW))
+                    .prepare(() -> new WrappedRunner<>(new DoNothingRunner<>(true))), 6),
+            WeightedEntry.wrap(new GoalAttackAction<GolemBase>(GolemBase.RANGED_CROSSBOW)
+                    .cooldown(e -> e.getRandom().nextInt(20) + 10)
+                    .withCondition(((goal, target, prev) -> AttackAIType.from(goal.attacker) == AttackAIType.CROSSBOW))
+                    .prepare(() -> new WrappedRunner<>(new GolemRangedMover<>(7, 16))), 5)
+    );
+    public static final List<WeightedEntry.Wrapper<IdleAction<GolemBase>>> IDLE_ACTIONS = List.of(
+            WeightedEntry.wrap(new IdleAction<GolemBase>(() -> new MoveToTargetRunner<>(1, 0.5))
+                    .withCondition(((goal, target) -> AttackAIType.from(goal.attacker) == AttackAIType.MELEE)), 10),
+            WeightedEntry.wrap(new IdleAction<>(() -> new GolemRangedStrafing<>(15, 0.5f))
+                    .duration(e -> e.getRandom().nextInt(20) + 15)
+                    .withCondition(((goal, target) -> {
+                        AttackAIType type = AttackAIType.from(goal.attacker);
+                        return type == AttackAIType.BOW || type == AttackAIType.CROSSBOW;
+                    })), 10)
+    );
+
+    public final AnimatedAttackGoal<GolemBase> attackGoal = new AnimatedAttackGoal<>(this, ATTACKS, IDLE_ACTIONS);
 
     private final Predicate<LivingEntity> pred = e -> e instanceof Enemy && !(e instanceof Creeper);
 
@@ -100,8 +145,6 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     private int combatCounter;
     private GolemState state = GolemState.AGGRESSIVE;
     private int regenTicker = 0, enrageCooldown;
-
-    public GolemAttackGoal<GolemBase> attackGoal = new GolemAttackGoal<>(this);
 
     protected MoveTowardsRestrictionGoal moveRestriction = new MoveTowardsRestrictionGoal(this, 1.0D);
 
@@ -113,15 +156,31 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     protected WaterAvoidingRandomStrollGoal wander = new WaterAvoidingRandomStrollGoal(this, 0.6D);
     protected WaterAvoidingRandomFlyingGoal wanderFlying = new WaterAvoidingRandomFlyingGoal(this, 1);
 
-    private final AnimationHandler<GolemBase> animationHandler = new AnimationHandler<>(this, anims);
+    private final AnimationHandler<GolemBase> animationHandler = new AnimationHandler<>(this, ANIMS).withChangeListener(anim -> {
+        if (anim != null && anim.is(RANGED_ATTACK, RANGED_CROSSBOW)) {
+            this.startUsingItem(InteractionHand.MAIN_HAND);
+        }
+        return false;
+    });
 
     public final GolemUpgradesHandler upgrades = new GolemUpgradesHandler(this);
     private LivingEntity owner;
+
+    private final PathNavigation groundNavigator, flyingNavigator;
+    private int hoverTime, hoverCooldown;
 
     public GolemBase(EntityType<? extends GolemBase> entityType, Level level) {
         super(entityType, level);
         this.updateAttributes();
         this.updateState(this.state);
+        this.flyingNavigator = new FlyingPathNavigation(this, this.level) {
+            @Override
+            public boolean isStableDestination(BlockPos blockPos) {
+                return true;
+            }
+        };
+        this.groundNavigator = this.navigation;
+        this.moveControl = new GolemMoveControl(this);
     }
 
     public GolemBase(Level world, BlockPos pos) {
@@ -417,6 +476,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     public void aiStep() {
         super.aiStep();
         this.getAnimationHandler().tick();
+        this.getAnimationHandler().runIfNotNull(this::runAction);
         if (!this.level.isClientSide) {
             if (this.combatCounter > 0)
                 this.combatCounter--;
@@ -451,6 +511,22 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
                 this.level.getEntities(EntityTypeTest.forClass(Mob.class), aabb, m -> this.enragerTest.test(this, m)).forEach(target);
                 this.enrageCooldown = 20 + this.random.nextInt(40);
             }
+
+            if (this.canFlyFlag()) {
+                if (this.getTarget() != null) {
+                    if (--this.hoverTime >= 0) {
+                        if (this.hoverTime == 0)
+                            this.setFlying(false, true);
+                    } else if (--this.hoverCooldown < 0) {
+                        this.hoverTime = 150 + this.getRandom().nextInt(50) + this.upgrades.flyUpgrades() * 30;
+                        this.hoverCooldown = 60;
+                        this.setFlying(true, true);
+                    }
+                } else {
+                    --this.hoverCooldown;
+                    this.setFlying(true, false);
+                }
+            }
         } else {
             if (!this.isShutdown()) {
                 if (this.random.nextBoolean()) {
@@ -464,6 +540,51 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
                     this.level.addParticle(ParticleTypes.FLAME, this.getX() + off[0], this.getY() + 4 / 16f, this.getZ() + off[1], 0.0, 0.0, 0.0);
                 }
             }
+        }
+    }
+
+    private void runAction(AnimatedAction anim) {
+        if (this.getTarget() != null) {
+            this.lookAt(this.getTarget(), 60, 90);
+        }
+        if (anim.is(MELEE_1, MELEE_2)) {
+            this.getNavigation().stop();
+            LivingEntity target = this.getTarget();
+            if (anim.isAt("attack") && target != null) {
+                double dist = target.distanceToSqr(this);
+                if (dist <= this.getMeleeAttackRangeSqr(target) * 3) {
+                    this.doHurtTarget(target);
+                }
+            }
+        } else if (anim.is(RANGED_ATTACK)) {
+            LivingEntity target = this.getTarget();
+            boolean canSee = target != null && this.getSensing().hasLineOfSight(target);
+            if (anim.isAt("attack")) {
+                if (canSee) {
+                    this.releaseUsingItem();
+                    GolemBase.rangedArrow(this, target, BowItem.getPowerForTime(this.getTicksUsingItem()));
+                } else
+                    this.stopUsingItem();
+            }
+        } else if (anim.is(RANGED_CROSSBOW)) {
+            LivingEntity target = this.getTarget();
+            boolean canSee = target != null && this.getSensing().hasLineOfSight(target);
+            if (anim.isAt("attack")) {
+                if (canSee) {
+                    this.useItemRemaining = 0;
+                    this.releaseUsingItem();
+                    GolemBase.rangedCrossbow(this, target, 3.15F);
+                } else
+                    this.stopUsingItem();
+            }
+        }
+    }
+
+    @Override
+    public void setTarget(@Nullable LivingEntity target) {
+        super.setTarget(target);
+        if (target != null) {
+            this.setFlying(this.hoverTime >= 0, true);
         }
     }
 
@@ -523,21 +644,8 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         this.shutDownGolem(compoundTag.getBoolean("ShutDown"));
     }
 
-    public boolean hasRangedWeapon() {
-        return this.getMainHandItem().getItem() instanceof ProjectileWeaponItem;
-    }
-
-    public AnimatedAction getAttack(boolean ranged) {
-        if (ranged) {
-            if (this.getMainHandItem().getItem() instanceof CrossbowItem)
-                return rangedCrossbow;
-            return rangedAttack;
-        }
-        return this.getRandom().nextBoolean() ? melee1 : melee2;
-    }
-
     public Goal wanderGoal() {
-        if (this.upgrades.canFly()) {
+        if (this.canFlyFlag()) {
             return this.wanderFlying;
         }
         return this.wander;
@@ -554,18 +662,34 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         return this.animationHandler;
     }
 
-    public void updateToFlyingPathing() {
-        if (this.level.isClientSide || !this.upgrades.canFly())
+    public void setFlying(boolean flag, boolean reset) {
+        if (!this.upgrades.canFly())
             return;
-        this.navigation = new FlyingPathNavigation(this, this.level) {
+        if (flag ? this.navigation == this.flyingNavigator : this.navigation == this.groundNavigator)
+            return;
+        this.setNoGravity(flag);
+        if (reset) {
+            this.groundNavigator.stop();
+            this.flyingNavigator.stop();
+        }
+        if (flag) {
+            this.navigation = this.flyingNavigator;
+        } else {
+            this.navigation = this.groundNavigator;
+        }
+    }
 
-            @Override
-            public boolean isStableDestination(BlockPos blockPos) {
-                return true;
-            }
-        };
-        this.moveControl = new FlyingMoveControl(this, 20, true);
-        this.entityData.set(CAN_FLY, true);
+    public boolean isCurrentlyHovering() {
+        return this.canFlyFlag() && (this.hoverTime > 0 || this.getTarget() == null);
+    }
+
+    public void updateCanFlyingState() {
+        if (this.level.isClientSide)
+            return;
+        this.entityData.set(CAN_FLY, this.upgrades.canFly());
+        this.goalSelector.removeGoal(this.wander);
+        this.goalSelector.removeGoal(this.wanderFlying);
+        this.updateState(this.state);
     }
 
     public boolean canFlyFlag() {
@@ -672,10 +796,8 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
             if (key == SHUT_DOWN) {
                 //This case only happens during load. At that point we want to skip right to the end of the animation
                 if (this.entityData.get(SHUT_DOWN) && !this.getAnimationHandler().hasAnimation()) {
-                    this.getAnimationHandler().setAnimation(shutdownAction);
-                    AnimatedAction anim = this.getAnimationHandler().getAnimation();
-                    while (anim.getTick() < anim.getLength())
-                        anim.tick();
+                    this.getAnimationHandler().setAnimation(SHUTDOWN);
+                    this.getAnimationHandler().finishAnimation();
                 }
             }
         }
@@ -686,12 +808,27 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         if (flag) {
             this.setTarget(null);
             this.getNavigation().stop();
-            this.getAnimationHandler().setAnimation(shutdownAction);
+            this.getAnimationHandler().setAnimation(SHUTDOWN);
             this.setShiftKeyDown(false);
             this.setSprinting(false);
             this.unRide();
         } else {
-            this.getAnimationHandler().setAnimation(restart);
+            this.getAnimationHandler().setAnimation(RESTART);
+        }
+    }
+
+    enum AttackAIType {
+        MELEE,
+        BOW,
+        CROSSBOW;
+
+        static AttackAIType from(LivingEntity entity) {
+            ItemStack main = entity.getMainHandItem();
+            if (main.getItem() instanceof BowItem)
+                return BOW;
+            if (main.getItem() instanceof CrossbowItem)
+                return CROSSBOW;
+            return MELEE;
         }
     }
 }

@@ -21,8 +21,18 @@ repositories {
         name = "TenshiLib"
         url "https://gitlab.com/api/v4/projects/21830712/packages/maven"
     }
+    maven {
+        name = "CurseMaven"
+        url "https://www.cursemaven.com"
+    }
 }
 
 dependencies {
     modImplementation "io.github.flemmli97:tenshilib:${tenshilib_version}-forge"
+
+    modRuntimeOnly "curse.maven:mobbattle-268746:5780382"
+    modRuntimeOnly "curse.maven:dummy-225738:3820503"
+    modRuntimeOnly "curse.maven:spark-361579:3824951"
+
+    modRuntimeOnly "io.github.flemmli97:debugutils:1.18.2-1.0.1-forge"
 }

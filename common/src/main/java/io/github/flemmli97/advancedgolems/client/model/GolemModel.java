@@ -8,7 +8,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import io.github.flemmli97.advancedgolems.AdvancedGolems;
 import io.github.flemmli97.advancedgolems.entity.GolemBase;
-import io.github.flemmli97.tenshilib.api.entity.AnimatedAction;
 import io.github.flemmli97.tenshilib.client.AnimationManager;
 import io.github.flemmli97.tenshilib.client.model.BlockBenchAnimations;
 import io.github.flemmli97.tenshilib.client.model.ExtendedModel;
@@ -94,10 +93,7 @@ public class GolemModel<T extends GolemBase> extends EntityModel<T> implements E
         if (limbSwingAmount > 0.08 && !entity.isShutdown()) {
             this.anim.doAnimation(this, "move", entity.tickCount, partialTicks);
         }
-        AnimatedAction anim = entity.getAnimationHandler().getAnimation();
-        if (anim != null) {
-            this.anim.doAnimation(this, anim.getAnimationClient(), anim.getTick(), partialTicks);
-        }
+        this.anim.doAnimation(this, entity.getAnimationHandler(), partialTicks);
     }
 
     @Override

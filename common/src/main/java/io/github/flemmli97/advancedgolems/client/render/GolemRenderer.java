@@ -29,7 +29,7 @@ public class GolemRenderer<T extends GolemBase> extends MobRenderer<T, GolemMode
     public ResourceLocation getTextureLocation(T entity) {
         if (entity.isShutdown()) {
             AnimatedAction anim = entity.getAnimationHandler().getAnimation();
-            if (anim != null && anim.getID().equals(GolemBase.shutdownAction.getID()) && anim.getTick() >= anim.getLength())
+            if (anim != null && anim.getID().equals(GolemBase.SHUTDOWN.getID()) && anim.done(0))
                 return this.textureShutdown;
         }
         return this.texture;
@@ -38,12 +38,12 @@ public class GolemRenderer<T extends GolemBase> extends MobRenderer<T, GolemMode
     @Override
     public boolean shouldRender(T entity, Frustum camera, double camX, double camY, double camZ) {
         AnimatedAction anim = entity.getAnimationHandler().getAnimation();
-        if (anim != null && GolemBase.restart.getID().equals(anim.getID())) {
-            if (anim.getTick() > 10) {
-                if (anim.getTick() % 2 == 0)
+        if (anim != null && GolemBase.RESTART.getID().equals(anim.getID())) {
+            if (anim.isPast(0.5)) {
+                if (anim.getTick(1) % (anim.getSpeed() * 2) == 0)
                     return false;
             }
-            if (anim.getTick() % 3 == 0)
+            if (anim.getTick(1) % (anim.getSpeed() * 3) == 0)
                 return false;
         }
         return super.shouldRender(entity, camera, camX, camY, camZ);
