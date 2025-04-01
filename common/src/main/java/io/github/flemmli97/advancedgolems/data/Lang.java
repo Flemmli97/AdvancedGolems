@@ -50,7 +50,7 @@ public class Lang implements DataProvider {
         this.add("golem.owner.wrong.owner", "This is %s's golem");
 
         this.add("config.title.advancedgolems", "Advanced Golems Config");
-        this.add(ModEntities.golem.get().getDescriptionId(), "Golem");
+        this.add(ModEntities.GOLEM.get().getDescriptionId(), "Golem");
     }
 
     @Override

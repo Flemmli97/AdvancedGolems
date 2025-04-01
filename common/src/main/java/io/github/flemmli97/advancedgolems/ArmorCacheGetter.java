@@ -22,7 +22,7 @@ public class ArmorCacheGetter {
                         ARMOR_LOCATION_CACHE = (Map<String, ResourceLocation>) f.get(null);
                         break;
                     } catch (IllegalAccessException e) {
-                        e.printStackTrace();
+                        AdvancedGolems.LOGGER.error(e);
                     }
                 }
             }

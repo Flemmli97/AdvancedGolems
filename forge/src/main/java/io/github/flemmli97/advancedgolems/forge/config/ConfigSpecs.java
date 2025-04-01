@@ -6,8 +6,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class ConfigSpecs {
 
-    public static final ForgeConfigSpec commonSpec;
-    public static final ConfigSpecs conf;
+    public static final ForgeConfigSpec COMMON_SPEC;
+    public static final ConfigSpecs CONF;
 
     public final ForgeConfigSpec.DoubleValue golemHealth;
     public final ForgeConfigSpec.DoubleValue golemBaseAttack;
@@ -75,7 +75,7 @@ public class ConfigSpecs {
 
     static {
         Pair<ConfigSpecs, ForgeConfigSpec> specPair2 = new ForgeConfigSpec.Builder().configure(ConfigSpecs::new);
-        commonSpec = specPair2.getRight();
-        conf = specPair2.getLeft();
+        COMMON_SPEC = specPair2.getRight();
+        CONF = specPair2.getLeft();
     }
 }

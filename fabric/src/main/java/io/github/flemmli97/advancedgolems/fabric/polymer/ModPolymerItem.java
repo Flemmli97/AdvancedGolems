@@ -19,7 +19,7 @@ public abstract class ModPolymerItem implements PolymerItem {
     public ItemStack getPolymerItemStack(ItemStack itemStack, @Nullable ServerPlayer player) {
         ItemStack stack = PolymerItemUtils.createItemStack(itemStack, player);
         if (itemStack.getItem() instanceof GolemController) {
-            stack.getOrCreateTag().put("SkullOwner", PolymerUtils.createSkullOwner(GolemController.skullValues[GolemController.getMode(itemStack)]));
+            stack.getOrCreateTag().put("SkullOwner", PolymerUtils.createSkullOwner(GolemController.SKULL_VALUES[GolemController.getMode(itemStack)]));
         } else {
             stack.enchant(Enchantments.UNBREAKING, 1);
             stack.hideTooltipPart(ItemStack.TooltipPart.ENCHANTMENTS);

@@ -25,7 +25,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 public class AdvancedGolemsForge {
 
     public AdvancedGolemsForge() {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ConfigSpecs.commonSpec, AdvancedGolems.MODID + ".toml");
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ConfigSpecs.COMMON_SPEC, AdvancedGolems.MODID + ".toml");
         IEventBus modbus = FMLJavaModLoadingContext.get().getModEventBus();
         ModEntities.ENTITIES.registerContent();
         ModItems.ITEMS.registerContent();
@@ -40,11 +40,11 @@ public class AdvancedGolemsForge {
     }
 
     public static void attributeEvent(EntityAttributeCreationEvent event) {
-        event.put(ModEntities.golem.get(), GolemBase.createAttributes().build());
+        event.put(ModEntities.GOLEM.get(), GolemBase.createAttributes().build());
     }
 
     public static void configReload(ModConfigEvent event) {
-        if (event.getConfig().getSpec() == ConfigSpecs.commonSpec)
+        if (event.getConfig().getSpec() == ConfigSpecs.COMMON_SPEC)
             ConfigLoader.load();
     }
 

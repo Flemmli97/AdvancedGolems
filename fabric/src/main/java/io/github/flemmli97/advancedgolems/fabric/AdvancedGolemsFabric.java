@@ -42,6 +42,6 @@ public class AdvancedGolemsFabric implements ModInitializer {
 
 
     public static void registerAttributes() {
-        FabricDefaultAttributeRegistry.register(ModEntities.golem.get(), GolemBase.createAttributes());
+        FabricDefaultAttributeRegistry.register(ModEntities.GOLEM.get(), GolemBase.createAttributes());
     }
 }

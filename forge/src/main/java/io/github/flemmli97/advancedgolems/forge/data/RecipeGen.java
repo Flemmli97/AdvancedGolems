@@ -23,7 +23,7 @@ public class RecipeGen extends RecipeProvider {
                 .define('S', Items.IRON_SWORD)
                 .define('D', Items.PUMPKIN)
                 .define('G', Items.PAPER)
-                .define('I', AdvancedGolems.blackDyes)
+                .define('I', AdvancedGolems.BLACK_DYES)
                 .pattern("LIL")
                 .pattern("GDG")
                 .pattern("LSL")
@@ -41,7 +41,7 @@ public class RecipeGen extends RecipeProvider {
                 .save(consumer);
         ShapedRecipeBuilder.shaped(ModItems.GOLEM_BELL.get())
                 .define('B', Items.BELL)
-                .define('S', AdvancedGolems.rodsWooden)
+                .define('S', AdvancedGolems.RODS_WOODEN)
                 .pattern("  B")
                 .pattern(" S ")
                 .pattern("S  ")

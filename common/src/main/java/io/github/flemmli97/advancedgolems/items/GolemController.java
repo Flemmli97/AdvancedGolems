@@ -144,7 +144,7 @@ public class GolemController extends Item {
         stackTag.put(AdvancedGolems.MODID, tag);
     }
 
-    public static String[] skullValues = new String[]{
+    public static final String[] SKULL_VALUES = new String[]{
             //Mode 0
             "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTg4MzJjMTQ2NmM4NDFjYzc5ZDVmMTAyOTVkNDY0Mjc5OTY3OTc1YTI0NTFjN2E1MzNjNzk5Njg5NzQwOGJlYSJ9fX0=",
             //Mode 1

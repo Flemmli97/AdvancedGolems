@@ -10,11 +10,11 @@ import org.apache.logging.log4j.Logger;
 public class AdvancedGolems {
 
     public static final String MODID = "advancedgolems";
-    public static final Logger logger = LogManager.getLogger(AdvancedGolems.MODID);
+    public static final Logger LOGGER = LogManager.getLogger(AdvancedGolems.MODID);
 
     public static boolean polymer;
 
-    public static final TagKey<Item> blackDyes = PlatformUtils.INSTANCE.itemTag(new ResourceLocation("c", "black_dyes"));
-    public static final TagKey<Item> rodsWooden = PlatformUtils.INSTANCE.itemTag(new ResourceLocation("c", "wooden_rods"));
+    public static final TagKey<Item> BLACK_DYES = PlatformUtils.INSTANCE.itemTag(new ResourceLocation("c", "black_dyes"));
+    public static final TagKey<Item> RODS_WOODEN = PlatformUtils.INSTANCE.itemTag(new ResourceLocation("c", "wooden_rods"));
 
 }

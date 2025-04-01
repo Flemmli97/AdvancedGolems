@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 
 public class GolemUpgradesHandler {
 
-    private static final UUID itemMod = UUID.fromString("9e969e16-cf32-4f52-a22d-85d996556f98");
+    private static final UUID ITEM_MOD = UUID.fromString("9e969e16-cf32-4f52-a22d-85d996556f98");
 
     private final GolemBase golem;
 
@@ -99,8 +99,8 @@ public class GolemUpgradesHandler {
     private void modifyAtt(Attribute att, double val) {
         AttributeInstance inst = this.golem.getAttribute(att);
         if (inst != null) {
-            inst.removeModifier(itemMod);
-            inst.addPermanentModifier(new AttributeModifier(itemMod, "golem.modifier", val, AttributeModifier.Operation.ADDITION));
+            inst.removeModifier(ITEM_MOD);
+            inst.addPermanentModifier(new AttributeModifier(ITEM_MOD, "golem.modifier", val, AttributeModifier.Operation.ADDITION));
         }
     }
 

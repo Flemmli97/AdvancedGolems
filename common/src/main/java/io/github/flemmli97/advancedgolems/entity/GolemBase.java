@@ -184,7 +184,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     }
 
     public GolemBase(Level world, BlockPos pos) {
-        this(ModEntities.golem.get(), world);
+        this(ModEntities.GOLEM.get(), world);
         this.setPos(pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5);
         this.restrictTo(pos, Config.homeRadius);
     }
