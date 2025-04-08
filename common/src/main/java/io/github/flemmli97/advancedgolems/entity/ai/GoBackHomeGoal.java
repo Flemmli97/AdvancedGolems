@@ -1,6 +1,7 @@
 package io.github.flemmli97.advancedgolems.entity.ai;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -23,7 +24,7 @@ public class GoBackHomeGoal extends Goal {
         if (this.golem.hasRestriction() && this.golem.getRestrictCenter().distToCenterSqr(this.golem.position()) > 1 && this.golem.getTarget() == null) {
             BlockPos blockpos = this.golem.getRestrictCenter();
             if (blockpos.distToCenterSqr(this.golem.position()) >= 256) {
-                Vec3 vec3d = DefaultRandomPos.getPosTowards(this.golem, 16, 7, new Vec3(blockpos.getX(), blockpos.getY(), blockpos.getZ()), 1);
+                Vec3 vec3d = DefaultRandomPos.getPosTowards(this.golem, 16, 7, new Vec3(blockpos.getX(), blockpos.getY(), blockpos.getZ()), 90 * Mth.DEG_TO_RAD);
                 if (vec3d == null) {
                     return false;
                 } else {
