@@ -1,11 +1,11 @@
-package io.github.flemmli97.advancedgolems.forge;
+package io.github.flemmli97.advancedgolems.neoforge;
 
 import io.github.flemmli97.advancedgolems.AdvancedGolems;
 import io.github.flemmli97.advancedgolems.entity.GolemBase;
 import io.github.flemmli97.advancedgolems.events.EventCalls;
-import io.github.flemmli97.advancedgolems.forge.client.ClientInit;
-import io.github.flemmli97.advancedgolems.forge.config.ConfigLoader;
-import io.github.flemmli97.advancedgolems.forge.config.ConfigSpecs;
+import io.github.flemmli97.advancedgolems.neoforge.client.ClientInit;
+import io.github.flemmli97.advancedgolems.neoforge.config.ConfigLoader;
+import io.github.flemmli97.advancedgolems.neoforge.config.ConfigSpecs;
 import io.github.flemmli97.advancedgolems.registry.ModDataComponents;
 import io.github.flemmli97.advancedgolems.registry.ModEntities;
 import io.github.flemmli97.advancedgolems.registry.ModItems;
@@ -28,9 +28,9 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @Mod(value = AdvancedGolems.MODID)
-public class AdvancedGolemsForge {
+public class AdvancedGolemsNeoForge {
 
-    public AdvancedGolemsForge(IEventBus modBus) {
+    public AdvancedGolemsNeoForge(IEventBus modBus) {
         ModLoadingContext.get().getActiveContainer().registerConfig(ModConfig.Type.COMMON, ConfigSpecs.COMMON_SPEC, AdvancedGolems.MODID + ".toml");
         ModEntities.ENTITIES.registerContent(modBus);
         ModItems.ITEMS.registerContent(modBus);
@@ -40,10 +40,10 @@ public class AdvancedGolemsForge {
             modBus.addListener(ClientInit::layerRegister);
             NeoForge.EVENT_BUS.addListener(ClientInit::renderLast);
         }
-        modBus.addListener(AdvancedGolemsForge::configReload);
-        modBus.addListener(AdvancedGolemsForge::attributeEvent);
-        modBus.addListener(AdvancedGolemsForge::creativeTabRegister);
-        NeoForge.EVENT_BUS.addListener(AdvancedGolemsForge::projectileEvent);
+        modBus.addListener(AdvancedGolemsNeoForge::configReload);
+        modBus.addListener(AdvancedGolemsNeoForge::attributeEvent);
+        modBus.addListener(AdvancedGolemsNeoForge::creativeTabRegister);
+        NeoForge.EVENT_BUS.addListener(AdvancedGolemsNeoForge::projectileEvent);
     }
 
     public static void attributeEvent(EntityAttributeCreationEvent event) {

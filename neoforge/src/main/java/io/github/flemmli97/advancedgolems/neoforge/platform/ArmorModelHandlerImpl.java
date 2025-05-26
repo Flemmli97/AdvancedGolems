@@ -1,4 +1,4 @@
-package io.github.flemmli97.advancedgolems.forge.platform;
+package io.github.flemmli97.advancedgolems.neoforge.platform;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.flemmli97.advancedgolems.platform.ArmorModelHandler;

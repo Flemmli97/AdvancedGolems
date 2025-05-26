@@ -10,7 +10,7 @@
       "item": "minecraft:paper"
     },
     "I": {
-      "tag": "c:black_dyes"
+      "tag": "c:dyes/black"
     },
     "L": {
       "item": "minecraft:lapis_lazuli"
@@ -25,7 +25,7 @@
     "LSL"
   ],
   "result": {
-    "item": "advancedgolems:golem_spawner"
-  },
-  "show_notification": true
+    "count": 1,
+    "id": "advancedgolems:golem_spawner"
+  }
 }

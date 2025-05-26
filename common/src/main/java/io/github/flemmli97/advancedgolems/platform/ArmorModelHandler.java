@@ -13,7 +13,7 @@ public interface ArmorModelHandler {
 
     ArmorModelHandler INSTANCE = InitUtil.getPlatformInstance(ArmorModelHandler.class,
             "io.github.flemmli97.advancedgolems.fabric.platform.ArmorModelHandlerImpl",
-            "io.github.flemmli97.advancedgolems.forge.platform.ArmorModelHandlerImpl");
+            "io.github.flemmli97.advancedgolems.neoforge.platform.ArmorModelHandlerImpl");
 
     <T extends LivingEntity, A extends HumanoidModel<T>> Model getModel(PoseStack poseStack, MultiBufferSource multiBufferSource, T entity, ItemStack itemStack, EquipmentSlot equipmentSlot, int light, A humanoidModel);
 }

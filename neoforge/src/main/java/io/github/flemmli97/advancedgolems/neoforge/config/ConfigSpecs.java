@@ -1,4 +1,4 @@
-package io.github.flemmli97.advancedgolems.forge.config;
+package io.github.flemmli97.advancedgolems.neoforge.config;
 
 import io.github.flemmli97.advancedgolems.config.Config;
 import net.neoforged.fml.config.IConfigSpec;

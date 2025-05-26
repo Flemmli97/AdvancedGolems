@@ -1,4 +1,4 @@
-package io.github.flemmli97.advancedgolems.forge.data;
+package io.github.flemmli97.advancedgolems.neoforge.data;
 
 import io.github.flemmli97.advancedgolems.AdvancedGolems;
 import io.github.flemmli97.advancedgolems.registry.ModItems;

@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "minecraft:bell"
-            ]
+            "items": "minecraft:bell"
           }
         ]
       },
@@ -22,14 +20,12 @@
   },
   "requirements": [
     [
-      "golem_bell",
-      "has_the_recipe"
+      "has_the_recipe", "golem_bell"
     ]
   ],
   "rewards": {
     "recipes": [
       "advancedgolems:golem_bell"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "minecraft:pumpkin"
-            ]
+            "items": "minecraft:pumpkin"
           }
         ]
       },
@@ -22,14 +20,12 @@
   },
   "requirements": [
     [
-      "golem_spawner",
-      "has_the_recipe"
+      "has_the_recipe", "golem_spawner"
     ]
   ],
   "rewards": {
     "recipes": [
       "advancedgolems:golem_spawner"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

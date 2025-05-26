@@ -16,7 +16,7 @@
     " S "
   ],
   "result": {
-    "item": "advancedgolems:golem_control"
-  },
-  "show_notification": true
+    "count": 1,
+    "id": "advancedgolems:golem_control"
+  }
 }

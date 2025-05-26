@@ -1,4 +1,4 @@
-package io.github.flemmli97.advancedgolems.forge.client;
+package io.github.flemmli97.advancedgolems.neoforge.client;
 
 import io.github.flemmli97.advancedgolems.AdvancedGolems;
 import io.github.flemmli97.advancedgolems.client.ClientRenderHandler;
