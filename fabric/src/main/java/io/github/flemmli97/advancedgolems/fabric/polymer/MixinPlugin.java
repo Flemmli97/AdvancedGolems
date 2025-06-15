@@ -1,6 +1,6 @@
 package io.github.flemmli97.advancedgolems.fabric.polymer;
 
-import io.github.flemmli97.advancedgolems.fabric.config.ConfigSpecs;
+import io.github.flemmli97.advancedgolems.config.ConfigSpecs;
 import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -23,7 +23,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return FabricLoader.getInstance().isModLoaded("polymer") && ConfigSpecs.get().usePolymer.get();
+        return FabricLoader.getInstance().isModLoaded("polymer") && ConfigSpecs.CONF.usePolymer.get();
     }
 
     @Override

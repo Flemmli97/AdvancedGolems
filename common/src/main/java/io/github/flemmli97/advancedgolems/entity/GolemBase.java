@@ -2,20 +2,24 @@ package io.github.flemmli97.advancedgolems.entity;
 
 import com.mojang.authlib.GameProfile;
 import io.github.flemmli97.advancedgolems.config.Config;
-import io.github.flemmli97.advancedgolems.entity.ai.GoBackHomeGoal;
-import io.github.flemmli97.advancedgolems.entity.ai.GolemAttackGoal;
-import io.github.flemmli97.advancedgolems.entity.ai.NearestTargetInRestriction;
+import io.github.flemmli97.advancedgolems.entity.ai.GolemKeepDistance;
+import io.github.flemmli97.advancedgolems.entity.ai.GolemMoveControl;
+import io.github.flemmli97.advancedgolems.entity.ai.GolemStrafing;
+import io.github.flemmli97.advancedgolems.entity.ai.SetMoveToHomePosition;
 import io.github.flemmli97.advancedgolems.items.BowHelper;
 import io.github.flemmli97.advancedgolems.items.GolemSpawnItem;
-import io.github.flemmli97.advancedgolems.mixin.LivingEntityAccessor;
 import io.github.flemmli97.advancedgolems.mixin.ProjectileWeaponItemAccessor;
 import io.github.flemmli97.advancedgolems.registry.ModEntities;
 import io.github.flemmli97.advancedgolems.registry.ModItems;
-import io.github.flemmli97.tenshilib.api.entity.AnimatedAction;
-import io.github.flemmli97.tenshilib.api.entity.AnimationHandler;
-import io.github.flemmli97.tenshilib.api.entity.IAnimated;
-import io.github.flemmli97.tenshilib.common.entity.EntityUtil;
-import io.github.flemmli97.tenshilib.common.utils.MathUtils;
+import io.github.flemmli97.tenshilib.common.entity.EntityUtils;
+import io.github.flemmli97.tenshilib.common.entity.ai.brain.AttackBehaviourBuilder;
+import io.github.flemmli97.tenshilib.common.entity.ai.brain.behaviour.SetMoveToRestriction;
+import io.github.flemmli97.tenshilib.common.entity.animated.AnimatedEntity;
+import io.github.flemmli97.tenshilib.common.entity.animated.AnimationDefinitionContainer;
+import io.github.flemmli97.tenshilib.common.entity.animated.AnimationHandler;
+import io.github.flemmli97.tenshilib.common.entity.animated.AnimationState;
+import io.github.flemmli97.tenshilib.common.entity.animated.AnimationsBuilder;
+import io.github.flemmli97.tenshilib.common.utils.math.MathUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
@@ -39,18 +43,12 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.OwnableEntity;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.control.FlyingMoveControl;
-import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.MoveTowardsRestrictionGoal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomFlyingGoal;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
-import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.AbstractGolem;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -61,6 +59,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -72,6 +71,25 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.tslat.smartbrainlib.api.SmartBrainOwner;
+import net.tslat.smartbrainlib.api.core.BrainActivityGroup;
+import net.tslat.smartbrainlib.api.core.SmartBrainProvider;
+import net.tslat.smartbrainlib.api.core.behaviour.FirstApplicableBehaviour;
+import net.tslat.smartbrainlib.api.core.behaviour.OneRandomBehaviour;
+import net.tslat.smartbrainlib.api.core.behaviour.custom.misc.Idle;
+import net.tslat.smartbrainlib.api.core.behaviour.custom.move.FloatToSurfaceOfFluid;
+import net.tslat.smartbrainlib.api.core.behaviour.custom.move.MoveToWalkTarget;
+import net.tslat.smartbrainlib.api.core.behaviour.custom.path.SetRandomFlyingTarget;
+import net.tslat.smartbrainlib.api.core.behaviour.custom.path.SetRandomWalkTarget;
+import net.tslat.smartbrainlib.api.core.behaviour.custom.path.SetWalkTargetToAttackTarget;
+import net.tslat.smartbrainlib.api.core.behaviour.custom.target.InvalidateAttackTarget;
+import net.tslat.smartbrainlib.api.core.behaviour.custom.target.SetPlayerLookTarget;
+import net.tslat.smartbrainlib.api.core.behaviour.custom.target.SetRandomLookTarget;
+import net.tslat.smartbrainlib.api.core.behaviour.custom.target.TargetOrRetaliate;
+import net.tslat.smartbrainlib.api.core.sensor.ExtendedSensor;
+import net.tslat.smartbrainlib.api.core.sensor.custom.UnreachableTargetSensor;
+import net.tslat.smartbrainlib.api.core.sensor.vanilla.HurtBySensor;
+import net.tslat.smartbrainlib.api.core.sensor.vanilla.NearbyLivingEntitySensor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -80,7 +98,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity {
+public class GolemBase extends AbstractGolem implements AnimatedEntity, OwnableEntity, SmartBrainOwner<GolemBase> {
 
     protected static final EntityDataAccessor<BlockPos> HOME = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.BLOCK_POS);
     protected static final EntityDataAccessor<Float> HOME_DIST = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.FLOAT);
@@ -88,16 +106,17 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     protected static final EntityDataAccessor<Optional<UUID>> OWNER_UUID = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.OPTIONAL_UUID);
     private static final EntityDataAccessor<Boolean> SHUT_DOWN = SynchedEntityData.defineId(GolemBase.class, EntityDataSerializers.BOOLEAN);
 
-    public static final AnimatedAction melee1 = new AnimatedAction(Mth.ceil(0.68 * 20), (int) (0.48 * 20), "melee1");
-    public static final AnimatedAction melee2 = new AnimatedAction(Mth.ceil(0.68 * 20), (int) (0.48 * 20), "melee2");
-    public static final AnimatedAction rangedAttack = new AnimatedAction(25, 20, "ranged");
-    public static final AnimatedAction rangedCrossbow = new AnimatedAction(30, 25, "ranged_crossbow");
-    public static final AnimatedAction shutdownAction = AnimatedAction.builder(36, "shutdown").marker(1).infinite().build();
-    public static final AnimatedAction restart = new AnimatedAction(24, 1, "restart");
+    public static final AnimationsBuilder BUILDER = new AnimationsBuilder();
+    public static final String MELEE_1 = BUILDER.add("melee_1", AnimationsBuilder.definition(0.64).marker("attack", 0.48));
+    public static final String MELEE_2 = BUILDER.add("melee_2", AnimationsBuilder.definition(0.64).marker("attack", 0.48));
+    public static final String RANGED_ATTACK = BUILDER.add("ranged", AnimationsBuilder.definition(1.25).marker("attack", 1));
+    public static final String RANGED_CROSSBOW = BUILDER.add("ranged_crossbow", AnimationsBuilder.definition(1.5).marker("attack", 1.25));
+    public static final String SHUTDOWN = BUILDER.add("shutdown", AnimationsBuilder.definition(1.8).infinite());
+    public static final String RESTART = BUILDER.add("restart", AnimationsBuilder.definition(1.2));
+    public static final AnimationDefinitionContainer ANIMS = BUILDER.build();
 
-    public static final AnimatedAction[] anims = new AnimatedAction[]{melee1, melee2, rangedAttack, shutdownAction, restart};
-
-    private final Predicate<LivingEntity> pred = e -> e instanceof Enemy && !(e instanceof Creeper);
+    private final Predicate<LivingEntity> pred = e -> e instanceof Enemy && !(e instanceof Creeper)
+            && this.isWithinRestriction(e.blockPosition());
 
     private final TargetingConditions enragerTest = TargetingConditions.forCombat().selector(this.pred);
 
@@ -105,27 +124,31 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     private GolemState state = GolemState.AGGRESSIVE;
     private int regenTicker = 0, enrageCooldown;
 
-    public GolemAttackGoal<GolemBase> attackGoal = new GolemAttackGoal<>(this);
-
-    protected MoveTowardsRestrictionGoal moveRestriction = new MoveTowardsRestrictionGoal(this, 1.0D);
-
-    protected NearestTargetInRestriction<Mob> meleeTarget = new NearestTargetInRestriction<>(this, Mob.class, 0, false, true, this.pred);
-    protected NearestTargetInRestriction<Mob> rangedTarget = new NearestTargetInRestriction<>(this, Mob.class, 0, false, false, this.pred);
-    protected HurtByTargetGoal hurt = new HurtByTargetGoal(this);
-    protected GoBackHomeGoal aiHome = new GoBackHomeGoal(this);
-
-    protected WaterAvoidingRandomStrollGoal wander = new WaterAvoidingRandomStrollGoal(this, 0.6D);
-    protected WaterAvoidingRandomFlyingGoal wanderFlying = new WaterAvoidingRandomFlyingGoal(this, 1);
-
-    private final AnimationHandler<GolemBase> animationHandler = new AnimationHandler<>(this, anims);
+    private final AnimationHandler<GolemBase> animationHandler = new AnimationHandler<>(this, ANIMS).withChangeListener(anim -> {
+        if (anim != null && anim.is(RANGED_ATTACK, RANGED_CROSSBOW)) {
+            this.startUsingItem(InteractionHand.MAIN_HAND);
+        }
+        return false;
+    });
 
     public final GolemUpgradesHandler upgrades = new GolemUpgradesHandler(this);
     private LivingEntity owner;
+
+    private final PathNavigation groundNavigator, flyingNavigator;
+    private int hoverTime, hoverCooldown;
 
     public GolemBase(EntityType<? extends GolemBase> entityType, Level level) {
         super(entityType, level);
         this.updateAttributes();
         this.updateState(this.state);
+        this.flyingNavigator = new FlyingPathNavigation(this, this.level()) {
+            @Override
+            public boolean isStableDestination(BlockPos blockPos) {
+                return true;
+            }
+        };
+        this.groundNavigator = this.navigation;
+        this.moveControl = new GolemMoveControl(this);
     }
 
     public GolemBase(Level world, BlockPos pos) {
@@ -150,62 +173,110 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         builder.define(SHUT_DOWN, false);
     }
 
-    @Override
-    protected void registerGoals() {
-        this.goalSelector.addGoal(1, new FloatGoal(this));
-        this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 6.0F));
-        this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
-    }
-
     public GolemState getState() {
         return this.state;
+    }
+
+    public boolean canTargetEnemies() {
+        return this.getState() == GolemState.AGGRESSIVE || this.getState() == GolemState.AGGRESSIVESTAND;
+    }
+
+    public boolean stayAtHomePos() {
+        return this.getState() == GolemState.AGGRESSIVESTAND || this.getState() == GolemState.PASSIVESTAND;
     }
 
     public void updateState(GolemState state) {
         if (this.level() == null || this.level().isClientSide)
             return;
         this.state = state;
-        this.resetAI();
-        switch (this.state) {
-            case AGGRESSIVE -> {
-                this.goalSelector.addGoal(5, this.moveRestriction);
-                this.goalSelector.addGoal(6, this.wanderGoal());
-                this.targetSelector.addGoal(2, this.hurt);
-                this.combatAI();
-            }
-            case AGGRESSIVESTAND -> {
-                this.goalSelector.addGoal(5, this.aiHome);
-                this.targetSelector.addGoal(2, this.hurt);
-                this.combatAI();
-            }
-            case PASSIVE -> {
-                this.goalSelector.addGoal(5, this.moveRestriction);
-                this.goalSelector.addGoal(6, this.wanderGoal());
-            }
-            case PASSIVESTAND -> this.goalSelector.addGoal(5, this.aiHome);
-        }
+        this.updateFollowRange(AttackAIType.from(this) != AttackAIType.MELEE);
     }
 
-    private void resetAI() {
-        this.goalSelector.removeGoal(this.attackGoal);
-        this.goalSelector.removeGoal(this.wanderGoal());
-        this.goalSelector.removeGoal(this.moveRestriction);
-        this.goalSelector.removeGoal(this.aiHome);
-        this.targetSelector.removeGoal(this.meleeTarget);
-        this.targetSelector.removeGoal(this.rangedTarget);
-        this.targetSelector.removeGoal(this.hurt);
+    @Override
+    public BrainActivityGroup<GolemBase> getCoreTasks() {
+        return BrainActivityGroup.coreTasks(
+                new FloatToSurfaceOfFluid<>(),
+                new SetRandomLookTarget<>(),
+                new SetPlayerLookTarget<>(),
+                new LookAtTargetSink(40, 80));
     }
 
-    private void combatAI() {
-        ItemStack itemstack = this.getMainHandItem();
-        if (itemstack.getItem() instanceof ProjectileWeaponItem) {
-            this.goalSelector.addGoal(2, this.attackGoal);
-            this.targetSelector.addGoal(3, this.rangedTarget);
-            this.updateFollowRange(true);
-        } else {
-            this.goalSelector.addGoal(2, this.attackGoal);
-            this.targetSelector.addGoal(3, this.meleeTarget);
-            this.updateFollowRange(false);
+    @Override
+    public BrainActivityGroup<GolemBase> getIdleTasks() {
+        return BrainActivityGroup.idleTasks(
+                new MoveToWalkTarget<>(),
+                new FirstApplicableBehaviour<>(
+                        new TargetOrRetaliate<GolemBase>().startCondition(GolemBase::canTargetEnemies),
+                        new SetMoveToRestriction<GolemBase>().startCondition(entity -> !entity.stayAtHomePos()),
+                        new SetMoveToHomePosition<GolemBase>().startCondition(GolemBase::stayAtHomePos),
+                        new OneRandomBehaviour<>(
+                                new SetRandomWalkTarget<GolemBase>().startCondition(e -> !e.canFlyFlag() && !e.stayAtHomePos()),
+                                new SetRandomFlyingTarget<GolemBase>().startCondition(e -> e.canFlyFlag() && !e.stayAtHomePos()),
+                                new Idle<>().runFor(entity -> entity.getRandom().nextInt(30, 60))
+                        )
+                )
+        );
+    }
+
+    @Override
+    public BrainActivityGroup<? extends GolemBase> getFightTasks() {
+        return BrainActivityGroup.fightTasks(
+                new InvalidateAttackTarget<GolemBase>()
+                        .invalidateIf((entity, target) -> !entity.canTargetEnemies()),
+                AttackBehaviourBuilder.<GolemBase>create().universalHandler(GolemBase::handleAnimationTick)
+                        .start(MELEE_1, MELEE_2).prepare(new SetWalkTargetToAttackTarget<>(), new MoveToWalkTarget<>())
+                        .end(1, e -> AttackAIType.from(e) == AttackAIType.MELEE)
+                        .start(RANGED_ATTACK).prepare(new GolemStrafing<>()).parallel(entity -> entity.getRandom().nextInt(10) + 10)
+                        .end(1, e -> AttackAIType.from(e) == AttackAIType.BOW)
+                        .start(RANGED_CROSSBOW).prepare(new GolemKeepDistance<>())
+                        .end(1, e -> AttackAIType.from(e) == AttackAIType.CROSSBOW)
+                        .build()
+        );
+    }
+
+    @Override
+    public List<? extends ExtendedSensor<? extends GolemBase>> getSensors() {
+        return List.of(new NearbyLivingEntitySensor<GolemBase>().setPredicate((target, entity) -> this.pred.test(target)),
+                new HurtBySensor<>(),
+                new UnreachableTargetSensor<>());
+    }
+
+    @Override
+    protected Brain.Provider<?> brainProvider() {
+        return new SmartBrainProvider<>(this);
+    }
+
+    @Override
+    protected void customServerAiStep() {
+        this.tickBrain(this);
+    }
+
+    public void handleAnimationTick(LivingEntity target, AnimationState state) {
+        if (state.is(MELEE_1, MELEE_2)) {
+            if (target == null)
+                return;
+            if (this.isWithinMeleeAttackRange(target) && state.isAt("attack")) {
+                this.doHurtTarget(target);
+            }
+        } else if (state.is(RANGED_ATTACK)) {
+            boolean canSee = target != null && this.getSensing().hasLineOfSight(target);
+            if (state.isAt("attack")) {
+                if (canSee) {
+                    this.releaseUsingItem();
+                    GolemBase.rangedArrow(this, target);
+                } else
+                    this.stopUsingItem();
+            }
+        } else if (state.is(RANGED_CROSSBOW)) {
+            boolean canSee = target != null && this.getSensing().hasLineOfSight(target);
+            if (state.isAt("attack")) {
+                if (canSee) {
+                    this.useItemRemaining = 0;
+                    this.releaseUsingItem();
+                    GolemBase.rangedCrossbow(this, target, 2);
+                } else
+                    this.stopUsingItem();
+            }
         }
     }
 
@@ -455,19 +526,43 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
                 this.level().getEntities(EntityTypeTest.forClass(Mob.class), aabb, m -> this.enragerTest.test(this, m)).forEach(target);
                 this.enrageCooldown = 20 + this.random.nextInt(40);
             }
+
+            if (this.canFlyFlag()) {
+                if (this.getTarget() != null) {
+                    if (--this.hoverTime >= 0) {
+                        if (this.hoverTime == 0)
+                            this.setFlying(false, true);
+                    } else if (--this.hoverCooldown < 0) {
+                        this.hoverTime = 150 + this.getRandom().nextInt(50) + this.upgrades.flyUpgrades() * 30;
+                        this.hoverCooldown = 60;
+                        this.setFlying(true, true);
+                    }
+                } else {
+                    --this.hoverCooldown;
+                    this.setFlying(true, false);
+                }
+            }
         } else {
             if (!this.isShutdown()) {
                 if (this.random.nextBoolean()) {
-                    double[] off = MathUtils.rotate2d(0, -2.5 / 16f, MathUtils.degToRad(this.yBodyRot));
+                    double[] off = MathUtils.rotate2d(0, -2.5 / 16f, this.yBodyRot * Mth.DEG_TO_RAD);
                     this.level().addParticle(ParticleTypes.SMOKE, this.getX() + off[0], this.getY() + this.getBbHeight() + 0.1, this.getZ() + off[1], 0.0, 0.0, 0.0);
                 }
                 if (this.canFlyFlag() && this.tickCount % 4 == 0 && this.getDeltaMovement().y > -0.01 && !this.collidesDown()) {
-                    double[] off = MathUtils.rotate2d(1.5 / 16f, -3.5 / 16f, MathUtils.degToRad(this.yBodyRot));
+                    double[] off = MathUtils.rotate2d(1.5 / 16f, -3.5 / 16f, this.yBodyRot * Mth.DEG_TO_RAD);
                     this.level().addParticle(ParticleTypes.FLAME, this.getX() + off[0], this.getY() + 4 / 16f, this.getZ() + off[1], 0.0, 0.0, 0.0);
-                    off = MathUtils.rotate2d(-1.5 / 16f, -3.5 / 16f, MathUtils.degToRad(this.yBodyRot));
+                    off = MathUtils.rotate2d(-1.5 / 16f, -3.5 / 16f, this.yBodyRot * Mth.DEG_TO_RAD);
                     this.level().addParticle(ParticleTypes.FLAME, this.getX() + off[0], this.getY() + 4 / 16f, this.getZ() + off[1], 0.0, 0.0, 0.0);
                 }
             }
+        }
+    }
+
+    @Override
+    public void setTarget(@Nullable LivingEntity target) {
+        super.setTarget(target);
+        if (target != null) {
+            this.setFlying(this.hoverTime >= 0, true);
         }
     }
 
@@ -527,30 +622,6 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         this.shutDownGolem(compoundTag.getBoolean("ShutDown"));
     }
 
-    public boolean hasRangedWeapon() {
-        return this.getMainHandItem().getItem() instanceof ProjectileWeaponItem;
-    }
-
-    public boolean isWithinMeleeAttackRange(LivingEntity entity, double hInc, double vInc) {
-        return this.getAttackBoundingBox().inflate(hInc, vInc, hInc).intersects(((LivingEntityAccessor) entity).getEntityHitbox());
-    }
-
-    public AnimatedAction getAttack(boolean ranged) {
-        if (ranged) {
-            if (this.getMainHandItem().getItem() instanceof CrossbowItem)
-                return rangedCrossbow;
-            return rangedAttack;
-        }
-        return this.getRandom().nextBoolean() ? melee1 : melee2;
-    }
-
-    public Goal wanderGoal() {
-        if (this.upgrades.canFly()) {
-            return this.wanderFlying;
-        }
-        return this.wander;
-    }
-
     public void updateAttributes() {
         this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(Config.golemBaseAttack);
         this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(Config.golemHealth);
@@ -562,18 +633,32 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         return this.animationHandler;
     }
 
-    public void updateToFlyingPathing() {
-        if (this.level().isClientSide || !this.upgrades.canFly())
+    public void setFlying(boolean flag, boolean reset) {
+        if (!this.upgrades.canFly())
             return;
-        this.navigation = new FlyingPathNavigation(this, this.level()) {
+        if (flag ? this.navigation == this.flyingNavigator : this.navigation == this.groundNavigator)
+            return;
+        this.setNoGravity(flag);
+        if (reset) {
+            this.groundNavigator.stop();
+            this.flyingNavigator.stop();
+        }
+        if (flag) {
+            this.navigation = this.flyingNavigator;
+        } else {
+            this.navigation = this.groundNavigator;
+        }
+    }
 
-            @Override
-            public boolean isStableDestination(BlockPos blockPos) {
-                return true;
-            }
-        };
-        this.moveControl = new FlyingMoveControl(this, 20, true);
-        this.entityData.set(CAN_FLY, true);
+    public boolean isCurrentlyHovering() {
+        return this.canFlyFlag() && (this.hoverTime > 0 || this.getTarget() == null);
+    }
+
+    public void updateCanFlyingState() {
+        if (this.level().isClientSide)
+            return;
+        this.entityData.set(CAN_FLY, this.upgrades.canFly());
+        this.updateState(this.state);
     }
 
     public boolean canFlyFlag() {
@@ -624,9 +709,9 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         InteractionHand interactionHand = ProjectileUtil.getWeaponHoldingHand(mob, Items.CROSSBOW);
         ItemStack itemStack = mob.getItemInHand(interactionHand);
         if (itemStack.getItem() instanceof CrossbowItem crossbow) {
-            ChargedProjectiles projectile = itemStack.set(DataComponents.CHARGED_PROJECTILES, ChargedProjectiles.EMPTY);
+            ChargedProjectiles projectile = itemStack.get(DataComponents.CHARGED_PROJECTILES);
             float vel = projectile != null && projectile.contains(Items.FIREWORK_ROCKET) ? 1.6F : strength;
-            crossbow.performShooting(mob.level(), mob, interactionHand, itemStack, vel, 13.5f - mob.level().getDifficulty().getId() * 4, target);
+            crossbow.performShooting(mob.level(), mob, interactionHand, itemStack, vel, 10 - mob.level().getDifficulty().getId() * 3, target);
         }
     }
 
@@ -660,7 +745,7 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
     @Override
     public LivingEntity getOwner() {
         if (this.owner == null || this.owner.isRemoved()) {
-            this.entityData.get(OWNER_UUID).ifPresent((uuid) -> this.owner = EntityUtil.findFromUUID(LivingEntity.class, this.level(), uuid));
+            this.entityData.get(OWNER_UUID).ifPresent((uuid) -> this.owner = EntityUtils.findFromUUID(LivingEntity.class, this.level(), uuid));
         }
         return this.owner;
     }
@@ -705,10 +790,8 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
             if (key == SHUT_DOWN) {
                 //This case only happens during load. At that point we want to skip right to the end of the animation
                 if (this.entityData.get(SHUT_DOWN) && !this.getAnimationHandler().hasAnimation()) {
-                    this.getAnimationHandler().setAnimation(shutdownAction);
-                    AnimatedAction anim = this.getAnimationHandler().getAnimation();
-                    while (anim.getTick() < anim.getLength())
-                        anim.tick();
+                    this.getAnimationHandler().setAnimation(SHUTDOWN);
+                    this.getAnimationHandler().finishAnimation();
                 }
             }
         }
@@ -719,12 +802,27 @@ public class GolemBase extends AbstractGolem implements IAnimated, OwnableEntity
         if (flag) {
             this.setTarget(null);
             this.getNavigation().stop();
-            this.getAnimationHandler().setAnimation(shutdownAction);
+            this.getAnimationHandler().setAnimation(SHUTDOWN);
             this.setShiftKeyDown(false);
             this.setSprinting(false);
             this.unRide();
         } else {
-            this.getAnimationHandler().setAnimation(restart);
+            this.getAnimationHandler().setAnimation(RESTART);
+        }
+    }
+
+    enum AttackAIType {
+        MELEE,
+        BOW,
+        CROSSBOW;
+
+        static AttackAIType from(LivingEntity entity) {
+            ItemStack main = entity.getMainHandItem();
+            if (main.getItem() instanceof BowItem)
+                return BOW;
+            if (main.getItem() instanceof CrossbowItem)
+                return CROSSBOW;
+            return MELEE;
         }
     }
 }

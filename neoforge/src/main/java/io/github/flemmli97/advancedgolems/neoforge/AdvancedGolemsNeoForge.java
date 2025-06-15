@@ -1,11 +1,11 @@
 package io.github.flemmli97.advancedgolems.neoforge;
 
 import io.github.flemmli97.advancedgolems.AdvancedGolems;
+import io.github.flemmli97.advancedgolems.config.ConfigLoader;
+import io.github.flemmli97.advancedgolems.config.ConfigSpecs;
 import io.github.flemmli97.advancedgolems.entity.GolemBase;
 import io.github.flemmli97.advancedgolems.events.EventCalls;
 import io.github.flemmli97.advancedgolems.neoforge.client.ClientInit;
-import io.github.flemmli97.advancedgolems.neoforge.config.ConfigLoader;
-import io.github.flemmli97.advancedgolems.neoforge.config.ConfigSpecs;
 import io.github.flemmli97.advancedgolems.registry.ModDataComponents;
 import io.github.flemmli97.advancedgolems.registry.ModEntities;
 import io.github.flemmli97.advancedgolems.registry.ModItems;
@@ -37,7 +37,6 @@ public class AdvancedGolemsNeoForge {
         ModDataComponents.DATA_COMPONENTS.registerContent(modBus);
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modBus.addListener(ClientInit::clientInit);
-            modBus.addListener(ClientInit::layerRegister);
             NeoForge.EVENT_BUS.addListener(ClientInit::renderLast);
         }
         modBus.addListener(AdvancedGolemsNeoForge::configReload);

@@ -4,8 +4,7 @@
   "package": "io.github.flemmli97.advancedgolems.mixin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "ProjectileWeaponItemAccessor",
-    "LivingEntityAccessor"
+    "ProjectileWeaponItemAccessor"
   ],
   "server": [
   ],

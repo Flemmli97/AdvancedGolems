@@ -1,6 +1,5 @@
-package io.github.flemmli97.advancedgolems.neoforge.config;
+package io.github.flemmli97.advancedgolems.config;
 
-import io.github.flemmli97.advancedgolems.config.Config;
 import net.neoforged.fml.config.IConfigSpec;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
@@ -41,6 +40,8 @@ public class ConfigSpecs {
     public final ModConfigSpec.BooleanValue immortalGolems;
     public final ModConfigSpec.ConfigValue<String> reviveItem;
 
+    public final ModConfigSpec.BooleanValue usePolymer;
+
     public ConfigSpecs(ModConfigSpec.Builder builder) {
         this.golemHealth = builder.comment("Health of a golem").defineInRange("Golem Health", Config.golemHealth, 0, Double.MAX_VALUE);
         this.golemBaseAttack = builder.comment("Base attack of a golem").defineInRange("Golem Attack", Config.golemBaseAttack, 0, Double.MAX_VALUE);
@@ -72,6 +73,8 @@ public class ConfigSpecs {
 
         this.immortalGolems = builder.comment("If true golems shutdown instead of dying. You need to revive them again").define("Immortal Golem", Config.immortalGolems);
         this.reviveItem = builder.comment("Item needed to revive a shutdown golem").define("Revive Item", Config.reviveItem.toString());
+
+        this.usePolymer = builder.comment("Enable polymer support").define("Polymer", false);
     }
 
     static {

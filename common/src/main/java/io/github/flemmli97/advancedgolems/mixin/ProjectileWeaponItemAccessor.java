@@ -16,5 +16,4 @@ public interface ProjectileWeaponItemAccessor {
 
     @Invoker("getDurabilityUse")
     int getDurabilityUseInv(ItemStack stack);
-
 }

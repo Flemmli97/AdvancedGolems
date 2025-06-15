@@ -36,7 +36,7 @@ public class GolemUpgradesHandler {
     public GolemUpgradesHandler(GolemBase golem) {
         this.golem = golem;
         this.holders = new LinkedList<>();
-        this.holders.add(this.flyingHolder = new BooleanHolder(Config.flyItem, "CanFly", this.golem::updateToFlyingPathing));
+        this.holders.add(this.flyingHolder = new BooleanHolder(Config.flyItem, "CanFly", this.golem::updateCanFlyingState));
         this.holders.add(this.fireResHolder = new BooleanHolder(Config.fireResItem, "FireResistant", () -> {
         }));
         this.holders.add(this.piercingProjectilesHolder = new BooleanHolder(Config.piercingItem, "PiercingProjectiles", () -> {
@@ -108,7 +108,7 @@ public class GolemUpgradesHandler {
     public void readData(CompoundTag tag) {
         for (UpgradeHolder<?> holder : this.holders)
             holder.load(tag);
-        this.golem.updateToFlyingPathing();
+        this.golem.updateCanFlyingState();
     }
 
     public CompoundTag saveData(CompoundTag tag) {

@@ -1,9 +1,10 @@
 package io.github.flemmli97.advancedgolems.fabric;
 
+import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeConfigRegistry;
 import io.github.flemmli97.advancedgolems.AdvancedGolems;
+import io.github.flemmli97.advancedgolems.config.ConfigSpecs;
 import io.github.flemmli97.advancedgolems.entity.GolemBase;
 import io.github.flemmli97.advancedgolems.events.EventCalls;
-import io.github.flemmli97.advancedgolems.fabric.config.ConfigSpecs;
 import io.github.flemmli97.advancedgolems.items.GolemController;
 import io.github.flemmli97.advancedgolems.registry.ModDataComponents;
 import io.github.flemmli97.advancedgolems.registry.ModEntities;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
+import net.neoforged.fml.config.ModConfig;
 import org.jetbrains.annotations.Nullable;
 
 public class AdvancedGolemsFabric implements ModInitializer {
@@ -27,7 +29,7 @@ public class AdvancedGolemsFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         AdvancedGolems.polymer = FabricLoader.getInstance().isModLoaded("polymer");
-        ConfigSpecs.init();
+        NeoForgeConfigRegistry.INSTANCE.register(AdvancedGolems.MODID, ModConfig.Type.COMMON, ConfigSpecs.COMMON_SPEC);
         ModEntities.ENTITIES.registerContent();
         ModItems.ITEMS.registerContent();
         ModDataComponents.DATA_COMPONENTS.registerContent();
@@ -44,7 +46,6 @@ public class AdvancedGolemsFabric implements ModInitializer {
         }
         return InteractionResult.PASS;
     }
-
 
     public static void registerAttributes() {
         FabricDefaultAttributeRegistry.register(ModEntities.GOLEM.get(), GolemBase.createAttributes());

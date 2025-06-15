@@ -1,6 +1,4 @@
-package io.github.flemmli97.advancedgolems.neoforge.config;
-
-import io.github.flemmli97.advancedgolems.config.Config;
+package io.github.flemmli97.advancedgolems.config;
 
 public class ConfigLoader {
 

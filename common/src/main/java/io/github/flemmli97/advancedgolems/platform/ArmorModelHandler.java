@@ -1,7 +1,7 @@
 package io.github.flemmli97.advancedgolems.platform;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import io.github.flemmli97.tenshilib.platform.InitUtil;
+import io.github.flemmli97.tenshilib.loader.LoaderInitializer;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -11,7 +11,7 @@ import net.minecraft.world.item.ItemStack;
 
 public interface ArmorModelHandler {
 
-    ArmorModelHandler INSTANCE = InitUtil.getPlatformInstance(ArmorModelHandler.class,
+    ArmorModelHandler INSTANCE = LoaderInitializer.getImplInstance(ArmorModelHandler.class,
             "io.github.flemmli97.advancedgolems.fabric.platform.ArmorModelHandlerImpl",
             "io.github.flemmli97.advancedgolems.neoforge.platform.ArmorModelHandlerImpl");
 

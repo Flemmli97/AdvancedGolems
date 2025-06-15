@@ -15,14 +15,10 @@ ext {
     mod_meta.tenshilib_version = tenshilib_version
 }
 
-repositories {
-    mavenLocal()
-    maven {
-        name = "TenshiLib"
-        url "https://maven.blazing-coop.net/releases"
-    }
-}
-
 dependencies {
     modImplementation "io.github.flemmli97:tenshilib:${tenshilib_version}-neoforge"
+
+    modImplementation "net.tslat.smartbrainlib:SmartBrainLib-neoforge-${project.minecraft_version}:${project.sbl_version}"
+
+    modRuntimeOnly "io.github.flemmli97:debugutils:1.21.1-1.0.7-neoforge"
 }

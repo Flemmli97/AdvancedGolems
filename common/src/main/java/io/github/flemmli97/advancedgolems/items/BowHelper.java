@@ -7,6 +7,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.List;
 
 public class BowHelper extends BowItem {
+
     private BowHelper(Properties properties) {
         super(properties);
     }

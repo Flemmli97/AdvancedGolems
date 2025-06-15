@@ -19,5 +19,4 @@ public class DataGen {
         data.addProvider(event.includeClient(), new ItemModelGen(packOutput, event.getExistingFileHelper()));
         data.addProvider(event.includeServer(), new RecipeGen(packOutput, event.getLookupProvider()));
     }
-
 }
