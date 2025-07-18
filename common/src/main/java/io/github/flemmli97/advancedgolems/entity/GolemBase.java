@@ -13,6 +13,7 @@ import io.github.flemmli97.advancedgolems.registry.ModEntities;
 import io.github.flemmli97.advancedgolems.registry.ModItems;
 import io.github.flemmli97.tenshilib.common.entity.EntityUtils;
 import io.github.flemmli97.tenshilib.common.entity.ai.brain.AttackBehaviourBuilder;
+import io.github.flemmli97.tenshilib.common.entity.ai.brain.behaviour.PlayAnimation;
 import io.github.flemmli97.tenshilib.common.entity.ai.brain.behaviour.SetMoveToRestriction;
 import io.github.flemmli97.tenshilib.common.entity.animated.AnimatedEntity;
 import io.github.flemmli97.tenshilib.common.entity.animated.AnimationDefinitionContainer;
@@ -46,7 +47,9 @@ import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
@@ -90,6 +93,7 @@ import net.tslat.smartbrainlib.api.core.sensor.ExtendedSensor;
 import net.tslat.smartbrainlib.api.core.sensor.custom.UnreachableTargetSensor;
 import net.tslat.smartbrainlib.api.core.sensor.vanilla.HurtBySensor;
 import net.tslat.smartbrainlib.api.core.sensor.vanilla.NearbyLivingEntitySensor;
+import net.tslat.smartbrainlib.util.BrainUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -173,6 +177,26 @@ public class GolemBase extends AbstractGolem implements AnimatedEntity, OwnableE
         builder.define(SHUT_DOWN, false);
     }
 
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (this.level().isClientSide) {
+            if (key == SHUT_DOWN) {
+                //This case only happens during load. At that point we want to skip right to the end of the animation
+                if (this.entityData.get(SHUT_DOWN) && !this.getAnimationHandler().hasAnimation()) {
+                    this.getAnimationHandler().setAnimation(SHUTDOWN);
+                    this.getAnimationHandler().finishAnimation();
+                }
+            }
+        }
+    }
+
+    public void updateAttributes() {
+        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(Config.golemBaseAttack);
+        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(Config.golemHealth);
+        this.setHealth(this.getMaxHealth());
+    }
+
     public GolemState getState() {
         return this.state;
     }
@@ -224,12 +248,17 @@ public class GolemBase extends AbstractGolem implements AnimatedEntity, OwnableE
                 new InvalidateAttackTarget<GolemBase>()
                         .invalidateIf((entity, target) -> !entity.canTargetEnemies()),
                 AttackBehaviourBuilder.<GolemBase>create().universalHandler(GolemBase::handleAnimationTick)
-                        .start(MELEE_1, MELEE_2).prepare(new SetWalkTargetToAttackTarget<>(), new MoveToWalkTarget<>())
-                        .end(1, e -> AttackAIType.from(e) == AttackAIType.MELEE)
+                        .start(MELEE_1, MELEE_2)
+                        .play((PlayAnimation<GolemBase>) new PlayAnimation<GolemBase>().startCondition(m -> {
+                            LivingEntity target = BrainUtils.getTargetOfEntity(m);
+                            return target != null && BehaviorUtils.isWithinAttackRange(m, target, 1);
+                        }))
+                        .prepare(new SetWalkTargetToAttackTarget<GolemBase>().closeEnoughDist((e, t) -> 1)).prepareOptional(new MoveToWalkTarget<>())
+                        .end(1, behaviour -> behaviour.startCondition(e -> AttackAIType.from(e) == AttackAIType.MELEE))
                         .start(RANGED_ATTACK).prepare(new GolemStrafing<>()).parallel(entity -> entity.getRandom().nextInt(10) + 10)
-                        .end(1, e -> AttackAIType.from(e) == AttackAIType.BOW)
+                        .end(1, behaviour -> behaviour.startCondition(e -> AttackAIType.from(e) == AttackAIType.BOW))
                         .start(RANGED_CROSSBOW).prepare(new GolemKeepDistance<>())
-                        .end(1, e -> AttackAIType.from(e) == AttackAIType.CROSSBOW)
+                        .end(1, behaviour -> behaviour.startCondition(e -> AttackAIType.from(e) == AttackAIType.CROSSBOW))
                         .build()
         );
     }
@@ -247,8 +276,110 @@ public class GolemBase extends AbstractGolem implements AnimatedEntity, OwnableE
     }
 
     @Override
+    public void aiStep() {
+        super.aiStep();
+        this.getAnimationHandler().tick();
+        if (!this.level().isClientSide) {
+            if (this.combatCounter > 0)
+                this.combatCounter--;
+            else {
+                if (!this.isShutdown() || this.getHealth() < this.getMaxHealth() * 0.3) {
+                    if (this.regenTicker == 0) {
+                        this.heal(1);
+                        this.regenTicker = 200 - this.upgrades.regenUpgrades() * 5;
+                    }
+                    if (this.regenTicker > 0)
+                        this.regenTicker--;
+                }
+            }
+            if (!this.isShutdown() && this.upgrades.enragesNearbyHostiles() && --this.enrageCooldown <= 0) {
+                AABB aabb = new AABB(this.getRestrictCenter()).inflate(this.getRestrictRadius() + 3);
+                boolean insideArea = aabb.contains(this.position());
+                Consumer<Mob> target = m -> {
+                    double maxDist = this.getRestrictRadius() + 4;
+                    if (m.getTarget() != this && (insideArea || m.distanceToSqr(this) < maxDist * maxDist)) {
+                        //If we manually set the attack target the mob will keep attack even if golem is shutdown.
+                        //Need to invoke any kind of revenge ai goals
+                        m.setLastHurtByMob(this);
+                        for (int i = 0; i < 3; ++i) {
+                            double d0 = this.random.nextGaussian() * 0.02D;
+                            double d1 = this.random.nextGaussian() * 0.02D;
+                            double d2 = this.random.nextGaussian() * 0.02D;
+                            ((ServerLevel) this.level()).sendParticles(ParticleTypes.ANGRY_VILLAGER, m.getRandomX(1.0D), m.getRandomY() + 1.0D, m.getRandomZ(1.0D), 0, d0, d1, d2, 1);
+                        }
+                    }
+                };
+                this.level().getEntities(EntityTypeTest.forClass(Mob.class), aabb, m -> this.enragerTest.test(this, m)).forEach(target);
+                this.enrageCooldown = 20 + this.random.nextInt(40);
+            }
+
+            if (this.canFlyFlag()) {
+                if (this.getTarget() != null) {
+                    if (--this.hoverTime >= 0) {
+                        if (this.hoverTime == 0)
+                            this.setFlying(false, true);
+                    } else if (--this.hoverCooldown < 0) {
+                        this.hoverTime = 150 + this.getRandom().nextInt(50) + this.upgrades.flyUpgrades() * 30;
+                        this.hoverCooldown = 60;
+                        this.setFlying(true, true);
+                    }
+                } else {
+                    --this.hoverCooldown;
+                    this.setFlying(true, false);
+                }
+            }
+            if (this.isShutdown() && this.tickCount % 10 == 0) {
+                this.level().getEntities(EntityTypeTest.forClass(Mob.class), this.getBoundingBox().inflate(8),
+                                m -> m.getTarget() == this
+                                        || (BrainUtils.hasMemory(m, MemoryModuleType.ATTACK_TARGET) && BrainUtils.getMemory(m, MemoryModuleType.ATTACK_TARGET) == this))
+                        .forEach(m -> BrainUtils.setTargetOfEntity(m, null));
+            }
+        } else {
+            if (!this.isShutdown()) {
+                if (this.random.nextBoolean()) {
+                    double[] off = MathUtils.rotate2d(0, -2.5 / 16f, this.yBodyRot * Mth.DEG_TO_RAD);
+                    this.level().addParticle(ParticleTypes.SMOKE, this.getX() + off[0], this.getY() + this.getBbHeight() + 0.1, this.getZ() + off[1], 0.0, 0.0, 0.0);
+                }
+                if (this.canFlyFlag() && this.tickCount % 4 == 0 && this.getDeltaMovement().y > -0.01 && !this.collidesDown()) {
+                    double[] off = MathUtils.rotate2d(1.5 / 16f, -3.5 / 16f, this.yBodyRot * Mth.DEG_TO_RAD);
+                    this.level().addParticle(ParticleTypes.FLAME, this.getX() + off[0], this.getY() + 4 / 16f, this.getZ() + off[1], 0.0, 0.0, 0.0);
+                    off = MathUtils.rotate2d(-1.5 / 16f, -3.5 / 16f, this.yBodyRot * Mth.DEG_TO_RAD);
+                    this.level().addParticle(ParticleTypes.FLAME, this.getX() + off[0], this.getY() + 4 / 16f, this.getZ() + off[1], 0.0, 0.0, 0.0);
+                }
+            }
+        }
+    }
+
+    @Override
     protected void customServerAiStep() {
         this.tickBrain(this);
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag compoundTag) {
+        super.addAdditionalSaveData(compoundTag);
+        compoundTag.putInt("State", this.state.ordinal());
+        if (this.hasRestriction()) {
+            BlockPos home = this.getRestrictCenter();
+            int[] homePos = {home.getX(), home.getY(), home.getZ()};
+            compoundTag.putIntArray("HomePos", homePos);
+        }
+        compoundTag.put("GolemUpgrades", this.upgrades.saveData(new CompoundTag()));
+        this.entityData.get(OWNER_UUID).ifPresent(uuid -> compoundTag.putUUID("Owner", uuid));
+        compoundTag.putBoolean("ShutDown", this.entityData.get(SHUT_DOWN));
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag compoundTag) {
+        super.readAdditionalSaveData(compoundTag);
+        this.upgrades.readData(compoundTag.getCompound("GolemUpgrades"));
+        int[] intArray = compoundTag.getIntArray("HomePos");
+        if (intArray.length == 3)
+            this.restrictTo(new BlockPos(intArray[0], intArray[1], intArray[2]), Config.homeRadius + this.upgrades.homeRadiusIncrease());
+        this.updateState(GolemState.values()[compoundTag.getInt("State")]);
+        if (compoundTag.hasUUID("Owner"))
+            this.entityData.set(OWNER_UUID, Optional.of(compoundTag.getUUID("Owner")));
+        this.shutDownGolem(compoundTag.getBoolean("ShutDown"));
     }
 
     public void handleAnimationTick(LivingEntity target, AnimationState state) {
@@ -429,7 +560,7 @@ public class GolemBase extends AbstractGolem implements AnimatedEntity, OwnableE
         }
         if (damageSource.getEntity() == this)
             return false;
-        if (this.isShutdown() && damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY))
+        if (this.isShutdown() && !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY))
             return false;
         if (this.getOffhandItem().getItem() instanceof ShieldItem) {
             if (damageSource.is(DamageTypeTags.IS_PROJECTILE)) {
@@ -448,6 +579,15 @@ public class GolemBase extends AbstractGolem implements AnimatedEntity, OwnableE
             this.regenTicker = 0;
         }
         return flag;
+    }
+
+    @Override
+    protected void actuallyHurt(DamageSource damageSrc, float damageAmount) {
+        super.actuallyHurt(damageSrc, damageAmount);
+        if (Config.immortalGolems && !damageSrc.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && this.getHealth() <= 0) {
+            this.setHealth(0.01f);
+            this.shutDownGolem(true);
+        }
     }
 
     @Override
@@ -489,76 +629,6 @@ public class GolemBase extends AbstractGolem implements AnimatedEntity, OwnableE
     }
 
     @Override
-    public void aiStep() {
-        super.aiStep();
-        this.getAnimationHandler().tick();
-        if (!this.level().isClientSide) {
-            if (this.combatCounter > 0)
-                this.combatCounter--;
-            else {
-                if (!this.isShutdown() || this.getHealth() < this.getMaxHealth() * 0.3) {
-                    if (this.regenTicker == 0) {
-                        this.heal(1);
-                        this.regenTicker = 200 - this.upgrades.regenUpgrades() * 5;
-                    }
-                    if (this.regenTicker > 0)
-                        this.regenTicker--;
-                }
-            }
-            if (!this.isShutdown() && this.upgrades.enragesNearbyHostiles() && --this.enrageCooldown <= 0) {
-                AABB aabb = new AABB(this.getRestrictCenter()).inflate(this.getRestrictRadius() + 3);
-                boolean insideArea = aabb.contains(this.position());
-                double maxDist = this.getRestrictRadius() + 4;
-                Consumer<Mob> target = m -> {
-                    if (m.getTarget() != this && (insideArea || m.distanceToSqr(this) < maxDist * maxDist)) {
-                        //If we manually set the attack target the mob will keep attack even if golem is shutdown.
-                        //Need to invoke any kind of revenge ai goals
-                        m.setLastHurtByMob(this);
-                        m.setTarget(this);
-                        for (int i = 0; i < 3; ++i) {
-                            double d0 = this.random.nextGaussian() * 0.02D;
-                            double d1 = this.random.nextGaussian() * 0.02D;
-                            double d2 = this.random.nextGaussian() * 0.02D;
-                            ((ServerLevel) this.level()).sendParticles(ParticleTypes.ANGRY_VILLAGER, m.getRandomX(1.0D), m.getRandomY() + 1.0D, m.getRandomZ(1.0D), 0, d0, d1, d2, 1);
-                        }
-                    }
-                };
-                this.level().getEntities(EntityTypeTest.forClass(Mob.class), aabb, m -> this.enragerTest.test(this, m)).forEach(target);
-                this.enrageCooldown = 20 + this.random.nextInt(40);
-            }
-
-            if (this.canFlyFlag()) {
-                if (this.getTarget() != null) {
-                    if (--this.hoverTime >= 0) {
-                        if (this.hoverTime == 0)
-                            this.setFlying(false, true);
-                    } else if (--this.hoverCooldown < 0) {
-                        this.hoverTime = 150 + this.getRandom().nextInt(50) + this.upgrades.flyUpgrades() * 30;
-                        this.hoverCooldown = 60;
-                        this.setFlying(true, true);
-                    }
-                } else {
-                    --this.hoverCooldown;
-                    this.setFlying(true, false);
-                }
-            }
-        } else {
-            if (!this.isShutdown()) {
-                if (this.random.nextBoolean()) {
-                    double[] off = MathUtils.rotate2d(0, -2.5 / 16f, this.yBodyRot * Mth.DEG_TO_RAD);
-                    this.level().addParticle(ParticleTypes.SMOKE, this.getX() + off[0], this.getY() + this.getBbHeight() + 0.1, this.getZ() + off[1], 0.0, 0.0, 0.0);
-                }
-                if (this.canFlyFlag() && this.tickCount % 4 == 0 && this.getDeltaMovement().y > -0.01 && !this.collidesDown()) {
-                    double[] off = MathUtils.rotate2d(1.5 / 16f, -3.5 / 16f, this.yBodyRot * Mth.DEG_TO_RAD);
-                    this.level().addParticle(ParticleTypes.FLAME, this.getX() + off[0], this.getY() + 4 / 16f, this.getZ() + off[1], 0.0, 0.0, 0.0);
-                    off = MathUtils.rotate2d(-1.5 / 16f, -3.5 / 16f, this.yBodyRot * Mth.DEG_TO_RAD);
-                    this.level().addParticle(ParticleTypes.FLAME, this.getX() + off[0], this.getY() + 4 / 16f, this.getZ() + off[1], 0.0, 0.0, 0.0);
-                }
-            }
-        }
-    }
-
-    @Override
     public void setTarget(@Nullable LivingEntity target) {
         super.setTarget(target);
         if (target != null) {
@@ -593,39 +663,6 @@ public class GolemBase extends AbstractGolem implements AnimatedEntity, OwnableE
     @Override
     protected SoundEvent getDeathSound() {
         return SoundEvents.IRON_GOLEM_DEATH;
-    }
-
-    @Override
-    public void addAdditionalSaveData(CompoundTag compoundTag) {
-        super.addAdditionalSaveData(compoundTag);
-        compoundTag.putInt("State", this.state.ordinal());
-        if (this.hasRestriction()) {
-            BlockPos home = this.getRestrictCenter();
-            int[] homePos = {home.getX(), home.getY(), home.getZ()};
-            compoundTag.putIntArray("HomePos", homePos);
-        }
-        compoundTag.put("GolemUpgrades", this.upgrades.saveData(new CompoundTag()));
-        this.entityData.get(OWNER_UUID).ifPresent(uuid -> compoundTag.putUUID("Owner", uuid));
-        compoundTag.putBoolean("ShutDown", this.entityData.get(SHUT_DOWN));
-    }
-
-    @Override
-    public void readAdditionalSaveData(CompoundTag compoundTag) {
-        super.readAdditionalSaveData(compoundTag);
-        this.upgrades.readData(compoundTag.getCompound("GolemUpgrades"));
-        int[] intArray = compoundTag.getIntArray("HomePos");
-        if (intArray.length == 3)
-            this.restrictTo(new BlockPos(intArray[0], intArray[1], intArray[2]), Config.homeRadius + this.upgrades.homeRadiusIncrease());
-        this.updateState(GolemState.values()[compoundTag.getInt("State")]);
-        if (compoundTag.hasUUID("Owner"))
-            this.entityData.set(OWNER_UUID, Optional.of(compoundTag.getUUID("Owner")));
-        this.shutDownGolem(compoundTag.getBoolean("ShutDown"));
-    }
-
-    public void updateAttributes() {
-        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(Config.golemBaseAttack);
-        this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(Config.golemHealth);
-        this.setHealth(this.getMaxHealth());
     }
 
     @Override
@@ -751,15 +788,6 @@ public class GolemBase extends AbstractGolem implements AnimatedEntity, OwnableE
     }
 
     @Override
-    protected void actuallyHurt(DamageSource damageSrc, float damageAmount) {
-        super.actuallyHurt(damageSrc, damageAmount);
-        if (Config.immortalGolems && !damageSrc.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && this.getHealth() <= 0) {
-            this.setHealth(0.01f);
-            this.shutDownGolem(true);
-        }
-    }
-
-    @Override
     public boolean canBeSeenAsEnemy() {
         return super.canBeSeenAsEnemy() && !this.isShutdown();
     }
@@ -771,7 +799,7 @@ public class GolemBase extends AbstractGolem implements AnimatedEntity, OwnableE
 
     @Override
     protected boolean isImmobile() {
-        return super.isImmobile() || this.isShutdown();
+        return super.isImmobile() || this.isShutdown() || this.getAnimationHandler().isCurrent(RESTART);
     }
 
     @Override
@@ -781,20 +809,6 @@ public class GolemBase extends AbstractGolem implements AnimatedEntity, OwnableE
 
     public boolean isShutdown() {
         return this.entityData.get(SHUT_DOWN);
-    }
-
-    @Override
-    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
-        super.onSyncedDataUpdated(key);
-        if (this.level().isClientSide) {
-            if (key == SHUT_DOWN) {
-                //This case only happens during load. At that point we want to skip right to the end of the animation
-                if (this.entityData.get(SHUT_DOWN) && !this.getAnimationHandler().hasAnimation()) {
-                    this.getAnimationHandler().setAnimation(SHUTDOWN);
-                    this.getAnimationHandler().finishAnimation();
-                }
-            }
-        }
     }
 
     public void shutDownGolem(boolean flag) {

@@ -21,9 +21,6 @@
     ],
     "client": [
       "io.github.flemmli97.advancedgolems.fabric.AdvancedGolemsFabricClient"
-    ],
-    "modmenu": [
-      "io.github.flemmli97.advancedgolems.fabric.integration.ModMenuIntegration"
     ]
   },
   "mixins": [
@@ -34,6 +31,8 @@
   "depends": {
     "fabric": ">=${fabric_version}",
     "minecraft": ">=${mcversion}",
-    "tenshilib": ">=${tenshilib_version}"
+    "tenshilib": ">=${tenshilib_version}",
+    "forgeconfigapiport": ">=${forge_config_api}",
+    "smartbrainlib": ">=${sbl_version}"
   }
 }

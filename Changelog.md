@@ -1,3 +1,9 @@
+Advanced Golems 1.5.3
+================
+- Update libs
+- Now uses brains instead of goals
+- Fabric: now requires forge config api port
+
 Advanced Golems 1.5.2
 ================
 - Update to 1.21.1

@@ -7,8 +7,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import io.github.flemmli97.advancedgolems.AdvancedGolems;
 import io.github.flemmli97.advancedgolems.entity.GolemBase;
-import io.github.flemmli97.tenshilib.client.data.AnimationManager;
-import io.github.flemmli97.tenshilib.client.data.ModelManager;
+import io.github.flemmli97.tenshilib.client.data.GeoAnimationManager;
+import io.github.flemmli97.tenshilib.client.data.GeoModelManager;
 import io.github.flemmli97.tenshilib.client.data.ReloadableCache;
 import io.github.flemmli97.tenshilib.client.model.BedrockAnimations;
 import io.github.flemmli97.tenshilib.client.model.ExtendedModel;
@@ -33,14 +33,14 @@ public class GolemModel<T extends GolemBase> extends EntityModel<T> implements E
     public ModelPartsContainer.ModelPartExtended leg;
 
     public GolemModel() throws NullPointerException {
-        this.model = ModelManager.getInstance().getModel(AdvancedGolems.modRes("golem"), m -> {
+        this.model = GeoModelManager.getInstance().getModel(AdvancedGolems.modRes("golem"), m -> {
             this.head = m.getPart("head");
             this.leftArm = m.getPart("armLeft");
             this.rightArm = m.getPart("armRight");
             this.jetPack = m.getPart("jetpack");
             this.leg = m.getPart("leg");
         });
-        this.anim = AnimationManager.getInstance().getAnimation(AdvancedGolems.modRes("golem"));
+        this.anim = GeoAnimationManager.getInstance().getAnimation(AdvancedGolems.modRes("golem"));
     }
 
     @Override
@@ -58,7 +58,7 @@ public class GolemModel<T extends GolemBase> extends EntityModel<T> implements E
     public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
         poseStack.pushPose();
         this.adjustModel(poseStack);
-        this.model.get().getMainPart().render(poseStack, buffer, packedLight, packedOverlay);
+        this.model.get().getRoot().render(poseStack, buffer, packedLight, packedOverlay);
         poseStack.popPose();
     }
 
@@ -91,7 +91,7 @@ public class GolemModel<T extends GolemBase> extends EntityModel<T> implements E
     public void copyPropertiesTo(EntityModel<T> entityModel) {
         super.copyPropertiesTo(entityModel);
         if (entityModel instanceof HumanoidModel<?> human) {
-            PartPose main = this.model.get().getMainPart().storePose();
+            PartPose main = this.model.get().getRoot().storePose();
             human.body.loadPose(main);
             Vector3f bodyOffset = this.withParentX(main, 0, (21.5f - 16 - 1.1f), 1.4f);//BlockBench pivot point coords with offset
             human.body.x -= bodyOffset.x();
