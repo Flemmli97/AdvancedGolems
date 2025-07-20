@@ -1,7 +1,9 @@
 package io.github.flemmli97.advancedgolems.fabric;
 
 import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeConfigRegistry;
+import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeModConfigEvents;
 import io.github.flemmli97.advancedgolems.AdvancedGolems;
+import io.github.flemmli97.advancedgolems.config.ConfigLoader;
 import io.github.flemmli97.advancedgolems.config.ConfigSpecs;
 import io.github.flemmli97.advancedgolems.entity.GolemBase;
 import io.github.flemmli97.advancedgolems.events.EventCalls;
@@ -29,6 +31,14 @@ public class AdvancedGolemsFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         AdvancedGolems.polymer = FabricLoader.getInstance().isModLoaded("polymer");
+        NeoForgeModConfigEvents.loading(AdvancedGolems.MODID).register(config -> {
+            if (config.getSpec() == ConfigSpecs.COMMON_SPEC)
+                ConfigLoader.load();
+        });
+        NeoForgeModConfigEvents.reloading(AdvancedGolems.MODID).register(config -> {
+            if (config.getSpec() == ConfigSpecs.COMMON_SPEC)
+                ConfigLoader.load();
+        });
         NeoForgeConfigRegistry.INSTANCE.register(AdvancedGolems.MODID, ModConfig.Type.COMMON, ConfigSpecs.COMMON_SPEC);
         ModEntities.ENTITIES.registerContent();
         ModItems.ITEMS.registerContent();

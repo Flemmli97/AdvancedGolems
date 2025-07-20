@@ -1,3 +1,7 @@
+Advanced Golems 1.5.3.b
+================
+- Fabric: Fix config loading
+
 Advanced Golems 1.5.3
 ================
 - Update libs
