@@ -19,14 +19,14 @@ public class GolemSpawnItem extends Item {
 
     @Override
     public InteractionResult useOn(UseOnContext ctx) {
-        Level world = ctx.getLevel();
-        if (!world.isClientSide) {
+        Level level = ctx.getLevel();
+        if (!level.isClientSide) {
             ItemStack stack = ctx.getItemInHand();
-            GolemBase golem = new GolemBase(world, ctx.getClickedPos());
+            GolemBase golem = new GolemBase(level, ctx.getClickedPos());
             golem.setOwner(ctx.getPlayer());
             if (stack.getOrDefault(ModDataComponents.SHUTDOWN.get(), false))
                 golem.shutDownGolem(true);
-            world.addFreshEntity(golem);
+            level.addFreshEntity(golem);
             if (!ctx.getPlayer().isCreative()) {
                 stack.shrink(1);
             }

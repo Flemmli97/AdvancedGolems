@@ -155,8 +155,8 @@ public class GolemBase extends AbstractGolem implements AnimatedEntity, OwnableE
         this.moveControl = new GolemMoveControl(this);
     }
 
-    public GolemBase(Level world, BlockPos pos) {
-        this(ModEntities.GOLEM.get(), world);
+    public GolemBase(Level level, BlockPos pos) {
+        this(ModEntities.GOLEM.get(), level);
         this.setPos(pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5);
         this.restrictTo(pos, Config.homeRadius);
     }

@@ -48,7 +48,7 @@ public class AdvancedGolemsFabric implements ModInitializer {
         EventCalls.getPopulatedTabs().forEach((tab, cons) -> ItemGroupEvents.modifyEntriesEvent(tab).register(c -> cons.accept(i -> c.accept(i.get()))));
     }
 
-    public static InteractionResult attackCallback(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
+    public static InteractionResult attackCallback(Player player, Level level, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
         ItemStack stack = player.getItemInHand(hand);
         if (stack.getItem() == ModItems.GOLEM_CONTROLLER.get()) {
             if (((GolemController) stack.getItem()).onLeftClickEntity(stack, player, entity))
