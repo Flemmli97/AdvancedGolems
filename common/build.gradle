@@ -3,9 +3,9 @@ plugins {
 }
 
 dependencies {
-    implementation "io.github.flemmli97:tenshilib:${tenshilib_version}-common"
-    implementation "fuzs.forgeconfigapiport:forgeconfigapiport-common-neoforgeapi:${forge_config_api}"
-    implementation "net.tslat.smartbrainlib:SmartBrainLib-common-${project.minecraft_version}:${project.sbl_version}"
+    compileOnly "io.github.flemmli97:tenshilib:${tenshilib_version}-common"
+    compileOnly "fuzs.forgeconfigapiport:forgeconfigapiport-common-neoforgeapi:${forge_config_api}"
+    compileOnly "net.tslat.smartbrainlib:SmartBrainLib-common-${project.minecraft_version}:${project.sbl_version}"
 }
 
 sourceSets.main.resources {
