@@ -1,4 +1,17 @@
-apply from: "https://raw.githubusercontent.com/Flemmli97/GradleScripts/arch-loom-v2/fabric.gradle"
+plugins {
+    id 'fabric-loom'
+    id 'com.matthewprenger.cursegradle' version '1.4.0'
+    id 'com.modrinth.minotaur' version '2.+'
+    id 'io.github.flemmli97.multiloader.platform-fabric'
+}
+
+loom {
+    runs {
+        client {
+            vmArgs "-XX:+AllowEnhancedClassRedefinition"
+        }
+    }
+}
 
 ext {
     mod_meta.tenshilib_version = tenshilib_version
@@ -7,7 +20,9 @@ ext {
 }
 
 repositories {
-    maven { url 'https://maven.nucleoid.xyz' }
+    maven {
+        url = 'https://maven.nucleoid.xyz'
+    }
 }
 
 dependencies {
@@ -18,8 +33,4 @@ dependencies {
     modImplementation "${translation_api}"
 
     modImplementation "net.tslat.smartbrainlib:SmartBrainLib-fabric-${project.minecraft_version}:${project.sbl_version}"
-}
-
-shadowJar {
-    exclude "**/recipes/**_alt.json", "**/advancements/**/**_alt.json"
 }
