@@ -29,6 +29,8 @@ public class GolemModel<T extends GolemBase> extends EntityModel<T> implements E
     public ModelPartsContainer.ModelPartExtended rightArm;
     public ModelPartsContainer.ModelPartExtended jetPack;
     public ModelPartsContainer.ModelPartExtended leg;
+    public ModelPartsContainer.ModelPartExtended itemLeft;
+    public ModelPartsContainer.ModelPartExtended itemRight;
 
     public GolemModel() throws NullPointerException {
         this.model = GeoModelManager.getInstance().getModel(AdvancedGolems.modRes("golem"), m -> {
@@ -37,6 +39,8 @@ public class GolemModel<T extends GolemBase> extends EntityModel<T> implements E
             this.rightArm = m.getPart("armRight");
             this.jetPack = m.getPart("jetpack");
             this.leg = m.getPart("leg");
+            this.itemLeft = m.getPart("itemLeft");
+            this.itemRight = m.getPart("itemRight");
         });
         this.anim = GeoAnimationManager.getInstance().getAnimation(AdvancedGolems.modRes("golem"));
     }
@@ -69,15 +73,10 @@ public class GolemModel<T extends GolemBase> extends EntityModel<T> implements E
     public void transform(HumanoidArm humanoidArm, PoseStack poseStack) {
         this.adjustModel(poseStack);
         if (humanoidArm == HumanoidArm.LEFT) {
-            this.leftArm.translateAndRotateWithParents(poseStack);
+            this.itemLeft.translateAndRotateWithParents(poseStack);
         } else if (humanoidArm == HumanoidArm.RIGHT) {
-            this.rightArm.translateAndRotateWithParents(poseStack);
+            this.itemRight.translateAndRotateWithParents(poseStack);
         }
-    }
-
-    @Override
-    public void postTransform(boolean leftSide, PoseStack stack) {
-        stack.translate((leftSide ? 3 : -3) / 16d, 9 / 16d, 0);
     }
 
     public void adjustModel(PoseStack poseStack) {

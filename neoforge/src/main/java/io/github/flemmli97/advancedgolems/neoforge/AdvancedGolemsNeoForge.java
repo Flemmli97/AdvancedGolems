@@ -32,9 +32,9 @@ public class AdvancedGolemsNeoForge {
 
     public AdvancedGolemsNeoForge(IEventBus modBus) {
         ModLoadingContext.get().getActiveContainer().registerConfig(ModConfig.Type.COMMON, ConfigSpecs.COMMON_SPEC, AdvancedGolems.MODID + ".toml");
-        ModEntities.ENTITIES.registerContent(modBus);
-        ModItems.ITEMS.registerContent(modBus);
-        ModDataComponents.DATA_COMPONENTS.registerContent(modBus);
+        ModEntities.ENTITIES.registerContent();
+        ModItems.ITEMS.registerContent();
+        ModDataComponents.DATA_COMPONENTS.registerContent();
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modBus.addListener(ClientInit::clientInit);
             NeoForge.EVENT_BUS.addListener(ClientInit::renderLast);

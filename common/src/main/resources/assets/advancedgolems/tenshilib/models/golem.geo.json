@@ -69,6 +69,11 @@
           ]
         },
         {
+          "name": "itemLeft",
+          "parent": "armLeft",
+          "pivot": [7, 7.5, -2]
+        },
+        {
           "name": "armRight",
           "parent": "body",
           "pivot": [-5, 17.5, 0],
@@ -80,6 +85,11 @@
               "mirror": true
             }
           ]
+        },
+        {
+          "name": "itemRight",
+          "parent": "armRight",
+          "pivot": [-7, 7.5, -2]
         },
         {
           "name": "leg",
