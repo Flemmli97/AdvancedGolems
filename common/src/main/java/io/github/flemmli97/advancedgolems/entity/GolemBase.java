@@ -411,6 +411,11 @@ public class GolemBase extends AbstractGolem implements AnimatedEntity, OwnableE
         }
     }
 
+    @Override
+    protected AABB getAttackBoundingBox() {
+        return super.getAttackBoundingBox().inflate(0.75, 0, 0.75);
+    }
+
     private void updateFollowRange(boolean ranged) {
         this.getAttribute(Attributes.FOLLOW_RANGE).setBaseValue(ranged ? 31.0D : 19.0D);
     }
