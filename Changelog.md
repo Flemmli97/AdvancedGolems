@@ -1,3 +1,8 @@
+Advanced Golems 1.5.4
+================
+- Update dependencies
+- Increase golem attack reach
+
 Advanced Golems 1.5.3.b
 ================
 - Fabric: Fix config loading

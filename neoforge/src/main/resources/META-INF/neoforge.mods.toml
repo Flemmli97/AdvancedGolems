@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[${loader_version},)"
+loaderVersion = "[${neoforge_loader_version},)"
 license="ARR"
 issueTrackerURL="https://github.com/Flemmli97/AdvancedGolems/issues"
 [[mixins]]
@@ -15,7 +15,7 @@ description='''Summon small golems that help defend your base'''
 [[dependencies.advancedgolems]]
 modId="minecraft"
 type="required"
-versionRange="[${mcversion},)"
+versionRange = "[${minecraft_version},)"
 ordering="NONE"
 side="BOTH"
 [[dependencies.advancedgolems]]
