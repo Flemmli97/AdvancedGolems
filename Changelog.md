@@ -1,3 +1,7 @@
+Advanced Golems 1.5.4.b
+================
+- Fix neoforge toml
+
 Advanced Golems 1.5.4
 ================
 - Update dependencies
